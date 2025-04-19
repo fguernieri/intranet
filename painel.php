@@ -20,8 +20,18 @@ $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8">
   <title>Painel - Intranet Bastards</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+  body { visibility: hidden; }
+</style>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../../assets/css/style.css">
+
+<script>
+  window.addEventListener('load', () => {
+    document.body.style.visibility = 'visible';
+  });
+</script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex">
 

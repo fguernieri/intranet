@@ -1,4 +1,7 @@
 <?php
+ob_start(); // inicia buffer de saída
+
+
 // modules/usuarios/admin_permissoes.php
 require_once __DIR__ . '/../../auth.php';
 require_once __DIR__ . '/../../config/db.php';
@@ -22,7 +25,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_perms'])) {
     foreach ($selected as $mid) {
         $ins->execute(['uid' => $user_id, 'mid' => $mid]);
     }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_perms'])) {
+    $user_id  = $_POST['user_id'];
+    $selected = $_POST['modulos'] ?? [];
+
+    echo "<pre>";
+    echo "Salvando permissões para user_id = $user_id\n";
+    print_r($selected);
+    echo "</pre>";
+
+    $pdo->prepare("DELETE FROM modulos_usuarios WHERE usuario_id = :uid")
+        ->execute(['uid' => $user_id]);
+
+    $ins = $pdo->prepare("INSERT INTO modulos_usuarios (usuario_id, modulo_id) VALUES (:uid, :mid)");
+    foreach ($selected as $mid) {
+        $ins->execute(['uid' => $user_id, 'mid' => $mid]);
+    }
+
+    echo "Tudo ok até aqui, tentando redirecionar...";
+
     header("Location: admin_permissoes.php?user_id=$user_id&ok=1");
+    exit;
+}
+
+    header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1");
     exit;
 }
 // Dados para listagem de usuários e módulos
@@ -36,6 +62,8 @@ if ($user_id) {
     $perms = $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 $ok = isset($_GET['ok']);
+ob_end_flush(); // esvazia e envia o buffer
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
