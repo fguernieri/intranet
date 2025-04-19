@@ -23,3 +23,15 @@ button {
 a {
   @apply text-yellow-400 hover:underline text-sm;
 }
+
+.btn-acao {
+  min-width: 90px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
