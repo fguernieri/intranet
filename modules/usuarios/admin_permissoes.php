@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crud_action'])) {
                 'link' => $link
             ]);
         }
-        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=criado");
+        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=criado#modulos");
         exit;
     }
 
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crud_action'])) {
                 'link' => $link
             ]);
         }
-        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=editado");
+        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=editado#modulos");
         exit;
     }
 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crud_action'])) {
             $stmt = $pdo->prepare("UPDATE modulos SET ativo = 0 WHERE id = :id");
             $stmt->execute(['id' => $id]);
         }
-        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=excluido");
+        header("Location: ".$_SERVER['PHP_SELF']."?user_id=$user_id&ok=1&modulo=excluido#modulos");
         exit;
     }
 }
@@ -181,7 +181,8 @@ ob_end_flush();
   <!-- Módulos -->
   <?php if ($_SESSION['usuario_perfil'] === 'admin'): ?>
   <hr class="my-6 border-yellow-500">
-  <section class="mt-8">
+  
+  <section id="modulos" class="mt-8">
     <h2 class="text-2xl font-bold mb-4 text-yellow-400">Gerenciar Módulos</h2>
 	<?php if (isset($_GET['modulo'])): ?>
 	  <?php if ($_GET['modulo'] === 'criado'): ?>
