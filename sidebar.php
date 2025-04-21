@@ -1,21 +1,23 @@
 <?php
-// sidebar.php - Menu lateral compartilhado
 require_once 'auth.php';
 require_once 'config/db.php';
-require_once __DIR__ . '/config/app.php';
+require_once 'config/app.php';
 
-
-// Busca módulos permitidos para o usuário logado
-$stmt = $pdo->prepare(
-    "SELECT m.nome, m.link
-     FROM modulos m
-     JOIN modulos_usuarios mu ON m.id = mu.modulo_id
-     WHERE mu.usuario_id = :uid AND m.ativo = 1
-     ORDER BY m.nome"
-);
-$stmt->execute(['uid' => $_SESSION['usuario_id']]);
-$modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Cache simples dos módulos
+if (!isset($_SESSION['modulos'])) {
+    $stmt = $pdo->prepare(
+        "SELECT m.nome, m.link
+         FROM modulos m
+         JOIN modulos_usuarios mu ON m.id = mu.modulo_id
+         WHERE mu.usuario_id = :uid AND m.ativo = 1
+         ORDER BY m.nome"
+    );
+    $stmt->execute(['uid' => $_SESSION['usuario_id']]);
+    $_SESSION['modulos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+$modulos = $_SESSION['modulos'];
 ?>
+
 <aside class="w-64 bg-gray-800 p-6 flex flex-col justify-between h-screen">
   <div>
     <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Bastards Brewery" class="w-28 mx-auto mb-6">
