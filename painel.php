@@ -20,55 +20,40 @@ $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8">
   <title>Painel - Intranet Bastards</title>
-  <style>
-  body { visibility: hidden; }
-</style>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="../../assets/css/style.css">
-
-<script>
-  window.addEventListener('load', () => {
-    document.body.style.visibility = 'visible';
-  });
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col sm:flex-row">
 
   <!-- Conteúdo principal -->
-  <main class="flex-1 p-10">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold">Bem-vindo, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></h1>
+  <main class="flex-1 p-4 sm:p-10 pt-20 sm:pt-10">
+    <header class="mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold">Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome']); ?></h1>
       <p class="text-gray-400 text-sm">
         <?php
-          // Formatação de data com IntlDateFormatter
           $hoje = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
           $fmt = new IntlDateFormatter(
             'pt_BR',
             IntlDateFormatter::FULL,
             IntlDateFormatter::NONE,
             'America/Sao_Paulo',
-            IntlDateFormatter::GREGORIAN,
-            "EEEE, d 'de' MMMM 'de' yyyy"
+            IntlDateFormatter::GREGORIAN
           );
-          echo ucfirst($fmt->format($hoje));
+          echo $fmt->format($hoje);
         ?>
       </p>
     </header>
 
-    <!-- Grid de módulos -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <?php if (empty($modulos)): ?>
-        <p class="text-gray-400">Nenhum módulo disponível.</p>
-      <?php else: ?>
-        <?php foreach ($modulos as $mod): ?>
-          <a href="<?php echo htmlspecialchars($mod['link']); ?>" class="block bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg transition">
-            <h2 class="text-xl font-semibold mb-2"><?php echo htmlspecialchars($mod['nome']); ?></h2>
-            <p class="text-sm text-gray-400"><?php echo htmlspecialchars($mod['descricao']); ?></p>
-          </a>
-        <?php endforeach; ?>
-      <?php endif; ?>
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <?php foreach ($modulos as $modulo): ?>
+        <a href="<?= htmlspecialchars($modulo['link']) ?>" class="block bg-gray-800 p-5 rounded-lg shadow hover:bg-gray-700 transition duration-200">
+          <h2 class="text-xl font-semibold text-yellow-400 mb-1"><?= htmlspecialchars($modulo['nome']) ?></h2>
+          <p class="text-gray-300 text-sm"><?= htmlspecialchars($modulo['descricao']) ?></p>
+        </a>
+      <?php endforeach; ?>
     </section>
   </main>
+
 </body>
 </html>

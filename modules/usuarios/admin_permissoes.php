@@ -97,12 +97,14 @@ ob_end_flush();
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
   <meta charset="UTF-8">
   <title>Admin - Gerência de Usuários & Permissões</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex">
+<body class="bg-gray-900 text-white min-h-screen flex bg-gray-900 text-white p-4 sm:p-6 ">
 
 <main class="flex-1 p-10">
 
