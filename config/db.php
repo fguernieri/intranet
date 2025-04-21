@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'intra_bastards';
+$dbname = 'basta920_intra_bastards';
 $user = 'root';
 $pass = '';
 
