@@ -106,7 +106,7 @@ ob_end_flush();
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex bg-gray-900 text-white p-4 sm:p-6 ">
 
-<main class="flex-1 p-10">
+<main class="flex-1">
 
   <!-- Usuários -->
   <section class="mb-10">
