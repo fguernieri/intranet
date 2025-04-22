@@ -125,10 +125,7 @@ require_once '../../sidebar.php';
     const chartRefs = {};
     const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#ec4899','#eab308','#6366f1','#0ea5e9'];
 
-    document.getElementById('toggleTheme').addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-    });
-
+    
     document.getElementById('jsonFile').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (file) {
