@@ -1,6 +1,8 @@
 <?php
 session_start();
 $erro = isset($_GET['erro']) ? true : false;
+
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

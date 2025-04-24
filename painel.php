@@ -2,7 +2,7 @@
 // Inicia sessão, protege página e configura DB
 require_once 'auth.php';
 require_once 'config/db.php';
-include __DIR__ . '/sidebar.php';
+require_once 'sidebar.php';
 
 // Busca módulos permitidos
 $stmt = $pdo->prepare(
@@ -23,6 +23,7 @@ $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css">
+
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col sm:flex-row">
 

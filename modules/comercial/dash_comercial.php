@@ -1,266 +1,219 @@
 <?php
-require_once '../../sidebar.php';
+declare(strict_types=1);
+require_once __DIR__ . '/../../auth.php';
 
+$permissoes = $_SESSION['vendedores_permitidos'] ?? [];
+$nomesPermitidos = [];
+
+if (!empty($permissoes)) {
+    $ph = implode(',', array_fill(0, count($permissoes), '?'));
+    $stmt = $pdo->prepare("SELECT nome FROM vendedores WHERE id IN ($ph)");
+    $stmt->execute($permissoes);
+    $nomesPermitidos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+$jsonPath = __DIR__ . '/pedidos_hrx.json';
+if (!file_exists($jsonPath)) die('Arquivo de pedidos não encontrado.');
+$pedidos = json_decode(file_get_contents($jsonPath), true) ?: [];
+
+$selectedVendedores = $_GET['vendedores'] ?? ['ALL'];
+$selectedVendedores = is_array($selectedVendedores) ? $selectedVendedores : [$selectedVendedores];
+$startDate = $_GET['start_date'] ?? date('Y-m-01');
+$endDate   = $_GET['end_date']   ?? date('Y-m-t');
+
+$dadosFiltrados = array_filter($pedidos, function($p) use ($nomesPermitidos, $selectedVendedores, $startDate, $endDate) {
+    if (!in_array($p['Vendedor'], $nomesPermitidos, true)) return false;
+    if (!in_array('ALL', $selectedVendedores, true) && !in_array($p['Vendedor'], $selectedVendedores, true)) return false;
+    $dia = date('Y-m-d', (int)$p['Data Pedido'] / 1000);
+    return ($dia >= $startDate && $dia <= $endDate);
+});
+
+$totalFaturado = 0;
+$clientes = [];
+$estados = [];
+foreach ($dadosFiltrados as $p) {
+    $valor = (float)$p['R$ Faturado'];
+    $totalFaturado += $valor;
+    if (!empty($p['Cód Cliente'])) $clientes[$p['Cód Cliente']] = true;
+    if (!empty($p['Estado']))     $estados[$p['Estado']] = true;
+}
+$totalPedidos  = count($dadosFiltrados);
+$totalClientes = count($clientes);
+$totalEstados  = count($estados);
+
+$porVendedor = $porPagamento = $porData = $pedidosPorDia = $clientesPorV = $pedidosPorEstado = [];
+foreach ($dadosFiltrados as $p) {
+    $ven = $p['Vendedor'] ?? 'N/A';
+    $fp  = $p['Forma Pagamento'] ?? 'N/A';
+    $val = (float)$p['R$ Faturado'];
+    $d   = date('Y-m-d', (int)$p['Data Pedido'] / 1000);
+    $est = $p['Estado'] ?? 'N/A';
+    $cli = $p['Cód Cliente'];
+
+    $porVendedor[$ven]     = ($porVendedor[$ven] ?? 0) + $val;
+    $porPagamento[$fp]     = ($porPagamento[$fp] ?? 0) + $val;
+    $porData[$d]           = ($porData[$d] ?? 0) + $val;
+    $pedidosPorDia[$d]     = ($pedidosPorDia[$d] ?? 0) + 1;
+    $pedidosPorEstado[$est]= ($pedidosPorEstado[$est] ?? 0) + 1;
+
+    if ($cli) {
+        $clientesPorV[$ven] = $clientesPorV[$ven] ?? [];
+        if (!in_array($cli, $clientesPorV[$ven], true)) {
+            $clientesPorV[$ven][] = $cli;
+        }
+    }
+}
+$clientesCount = array_map('count', $clientesPorV);
 ?>
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark transition-colors duration-300">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard de Pedidos - HRX</title>
+  <title>Dashboard Comercial v1.2</title>
+  <link rel="stylesheet" href="../../assets/css/style.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    };
-	// Carregar JSON padrão ao abrir a página
-	window.addEventListener('DOMContentLoaded', async () => {
-	  try {
-		const response = await fetch('pedidos_hrx.json');
-		if (response.ok) {
-		  pedidos = await response.json();
-		  renderFiltros(pedidos);
-		  atualizarDashboard();
-		  console.log("✅ pedidos_hrx.json carregado automaticamente.");
-		} else {
-		  console.warn("⚠️ Não foi possível carregar pedidos_hrx.json.");
-		}
-	  } catch (err) {
-		console.error("🚨 Erro ao carregar JSON padrão:", err);
-	  }
-	});
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-<body class="flex min-h-screen bg-gray-100 text-gray-900 dark:bg-slate-900 dark:text-gray-100 transition-colors duration-300">
+<body class="body bg-gray-900 text-white">
+  <div class="flex h-screen">
+    <?php include __DIR__ . '/../../sidebar.php'; ?>
 
-  <!-- 🎯 Dashboard Principal -->
-  <div id="dashboardApp">
-    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">📊 Dashboard Comercial</h1>
-      </div>
+    <main class="flex-1 p-6 overflow-auto">
+      <h1 class="text-3xl font-bold mb-2 text-yellow-400 text-center">Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome']); ?></h1>
+      <h2 class="text-xl font-semibold mb-6 text-center text-white">Dashboard Comercial v1.2 (ApexCharts)</h2>
 
-      <!-- Cards KPI -->
+      <form method="get" class="bg-gray-800 rounded-lg p-6 grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-white">
+        <!-- Vendedores -->
+        <div>
+          <label class="block mb-2 text-sm font-semibold">🧑‍💼 Vendedores</label>
+          <select name="vendedores[]" multiple class="w-full h-32 bg-gray-700 border border-gray-600 rounded-md text-sm p-2">
+            <option value="ALL" <?= in_array('ALL', $selectedVendedores, true) ? 'selected' : '' ?>>Todos</option>
+            <?php foreach ($nomesPermitidos as $n): ?>
+              <option value="<?= htmlspecialchars($n) ?>" <?= in_array($n, $selectedVendedores, true) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($n) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <!-- Data Início -->
+        <div>
+          <label class="block mb-2 text-sm font-semibold">📅 Data Início</label>
+          <input type="date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
+        </div>
+
+        <!-- Data Fim -->
+        <div>
+          <label class="block mb-2 text-sm font-semibold">📅 Data Fim</label>
+          <input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
+        </div>
+
+        <!-- Botão -->
+        <div class="flex items-end justify-end">
+          <button type="submit" class="btn-acao">Aplicar Filtros</button>
+        </div>
+      </form>
+
+
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">💵 Total Faturado</p>
-          <p id="kpiFaturamento" class="text-2xl font-bold text-blue-600 dark:text-blue-400">R$ 0,00</p>
+        <div class="card1">
+          <p>💵 Total Faturado</p>
+          <p>R$ <?= number_format($totalFaturado, 2, ',', '.') ?></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">📦 Total de Pedidos</p>
-          <p id="kpiPedidos" class="text-2xl font-bold text-green-600 dark:text-green-400">0</p>
+        <div class="card1">
+          <p> 📦 Total de Pedidos</p>
+          <p> <?= $totalPedidos ?></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">👥 Clientes Únicos</p>
-          <p id="kpiClientes" class="text-2xl font-bold text-purple-600 dark:text-purple-400">0</p>
+        <div class="card1">
+          <p>🏪 Clientes Únicos</p>
+          <p><?= $totalClientes ?></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">🌎 Estados com Pedido</p>
-          <p id="kpiEstados" class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">0</p>
-        </div>
-      </div>
-
-      <!-- Filtros -->
-      <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div>
-          <label class="block mb-2 font-semibold">📁 Carregar JSON</label>
-          <input type="file" id="jsonFile" accept=".json" class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-blue-600 file:text-white file:rounded-md" />
-        </div>
-        <div>
-          <label class="block mb-2 font-semibold">🧑‍💼 Vendedores</label>
-          <select id="vendedorSelect" multiple size="6" class="w-full h-32 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md"></select>
-        </div>
-        <div>
-          <label class="block mb-2 font-semibold">📆 Intervalo de Datas</label>
-          <input type="date" id="startDate" class="w-full mb-2 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md" />
-          <input type="date" id="endDate" class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md" />
+        <div class="card1">
+          <p>🌎 Estados com Pedido</p>
+          <p><?= $totalEstados ?></p>
         </div>
       </div>
 
-      <!-- Gráficos -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        <div><canvas id="totalPorVendedor"></canvas></div>
-        <div><canvas id="porPagamento"></canvas></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <?php
+        $charts = [
+          'chartVendedor' => 'Total por Vendedor',
+          'chartPagamento' => 'Total por Forma de Pagamento',
+          'chartData' => 'Faturamento por Data',
+          'chartPedidosDia' => 'Pedidos por Dia',
+          'chartClientes' => 'Clientes Únicos por Vendedor',
+          'chartEstado' => 'Pedidos por Estado',
+        ];
+        foreach ($charts as $id => $label): ?>
+          <div class="rounded-xl bg-white/5 p-4 shadow-md">
+            <p class="font-medium mb-2"><?= $label ?></p>
+            <div id="<?= $id ?>"></div>
+          </div>
+        <?php endforeach; ?>
       </div>
-      <div class="mb-10">
-        <p class="text-lg font-semibold mb-1">📈 Faturamento por Data:</p>
-        <span id="totalFaturamento" class="text-blue-500 dark:text-blue-300 block mb-2"></span>
-        <canvas id="faturamentoPorData"></canvas>
-      </div>
-      <div class="mb-10">
-        <p class="text-lg font-semibold mb-1">🗓️ Pedidos por Dia:</p>
-        <span id="totalPedidosDia" class="text-blue-500 dark:text-blue-300 block mb-2"></span>
-        <canvas id="pedidosPorDia"></canvas>
-      </div>
-      <div class="mb-10">
-        <div class="flex justify-between items-center mb-2">
-          <p class="text-lg font-semibold">👥 Clientes únicos por Vendedor:</p>
-          <select id="ordemClientes" class="border rounded-md px-2 py-1 dark:bg-gray-800">
-            <option value="desc">Maior → Menor</option>
-            <option value="asc">Menor → Maior</option>
-          </select>
-        </div>
-        <span id="totalClientes" class="text-blue-500 dark:text-blue-300 block mb-2"></span>
-        <canvas id="clientesPorVendedor"></canvas>
-      </div>
-      <div class="mb-10">
-        <div class="flex justify-between items-center mb-2">
-          <p class="text-lg font-semibold">🗺️ Pedidos por Estado:</p>
-          <select id="ordemEstados" class="border rounded-md px-2 py-1 dark:bg-gray-800">
-            <option value="desc">Maior → Menor</option>
-            <option value="asc">Menor → Maior</option>
-          </select>
-        </div>
-        <span id="totalEstados" class="text-blue-500 dark:text-blue-300 block mb-2"></span>
-        <canvas id="pedidosPorEstado"></canvas>
-      </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Scripts do Dashboard -->
   <script>
-    // ⚙️ Inicialização
-    let pedidos = [];
-    const chartRefs = {};
-    const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#ec4899','#eab308','#6366f1','#0ea5e9'];
-
+    const arredondar = arr => arr.map(v => parseFloat(parseFloat(v).toFixed(2)));
+    const categoriesVendedor  = <?= json_encode(array_keys($porVendedor)) ?>.map(Vendedor => Vendedor.split(' ')[0]);
+    const dataVendedor        = <?= json_encode(array_values($porVendedor)) ?>;
+    const categoriesPagamento = <?= json_encode(array_keys($porPagamento)) ?>;
+    const dataPagamento       = <?= json_encode(array_values($porPagamento)) ?>;
+    const categoriesData      = <?= json_encode(array_keys($porData)) ?>;
+    const dataData            = arredondar(<?= json_encode(array_values($porData)) ?>);
+    const categoriesDia       = <?= json_encode(array_keys($pedidosPorDia)) ?>;
+    const dataDia             = <?= json_encode(array_values($pedidosPorDia)) ?>;
+    const categoriesClientes  = <?= json_encode(array_keys($clientesCount)) ?>.map(Vendedor => Vendedor.split(' ')[0]);
+    const dataClientes        = <?= json_encode(array_values($clientesCount)) ?>;
+    const categoriesEstado    = <?= json_encode(array_keys($pedidosPorEstado)) ?>;
+    const dataEstado          = <?= json_encode(array_values($pedidosPorEstado)) ?>;
     
-    document.getElementById('jsonFile').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const text = await file.text();
-        pedidos = JSON.parse(text);
-        renderFiltros(pedidos);
-        atualizarDashboard();
-      }
+    function renderApex(selector, options) {
+      const chart = new ApexCharts(document.querySelector(selector), options);
+      chart.render();
+    }
+    
+  
+    window.addEventListener('load', () => {
+      renderApex('#chartVendedor', {
+        chart: { type: 'bar', height: 300, background: 'transparent'},
+        theme: { mode: 'dark'},
+        series: [{ name: 'Total por Vendedor', data: dataVendedor }],
+        xaxis: { categories: categoriesVendedor }
+      });
+      renderApex('#chartPagamento', {
+        chart: { type: 'donut', height: 300, background: 'transparent' },
+        theme: { mode: 'dark'},
+        series: dataPagamento,
+        labels: categoriesPagamento
+      });
+      renderApex('#chartData', {
+        chart: { type: 'line', height: 300, background: 'transparent' },
+        theme: { mode: 'dark'},
+        series: [{ name: 'Faturamento', data: dataData }],
+        xaxis: { categories: categoriesData }
+      });
+      renderApex('#chartPedidosDia', {
+        chart: { type: 'bar', height: 300, background: 'transparent' },
+        theme: { mode: 'dark'},
+        series: [{ name: 'Pedidos por Dia', data: dataDia }],
+        xaxis: { categories: categoriesDia }
+      });
+      renderApex('#chartClientes', {
+        chart: { type: 'bar', height: 300, background: 'transparent' },
+        theme: { mode: 'dark'},
+        series: [{ name: 'Clientes Únicos', data: dataClientes }],
+        xaxis: { categories: categoriesClientes }
+      });
+      renderApex('#chartEstado', {
+        chart: { type: 'bar', height: 300, background: 'transparent' },
+        theme: { mode: 'dark'},
+        series: [{ name: 'Pedidos por Estado', data: dataEstado }],
+        xaxis: { categories: categoriesEstado }
+      });
     });
-
-    document.getElementById('vendedorSelect').addEventListener('change', atualizarDashboard);
-    document.getElementById('startDate').addEventListener('change', atualizarDashboard);
-    document.getElementById('endDate').addEventListener('change', atualizarDashboard);
-    document.getElementById('ordemClientes').addEventListener('change', atualizarDashboard);
-    document.getElementById('ordemEstados').addEventListener('change', atualizarDashboard);
-
-    function renderFiltros(data) {
-      const todosVendedores = [...new Set(data.map(p => p.Vendedor).filter(Boolean))];
-      const select = document.getElementById('vendedorSelect');
-      select.innerHTML = '';
-      todosVendedores.forEach(v => {
-        const option = document.createElement('option');
-        option.value = v;
-        option.text = v;
-        select.appendChild(option);
-      });
-    }
-
-    function getSelectedVendedores() {
-      return Array.from(document.getElementById('vendedorSelect').selectedOptions).map(opt => opt.value);
-    }
-
-    function filtrarPedidos() {
-      const vendedoresSelecionados = getSelectedVendedores();
-      return pedidos.filter(p => {
-        const dataPedido = new Date(Number(p["Data Pedido"]));
-        const inicio = startDate.value ? new Date(startDate.value) : null;
-        const fim = endDate.value ? new Date(endDate.value) : null;
-        const dataOK = (!inicio || dataPedido >= inicio) && (!fim || dataPedido <= fim);
-        const vendedorOK = vendedoresSelecionados.length === 0 || vendedoresSelecionados.includes(p.Vendedor);
-        return dataOK && vendedorOK;
-      });
-    }
-
-    function atualizarDashboard() {
-      const data = filtrarPedidos();
-      const porVendedor = {}, porPagamento = {}, porData = {};
-      const pedidosPorDia = {}, clientesPorVendedor = {}, pedidosPorEstado = {};
-      let totalFaturamento = 0;
-
-      data.forEach(p => {
-        const vendedor = p.Vendedor || 'N/A';
-        const forma = p["Forma Pagamento"] || 'N/A';
-        const valor = parseFloat(p["R$ Faturado"]);
-        const dataPedido = new Date(Number(p["Data Pedido"]));
-        const labelData = dataPedido.toISOString().split('T')[0];
-        const estado = p.Estado || 'N/A';
-        const cliente = p["Cód Cliente"];
-
-        porVendedor[vendedor] = (porVendedor[vendedor] || 0) + valor;
-        porPagamento[forma] = (porPagamento[forma] || 0) + valor;
-        porData[labelData] = (porData[labelData] || 0) + valor;
-        pedidosPorDia[labelData] = (pedidosPorDia[labelData] || 0) + 1;
-        pedidosPorEstado[estado] = (pedidosPorEstado[estado] || 0) + 1;
-
-        if (!clientesPorVendedor[vendedor]) clientesPorVendedor[vendedor] = new Set();
-        if (cliente) clientesPorVendedor[vendedor].add(cliente);
-
-        totalFaturamento += valor;
-      });
-
-      const clientesPorVendedorCount = {};
-      Object.keys(clientesPorVendedor).forEach(v => {
-        clientesPorVendedorCount[v] = clientesPorVendedor[v].size;
-      });
-
-      const ordemClientes = document.getElementById('ordemClientes').value;
-      const ordemEstados = document.getElementById('ordemEstados').value;
-      const clientesOrdenados = ordenarObjeto(clientesPorVendedorCount, ordemClientes);
-      const estadosOrdenados = ordenarObjeto(pedidosPorEstado, ordemEstados);
-
-      // KPIs
-      document.getElementById('kpiFaturamento').textContent = `R$ ${totalFaturamento.toFixed(2)}`;
-      document.getElementById('kpiPedidos').textContent = `${data.length}`;
-      document.getElementById('kpiClientes').textContent = `${new Set(data.map(p => p["Cód Cliente"])).size}`;
-      document.getElementById('kpiEstados').textContent = `${new Set(data.map(p => p.Estado)).size}`;
-
-      document.getElementById('totalFaturamento').textContent = `R$ ${totalFaturamento.toFixed(2)}`;
-      document.getElementById('totalPedidosDia').textContent = `${data.length} pedidos`;
-      document.getElementById('totalClientes').textContent = `${Object.values(clientesPorVendedorCount).reduce((a, b) => a + b, 0)} clientes únicos`;
-      document.getElementById('totalEstados').textContent = `${Object.values(pedidosPorEstado).reduce((a, b) => a + b, 0)} pedidos`;
-
-      gerarGrafico('totalPorVendedor', 'Total por Vendedor (R$)', porVendedor, 'bar');
-      gerarGrafico('porPagamento', 'Total por Forma de Pagamento (R$)', porPagamento, 'doughnut');
-      gerarGrafico('faturamentoPorData', 'Faturamento ao Longo do Tempo (R$)', porData, 'line');
-      gerarGrafico('pedidosPorDia', 'Total de Pedidos por Dia', pedidosPorDia, 'bar');
-      gerarGrafico('clientesPorVendedor', 'Clientes Únicos por Vendedor', clientesOrdenados, 'bar');
-      gerarGrafico('pedidosPorEstado', 'Total de Pedidos por Estado', estadosOrdenados, 'bar');
-    }
-
-    function ordenarObjeto(obj, direcao = 'desc') {
-      return Object.fromEntries(Object.entries(obj).sort(([, a], [, b]) => direcao === 'asc' ? a - b : b - a));
-    }
-
-    function gerarGrafico(id, titulo, dados, tipo) {
-      const ctx = document.getElementById(id).getContext('2d');
-      if (chartRefs[id]) chartRefs[id].destroy();
-      chartRefs[id] = new Chart(ctx, {
-        type: tipo,
-        data: {
-          labels: Object.keys(dados),
-          datasets: [{
-            label: titulo,
-            data: Object.values(dados),
-            backgroundColor: tipo === 'line' ? 'rgba(59,130,246,0.2)' : colors,
-            borderColor: 'transparent',
-            borderWidth: 0,
-            fill: tipo === 'line',
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: tipo !== 'bar', position: 'bottom' },
-            title: { display: true, text: titulo }
-          },
-          scales: tipo === 'line' || tipo === 'bar' ? {
-            x: { title: { display: true, text: 'Categoria' }},
-            y: { beginAtZero: true, title: { display: true, text: 'Valor' }}
-          } : {}
-        }
-      });
-    }
   </script>
-
 </body>
 </html>

@@ -3,7 +3,6 @@ require_once 'auth.php';
 require_once 'config/db.php';
 require_once 'config/app.php';
 
-if (!isset($_SESSION['modulos'])) {
     $stmt = $pdo->prepare(
         "SELECT m.nome, m.link
          FROM modulos m
@@ -13,7 +12,7 @@ if (!isset($_SESSION['modulos'])) {
     );
     $stmt->execute(['uid' => $_SESSION['usuario_id']]);
     $_SESSION['modulos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+
 $modulos = $_SESSION['modulos'];
 ?>
 

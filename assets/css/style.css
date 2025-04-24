@@ -1,32 +1,6 @@
-/* assets/css/style.css */
-
-body {
-  @apply bg-gray-900 text-white min-h-screen flex items-center justify-center;
-}
-
-.container {
-  @apply bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md;
-}
-
-h1 {
-  @apply text-3xl font-bold mb-6 text-center text-yellow-400;
-}
-
-input {
-  @apply w-full p-3 rounded bg-gray-700 border border-gray-600 text-white placeholder-gray-400 mb-4;
-}
-
-button {
-  @apply w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded;
-}
-
-a {
-  @apply text-yellow-400 hover:underline text-sm;
-}
-
 .btn-acao {
   min-width: 90px;
-  height: 30px;
+  height: 33px;
   padding: 0 12px;
   border-radius: 0.25rem;
   font-weight: bold;
@@ -34,4 +8,60 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  background-color: #eab308; 
+  color: #111827;            
+  transition: background-color 0.2s;
+}
+
+.btn-acao:hover {
+  background-color: #ca8a04;
+}
+
+.btn-acao-vermelho {
+  min-width: 90px;
+  height: 33px;
+  padding: 0 12px;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dc2626; /* bg-red-600 */
+  color: #ffffff;            /* white */
+  transition: background-color 0.2s;
+}
+
+.btn-acao-vermelho:hover {
+  background-color: #b91c1c; /* bg-red-700 */
+}
+
+.divider_yellow {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  border-top: 1px solid #eab308; /* cor semelhante ao yellow-500 do Tailwind */
+}
+
+.card1 {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease-in-out;
+}
+.card1:hover {
+  transform: scale(1.1);
+}
+.card1 p:first-child {
+  font-size: 0.875rem; /* text-sm */
+  color: #d1d5db;      /* gray-300 */
+}
+.card1 p:last-child {
+  font-size: 1.5rem;   /* text-2xl */
+  font-weight: bold;
+}
+
+card1.no-hover:hover {
+  transform: none !important;
 }
