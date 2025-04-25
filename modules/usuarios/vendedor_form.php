@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../../config/db.php';
+require_once '../../config/db.php';
+require_once '../../sidebar.php';
+
 
 // Obter ID para edição
 $id = $_GET['id'] ?? null;
@@ -52,8 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex p-4 sm:p-6">
-  <?php include __DIR__ . '/../../sidebar.php'; ?>
+<body class="bg-gray-900 text-white min-h-screen flex">
   <main class="flex-1 flex items-center justify-center px-4 pb-8">
     <div class="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
       <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-400 mb-4 sm:mb-6">
