@@ -17,6 +17,15 @@ Este documento estabelece padrões para geração de código de interfaces web u
 </head>
 ```
 
+### Estrutura Básica de Corpo
+```html
+<body class="bg-gray-900 flex items-center justify-center min-h-screen text-white p-4">
+  <div class="bg-gray-800 p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full [max-width-específico]">
+    <!-- Conteúdo da página -->
+  </div>
+</body>
+```
+
 ## Princípios Mobile-First
 
 1. **Sempre parta do menor dispositivo para o maior**:
