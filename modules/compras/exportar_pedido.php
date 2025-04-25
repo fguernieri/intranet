@@ -1,7 +1,7 @@
 <?php
 // === modules/compras/exportar_pedido.php ===
 // ATENÇÃO: não deve haver nenhum output antes deste <?php
-
+require_once __DIR__ . '/../../sidebar.php';
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
 if (empty($_SESSION['usuario_id'])) {
@@ -103,11 +103,6 @@ $conn->close();
   <link href="/assets/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  <aside class="bg-gray-800 w-60 p-6 flex-shrink-0">
-    <?php include __DIR__ . '/../../sidebar.php'; ?>
-  </aside>
 
   <main class="flex-1 p-6 bg-gray-900">
 
