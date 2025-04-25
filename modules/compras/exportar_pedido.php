@@ -1,0 +1,219 @@
+<?php
+// === modules/compras/exportar_pedido.php ===
+// ATENÇÃO: não deve haver nenhum output antes deste <?php
+
+session_start();
+require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
+if (empty($_SESSION['usuario_id'])) {
+    header('Location: /login.php');
+    exit;
+}
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/db_config.php';
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$conn->set_charset('utf8mb4');
+if ($conn->connect_error) {
+    die("Conexão falhou: " . $conn->connect_error);
+}
+
+// 1) Lista de filiais de pedidos ou novos_insumos
+$res = $conn->query("
+    SELECT DISTINCT FILIAL FROM pedidos
+    UNION
+    SELECT DISTINCT FILIAL FROM novos_insumos
+    ORDER BY FILIAL
+");
+$filiais = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+
+// 2) Lê filtros
+$selFilial  = $_GET['filial']      ?? '';
+$dataInicio = $_GET['data_inicio'] ?? '';
+$dataFim    = $_GET['data_fim']    ?? '';
+$action     = $_GET['export']      ?? '';  // 'csv' para CSV
+
+if ($selFilial && $dataInicio && $dataFim) {
+    $dtIni = $dataInicio . ' 00:00:00';
+    $dtFim = $dataFim    . ' 23:59:59';
+
+    // SQL de agregação
+    $sql = "
+      SELECT
+        t.INSUMO,
+        t.CATEGORIA,
+        t.UNIDADE,
+        SUM(t.QUANTIDADE) AS QUANTIDADE,
+        GROUP_CONCAT(NULLIF(t.OBSERVACAO, '') SEPARATOR ' - ') AS OBSERVACAO
+      FROM (
+        SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
+          FROM pedidos
+         WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
+        UNION ALL
+        SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
+          FROM novos_insumos
+         WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
+      ) AS t
+      GROUP BY t.INSUMO, t.CATEGORIA, t.UNIDADE
+      ORDER BY t.INSUMO
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ssssss',
+        $selFilial, $dtIni, $dtFim,
+        $selFilial, $dtIni, $dtFim
+    );
+    $stmt->execute();
+    $res2 = $stmt->get_result();
+
+    // Se for pedido de CSV, envia download e sai
+    if ($action === 'csv') {
+        $fn = "pedidos_{$selFilial}_{$dataInicio}_a_{$dataFim}.csv";
+        header('Content-Type: text/csv; charset=UTF-8');
+        header("Content-Disposition: attachment; filename=\"{$fn}\"");
+        echo "\xEF\xBB\xBF"; // BOM
+
+        $out = fopen('php://output','w');
+        fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
+
+        while ($row = $res2->fetch_assoc()) {
+            $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
+            fputcsv($out, [
+                $row['INSUMO'],
+                $row['CATEGORIA'],
+                $row['UNIDADE'],
+                $q,
+                $row['OBSERVACAO'] ?? '',
+            ], ';');
+        }
+        fclose($out);
+        exit;
+    }
+
+    // Caso contrário, armazenamos em array para exibir na página
+    $dataRows = $res2->fetch_all(MYSQLI_ASSOC);
+}
+
+$conn->close();
+?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Exportar Pedido</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="/assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100 flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="bg-gray-800 w-60 p-6 flex-shrink-0">
+    <?php include __DIR__ . '/../../sidebar.php'; ?>
+  </aside>
+
+  <main class="flex-1 p-6 bg-gray-900">
+
+    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">
+      Exportar Pedido
+    </h1>
+
+    <!-- Formulário de filtros -->
+    <form method="get" class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1 text-white">Filial:</label>
+        <select name="filial" required
+                class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
+          <option value="">— Selecione —</option>
+          <?php foreach ($filiais as $f): 
+            $v = htmlspecialchars($f['FILIAL'], ENT_QUOTES);
+            $s = $v === $selFilial ? ' selected' : '';
+          ?>
+            <option value="<?= $v ?>"<?= $s ?>><?= $v ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1 text-white">Data Início:</label>
+        <input type="date" name="data_inicio" value="<?= htmlspecialchars($dataInicio) ?>" required
+               class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1 text-white">Data Fim:</label>
+        <input type="date" name="data_fim" value="<?= htmlspecialchars($dataFim) ?>" required
+               class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
+      </div>
+
+      <button type="submit"
+              class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded">
+        Aplicar Filtro
+      </button>
+    </form>
+
+    <?php if (!empty($dataRows)): ?>
+      <!-- Botões de exportação -->
+      <div class="max-w-4xl mx-auto flex justify-end space-x-2 mt-6">
+        <a href="?<?= http_build_query([
+              'filial'=>$selFilial,
+              'data_inicio'=>$dataInicio,
+              'data_fim'=>$dataFim,
+              'export'=>'csv'
+            ]) ?>"
+           class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">
+          Exportar CSV
+        </a>
+        <button id="btn-pdf"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Exportar PDF
+        </button>
+      </div>
+
+      <!-- Tabela de preview (usada para o PDF) -->
+      <div id="pdf-content" class="overflow-x-auto bg-gray-800 rounded-lg shadow mt-4 max-w-4xl mx-auto">
+        <table class="min-w-full text-xs text-gray-100">
+          <thead class="bg-gray-700 text-yellow-400">
+            <tr>
+              <th class="p-2 text-left">Insumo</th>
+              <th class="p-2 text-left">Categoria</th>
+              <th class="p-2 text-left">Unidade</th>
+              <th class="p-2 text-center">Qtde</th>
+              <th class="p-2 text-left">Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($dataRows as $row):
+              $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
+            ?>
+            <tr class="border-b border-gray-700">
+              <td class="p-2"><?= htmlspecialchars($row['INSUMO'], ENT_QUOTES) ?></td>
+              <td class="p-2"><?= htmlspecialchars($row['CATEGORIA'], ENT_QUOTES) ?></td>
+              <td class="p-2"><?= htmlspecialchars($row['UNIDADE'], ENT_QUOTES) ?></td>
+              <td class="p-2 text-center"><?= $q ?></td>
+              <td class="p-2"><?= htmlspecialchars($row['OBSERVACAO'], ENT_QUOTES) ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
+
+  </main>
+
+  <!-- html2pdf.js para exportar em PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <script>
+    document.getElementById('btn-pdf')?.addEventListener('click', () => {
+      const element = document.getElementById('pdf-content');
+      if (!element) return;
+      html2pdf()
+        .set({
+          margin: 0.5,
+          filename: `pedido_<?= $selFilial ?>_<?= $dataInicio ?>_a_<?= $dataFim ?>.pdf`,
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        })
+        .from(element)
+        .save();
+    });
+  </script>
+</body>
+</html>
