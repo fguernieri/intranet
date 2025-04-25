@@ -48,3 +48,66 @@
 [14-Apr-2025 00:54:50 America/Fortaleza] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in /home2/basta920/public_html/cozinha/salvar_edicao.php on line 77
 [14-Apr-2025 01:18:41 America/Fortaleza] PHP Warning:  move_uploaded_file(../uploads/prato_67fc8ca1d28dc.png): failed to open stream: No such file or directory in /home2/basta920/public_html/cozinha/salvar_ficha.php on line 29
 [14-Apr-2025 01:18:41 America/Fortaleza] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpXgg6Yw' to '../uploads/prato_67fc8ca1d28dc.png' in /home2/basta920/public_html/cozinha/salvar_ficha.php on line 29
+[21-Apr-2025 00:12:22 America/Fortaleza] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'basta920_intra_bastards.ficha_tecnica' doesn't exist in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/consulta.php:14
+Stack trace:
+#0 /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/consulta.php(14): PDOStatement->execute(Array)
+#1 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/consulta.php on line 14
+[22-Apr-2025 15:34:29 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:34:29 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:34:29 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:34:29 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:34:29 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[22-Apr-2025 15:35:39 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:35:39 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:35:39 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:35:39 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:35:39 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[22-Apr-2025 15:38:44 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:38:44 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:38:44 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 15:38:44 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 15:38:44 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[22-Apr-2025 17:03:47 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 17:03:47 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[22-Apr-2025 17:03:47 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[22-Apr-2025 17:03:47 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[23-Apr-2025 10:00:39 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[23-Apr-2025 10:00:39 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[23-Apr-2025 10:00:39 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[23-Apr-2025 10:00:39 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[23-Apr-2025 10:00:40 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[23-Apr-2025 10:01:55 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[23-Apr-2025 10:01:55 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[23-Apr-2025 10:01:55 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[23-Apr-2025 10:01:55 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[23-Apr-2025 10:01:55 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[24-Apr-2025 09:07:24 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 09:07:24 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[24-Apr-2025 09:07:24 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 09:07:24 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[24-Apr-2025 09:07:24 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[24-Apr-2025 10:36:03 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 10:36:03 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[24-Apr-2025 10:36:03 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 10:36:03 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[24-Apr-2025 10:37:32 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 10:37:32 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[24-Apr-2025 10:37:32 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[24-Apr-2025 10:37:32 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[24-Apr-2025 10:37:32 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:19) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[25-Apr-2025 14:33:56 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 14:33:56 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 14:33:56 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 14:33:56 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 14:33:56 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:18) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[25-Apr-2025 14:40:32 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 14:40:32 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 14:40:32 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 14:40:32 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 14:40:32 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:18) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101
+[25-Apr-2025 15:01:15 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 15:01:15 America/Fortaleza] PHP Warning:  Undefined variable $nome_prato in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 15:01:15 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 61
+[25-Apr-2025 15:01:15 America/Fortaleza] PHP Warning:  Undefined variable $imagem in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 68
+[25-Apr-2025 15:01:15 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/sidebar.php:18) in /home2/basta920/intra.bastardsbrewery.com.br/modules/ficha_tecnica/salvar_edicao.php on line 101

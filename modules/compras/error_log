@@ -1,0 +1,265 @@
+[23-Apr-2025 13:05:48 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:05:48 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:05:48 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:05:58 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:05:58 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:05:58 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:06:32 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:06:32 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:06:32 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:06:42 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:06:42 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:06:42 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:06:56 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:06:56 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:06:56 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:07:19 America/Fortaleza] PHP Warning:  Undefined array key "bar" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 6
+[23-Apr-2025 13:07:19 America/Fortaleza] PHP Warning:  Undefined array key "user" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 7
+[23-Apr-2025 13:07:19 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:18:12 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_bar.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_bar.php on line 19
+[23-Apr-2025 13:18:22 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_bar.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_bar.php on line 19
+[23-Apr-2025 13:20:27 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 19
+[23-Apr-2025 13:20:37 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 19
+[23-Apr-2025 13:22:44 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 19
+[23-Apr-2025 13:22:52 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 19
+[23-Apr-2025 13:22:52 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php:19
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 19
+[23-Apr-2025 13:23:23 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:15
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 15
+[23-Apr-2025 13:27:31 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:15
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 15
+[23-Apr-2025 13:44:47 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "stmt" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:34
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 34
+[23-Apr-2025 13:45:11 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "stmt" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php:34
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 34
+[23-Apr-2025 13:45:53 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:47:05 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:48:48 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:49:29 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:50:18 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:50:26 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:50:50 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 13:50:58 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 10
+[23-Apr-2025 14:43:37 America/Fortaleza] PHP Parse error:  syntax error, unexpected token "\" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 220
+[23-Apr-2025 14:43:45 America/Fortaleza] PHP Parse error:  syntax error, unexpected token "\" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php on line 220
+[23-Apr-2025 14:50:57 America/Fortaleza] PHP Parse error:  syntax error, unexpected variable "$_SERVER" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 5
+[23-Apr-2025 14:51:01 America/Fortaleza] PHP Parse error:  syntax error, unexpected variable "$_SERVER" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 5
+[23-Apr-2025 14:56:06 America/Fortaleza] PHP Warning:  require_once(db_config.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 3
+[23-Apr-2025 14:56:06 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required 'db_config.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:3
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 3
+[23-Apr-2025 15:35:33 America/Fortaleza] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:65
+Stack trace:
+#0 /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php(65): mysqli_stmt->bind_param('isssssdsss s', 10, NULL, NULL, NULL, NULL, NULL, 'BAR DA FABRICA', NULL, NULL, 'Lucas', '2025-04-23 15:3...')
+#1 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 65
+[23-Apr-2025 21:28:13 America/Fortaleza] PHP Parse error:  syntax error, unexpected token "if" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 44
+[23-Apr-2025 21:30:19 America/Fortaleza] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 12
+[23-Apr-2025 21:30:19 America/Fortaleza] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:12) in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 161
+[24-Apr-2025 10:08:24 America/Fortaleza] PHP Warning:  Undefined array key "new_insumo" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 10:08:24 America/Fortaleza] PHP Warning:  foreach() argument must be of type array|object, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 10:58:19 America/Fortaleza] PHP Warning:  Undefined array key "new_insumo" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 10:58:19 America/Fortaleza] PHP Warning:  foreach() argument must be of type array|object, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 11:00:26 America/Fortaleza] PHP Warning:  Undefined array key "new_insumo" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 11:00:26 America/Fortaleza] PHP Warning:  foreach() argument must be of type array|object, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 93
+[24-Apr-2025 11:31:00 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "stmtInsert" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:128
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 128
+[24-Apr-2025 12:04:47 America/Fortaleza] → NOVOS ITENS: count=0
+[24-Apr-2025 12:15:45 America/Fortaleza] PHP Warning:  Undefined array key "new_insumo" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 111
+[24-Apr-2025 12:15:45 America/Fortaleza] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:111
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 111
+[24-Apr-2025 12:18:20 America/Fortaleza] PHP Warning:  Undefined array key "new_insumo" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 111
+[24-Apr-2025 12:18:20 America/Fortaleza] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:111
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 111
+[24-Apr-2025 12:21:21 America/Fortaleza] SALVAR_PEDIDO: existentes inseridos=0, novos inseridos=0
+[24-Apr-2025 12:23:57 America/Fortaleza] SALVAR_PEDIDO: existentes inseridos=0, novos inseridos=0
+[24-Apr-2025 13:24:35 America/Fortaleza] DEBUG: existentes=200 | novos=0
+[24-Apr-2025 13:24:35 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:31:30 America/Fortaleza] DEBUG: existentes=200 | novos=0
+[24-Apr-2025 13:31:30 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:46:11 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:46:11 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:46:14 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:46:14 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:46:14 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:46:14 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:46:14 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:46:14 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:46:15 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:46:15 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:49:19 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 13:49:19 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 13:51:27 America/Fortaleza] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'basta920_intra_bastards.user_vendedor_permissoes' doesn't exist in /home2/basta920/intra.bastardsbrewery.com.br/auth.php:20
+Stack trace:
+#0 /home2/basta920/intra.bastardsbrewery.com.br/auth.php(20): PDOStatement->execute(Array)
+#1 /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php(5): require_once('/home2/basta920...')
+#2 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/auth.php on line 20
+[24-Apr-2025 13:51:56 America/Fortaleza] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'basta920_intra_bastards.user_vendedor_permissoes' doesn't exist in /home2/basta920/intra.bastardsbrewery.com.br/auth.php:20
+Stack trace:
+#0 /home2/basta920/intra.bastardsbrewery.com.br/auth.php(20): PDOStatement->execute(Array)
+#1 /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos.php(4): require_once('/home2/basta920...')
+#2 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/auth.php on line 20
+[24-Apr-2025 14:04:23 America/Fortaleza] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'basta920_intra_bastards.user_vendedor_permissoes' doesn't exist in /home2/basta920/intra.bastardsbrewery.com.br/auth.php:20
+Stack trace:
+#0 /home2/basta920/intra.bastardsbrewery.com.br/auth.php(20): PDOStatement->execute(Array)
+#1 /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php(5): require_once('/home2/basta920...')
+#2 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/auth.php on line 20
+[24-Apr-2025 14:14:22 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 14:14:22 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 14:20:53 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 14:20:53 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 14:27:07 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 14:27:07 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 14:29:40 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 14:29:40 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 14:32:10 America/Fortaleza] PHP Warning:  require_once(/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 13
+[24-Apr-2025 14:32:10 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php:13
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 13
+[24-Apr-2025 14:32:16 America/Fortaleza] PHP Warning:  require_once(/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 13
+[24-Apr-2025 14:32:16 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php:13
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 13
+[24-Apr-2025 14:37:52 America/Fortaleza] PHP Warning:  require_once(/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 10
+[24-Apr-2025 14:37:52 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 10
+[24-Apr-2025 14:38:03 America/Fortaleza] PHP Warning:  require_once(/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 10
+[24-Apr-2025 14:38:03 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required '/home2/basta920/intra.bastardsbrewery.com.br/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/exportar_pedido.php on line 10
+[24-Apr-2025 15:56:31 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 15:56:31 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 16:07:13 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 16:07:13 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 16:14:38 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 16:14:38 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 16:17:49 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 16:17:49 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 16:46:43 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 16:46:43 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:03:34 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:03:34 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:05:46 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:05:46 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:11:01 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:11:01 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:11:15 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:11:15 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:11:15 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:11:15 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 18:14:08 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 18:14:08 America/Fortaleza] salvar_pedido: COMMIT OK
+[24-Apr-2025 20:25:49 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 20:27:39 America/Fortaleza] DEBUG: existentes=330 | novos=0
+[24-Apr-2025 20:28:20 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 20:28:20 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 20:29:30 America/Fortaleza] DEBUG: existentes=376 | novos=0
+[24-Apr-2025 20:38:38 America/Fortaleza] PHP Parse error:  Unmatched '}' in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 133
+[24-Apr-2025 20:52:15 America/Fortaleza] PHP Parse error:  Unmatched '}' in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 133
+[24-Apr-2025 21:00:44 America/Fortaleza] PHP Parse error:  Unmatched '}' in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 133
+[24-Apr-2025 21:01:03 America/Fortaleza] PHP Parse error:  Unmatched '}' in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 133
+[24-Apr-2025 21:07:16 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:07:17 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:07:22 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:07:32 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:20:13 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:22:29 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[24-Apr-2025 21:47:49 America/Fortaleza] salvar_pedido.php: filial usada = '7TRAGOS'
+[25-Apr-2025 08:03:55 America/Fortaleza] PHP Warning:  require_once(db_config.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 4
+[25-Apr-2025 08:03:55 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required 'db_config.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:4
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 4
+[25-Apr-2025 08:05:26 America/Fortaleza] PHP Warning:  require_once(db_config.php): Failed to open stream: No such file or directory in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 4
+[25-Apr-2025 08:05:26 America/Fortaleza] PHP Fatal error:  Uncaught Error: Failed opening required 'db_config.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php:4
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_pedido.php on line 4
+[25-Apr-2025 10:04:03 America/Fortaleza] PHP Warning:  Undefined variable $filiais in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 15
+[25-Apr-2025 10:04:03 America/Fortaleza] PHP Warning:  foreach() argument must be of type array|object, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 15
+[25-Apr-2025 10:07:29 America/Fortaleza] PHP Warning:  Undefined variable $filiais in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 15
+[25-Apr-2025 10:07:29 America/Fortaleza] PHP Warning:  foreach() argument must be of type array|object, null given in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/select_filial.php on line 15
+[25-Apr-2025 10:08:39 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:08:43 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:08:44 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:08:47 America/Fortaleza] PHP Warning:  Undefined array key "BAR DA FABRICA" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_bardafabrica.php on line 11
+[25-Apr-2025 10:08:49 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:10:56 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:10:58 America/Fortaleza] PHP Warning:  Undefined array key "BAR DA FABRICA" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_bardafabrica.php on line 11
+[25-Apr-2025 10:12:56 America/Fortaleza] PHP Warning:  Undefined array key "7TRAGOS" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 11
+[25-Apr-2025 10:12:57 America/Fortaleza] PHP Warning:  Undefined array key "BAR DA FABRICA" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_bardafabrica.php on line 11
+[25-Apr-2025 11:41:03 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 11:43:07 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 11:43:39 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 11:44:50 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 11:46:38 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 11:51:47 America/Fortaleza] PHP Parse error:  syntax error, unexpected token ";" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/salvar_novos_insumos.php on line 13
+[25-Apr-2025 15:59:14 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php:20
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 20
+[25-Apr-2025 15:59:23 America/Fortaleza] PHP Fatal error:  Uncaught Error: Undefined constant "DB_HOST" in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php:20
+Stack trace:
+#0 {main}
+  thrown in /home2/basta920/intra.bastardsbrewery.com.br/modules/compras/insumos_7tragos.php on line 20

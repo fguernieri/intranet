@@ -25,7 +25,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="../../assets/css/style.css">
 
 </head>
-<body class="bg-gray-900 text-gray-100 p-3 min-h-screen flex">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex">
 
   <!-- Alerta de exclusão -->
 	<?php if (isset($_GET['excluido'])): ?>
@@ -61,7 +61,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
   <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold text-cyan-400 px-5 py-5 text-center mb-8">Consulta de Fichas Técnicas</h1>
+    <h1 class="text-3xl font-bold text-cyan-400 text-center mb-8">Consulta de Fichas Técnicas</h1>
 
     <!-- Campo de busca + botões -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
