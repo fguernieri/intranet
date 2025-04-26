@@ -28,6 +28,25 @@ $dadosFiltrados = array_filter($pedidos, function($p) use ($nomesPermitidos, $se
     return ($dia >= $startDate && $dia <= $endDate);
 });
 
+// Inicializa
+$data_inicial = null;
+$data_final = null;
+
+// Calcula datas
+if ($pedidos) {
+    foreach ($pedidos as $item) {
+        if (isset($item['Data Pedido'])) {
+            $data = intval($item['Data Pedido']) / 1000; // converte milissegundos para segundos
+            if (!$data_inicial || $data < $data_inicial) {
+                $data_inicial = $data;
+            }
+            if (!$data_final || $data > $data_final) {
+                $data_final = $data;
+            }
+        }
+    }
+}
+
 $totalFaturado = 0;
 $clientes = [];
 $estados = [];
@@ -83,7 +102,7 @@ $clientesCount = array_map('count', $clientesPorV);
       <h1 class="text-3xl font-bold mb-2 text-yellow-400 text-center">Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome']); ?></h1>
       <h2 class="text-xl font-semibold mb-6 text-center text-white">Dashboard Comercial v1.2 (ApexCharts)</h2>
 
-      <form method="get" class="bg-gray-800 rounded-lg p-6 grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-white">
+      <form method="get" class="bg-gray-800 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-white">
         <!-- Vendedores -->
         <div>
           <label class="block mb-2 text-sm font-semibold">🧑‍💼 Vendedores</label>
@@ -96,19 +115,29 @@ $clientesCount = array_map('count', $clientesPorV);
             <?php endforeach; ?>
           </select>
         </div>
+          <div class="grid-cols-2 gap-6">
+            <!-- Data Início -->
+            <div>
+              <label class="block mb-2 text-sm font-semibold">📅 Data Início</label>
+              <input type="date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
+            </div>
 
-        <!-- Data Início -->
-        <div>
-          <label class="block mb-2 text-sm font-semibold">📅 Data Início</label>
-          <input type="date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
-        </div>
-
-        <!-- Data Fim -->
-        <div>
-          <label class="block mb-2 text-sm font-semibold">📅 Data Fim</label>
-          <input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
-        </div>
-
+            <!-- Data Fim -->
+            <div>
+              <label class="block mb-2 text-sm font-semibold">📅 Data Fim</label>
+              <input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm">
+            </div>
+            
+            <div class="mb-4 p-2">
+              <p><strong>Período disponível:</strong> 
+              <?php if ($data_inicial && $data_final): ?>
+                <?= date('d/m/Y', $data_inicial) ?> a <?= date('d/m/Y', $data_final) ?>
+              <?php else: ?>
+                Dados indisponíveis
+              <?php endif; ?>
+              </p>
+            </div>
+          </div>
         <!-- Botão -->
         <div class="flex items-end justify-end">
           <button type="submit" class="btn-acao">Aplicar Filtros</button>
