@@ -104,7 +104,6 @@ if ($user_id) {
 }
 
 $ok = isset($_GET['ok']);
-ob_end_flush();
 ?>
 
 <!DOCTYPE html>
@@ -372,3 +371,13 @@ ob_end_flush();
 </main>
 </body>
 </html>
+<?php
+// 3) No final do arquivo, quando todo o HTML já foi "imprimido" no buffer:
+$htmlCompleto = ob_get_clean();  // pega tudo e limpa o buffer
+
+// (opcional) você pode manipular $htmlCompleto: str_replace, minify, etc.
+// $htmlCompleto = str_replace('foo', 'bar', $htmlCompleto);
+
+// finalmente envia ao cliente:
+echo $htmlCompleto;
+?>
