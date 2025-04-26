@@ -71,7 +71,7 @@ if (file_exists($logPath)) {
 </button>
 
 <!-- Sidebar desktop -->
-<aside class="hidden sm:flex w-64 bg-gray-800 p-6 flex-col justify-between h-screen text-white">
+<aside class="hidden sm:flex w-60 bg-gray-800 p-6 flex-col justify-between h-screen text-white">
   <div>
     <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Bastards Brewery" class="w-28 mx-auto mb-6">
     <nav class="space-y-4">

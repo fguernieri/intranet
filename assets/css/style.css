@@ -65,3 +65,7 @@
 card1.no-hover:hover {
   transform: none !important;
 }
+
+main {
+  overflow-y: auto;
+}
