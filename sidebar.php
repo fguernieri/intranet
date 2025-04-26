@@ -14,8 +14,33 @@ require_once 'config/app.php';
     $_SESSION['modulos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $modulos = $_SESSION['modulos'];
+
+// Caminho para o reflog do Git
+$logPath = __DIR__ . '/.git/logs/HEAD';
+
+// Valor padrão
+$lastUpdate = 'data indisponível';
+
+if (file_exists($logPath)) {
+    // Carrega todas as linhas do reflog (ignora linhas vazias)
+    $lines = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    // Pega a última entrada
+    $lastLine = array_pop($lines);
+
+    // Extrai o quarto campo: UNIX timestamp de 10 dígitos
+    if (preg_match('/\s(\d{10})\s/', $lastLine, $m)) {
+        $ts = intval($m[1]);
+        // Formata como dd/mm/YYYY HH:MM
+        $lastUpdate = date('d/m/Y H:i', $ts);
+    }
+}
 ?>
 
+<html lang="pt-BR">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 <!-- Overlay -->
 <div id="overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"></div>
 
@@ -34,6 +59,9 @@ $modulos = $_SESSION['modulos'];
   <?php endif; ?>
   <a href="<?= BASE_URL ?>/modules/usuarios/alterar_senha.php" class="block text-sm text-gray-400 hover:text-yellow-400">Alterar Senha</a>
   <a href="<?= BASE_URL ?>/logout.php" class="block text-sm text-red-500 hover:underline">Sair</a>
+  <p class="text-sm text-gray-400">
+      Última atualização: <?= htmlspecialchars($lastUpdate) ?>
+  </p>
 </div>
 
 <!-- Botão fixo lateral para abrir sidebar -->
@@ -57,6 +85,10 @@ $modulos = $_SESSION['modulos'];
       <a href="<?= BASE_URL ?>/modules/usuarios/alterar_senha.php" class="block text-sm text-gray-400 hover:text-yellow-400">Alterar Senha</a>
       <a href="<?= BASE_URL ?>/logout.php" class="block text-sm text-red-500 hover:underline">Sair</a>
     </nav>
+    <p class="text-sm text-gray-400 mt-6">
+      Última atualização:<br>
+      <?= htmlspecialchars($lastUpdate) ?>
+    </p>
   </div>
 </aside>
 
@@ -83,3 +115,4 @@ $modulos = $_SESSION['modulos'];
     }
   }
 </script>
+</html>
