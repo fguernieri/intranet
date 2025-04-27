@@ -6,8 +6,8 @@ require_once __DIR__ . '/../../auth.php';
 $pdoMain = $pdo; // conexão principal (intranet)
 
 // 2) Conexão DW — para dados de pedidos
-require_once __DIR__ . '/../../config/db_dw.php';
-$pdoDw = getDwConnection();
+// require_once __DIR__ . '/../../config/db_dw.php';
+// $pdoDw = getDwConnection();
 
 // 3) Permissões de vendedores vindas da sessão
 $permissoes = $_SESSION['vendedores_permitidos'] ?? [];
@@ -53,7 +53,7 @@ $whereClauses[] = "DATE(DataPedido) BETWEEN ? AND ?";
 $queryParams[]  = $startDate;
 $queryParams[]  = $endDate;
 
-// 8) Consulta na view/tabela PedidosComercial no DW
+// 8) Consulta na view/tabela pedidosfat
 $sql = "
 SELECT
   Empresa,
@@ -65,10 +65,10 @@ SELECT
   DataFaturamento AS DataFaturamento,
   ValorFaturado   AS ValorFaturado,
   FormaPagamento  AS FormaPagamento
-FROM PedidosComercial
+FROM pedidosfat
 " . ($whereClauses ? ' WHERE ' . implode(' AND ', $whereClauses) : '');
 
-$stmt  = $pdoDw->prepare($sql);
+$stmt  = $pdoMain->prepare($sql);
 $stmt->execute($queryParams);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
