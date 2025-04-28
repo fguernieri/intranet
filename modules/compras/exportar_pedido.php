@@ -1,6 +1,6 @@
 <?php
 // === modules/compras/exportar_pedido.php ===
-// ATENÇÃO: não deve haver nenhum output antes deste <?php
+// ATENÇÃO: não deve haver nenhum output (espaço, HTML, include) antes deste <?php
 
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
@@ -16,16 +16,7 @@ if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
 }
 
-// 1) Lista de filiais de pedidos ou novos_insumos
-$res = $conn->query("
-    SELECT DISTINCT FILIAL FROM pedidos
-    UNION
-    SELECT DISTINCT FILIAL FROM novos_insumos
-    ORDER BY FILIAL
-");
-$filiais = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
-
-// 2) Lê filtros
+// 1) Lê filtros
 $selFilial  = $_GET['filial']      ?? '';
 $dataInicio = $_GET['data_inicio'] ?? '';
 $dataFim    = $_GET['data_fim']    ?? '';
@@ -56,23 +47,23 @@ if ($selFilial && $dataInicio && $dataFim) {
       ORDER BY t.INSUMO
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('ssssss',
+    $stmt->bind_param(
+        'ssssss',
         $selFilial, $dtIni, $dtFim,
         $selFilial, $dtIni, $dtFim
     );
     $stmt->execute();
     $res2 = $stmt->get_result();
 
-    // Se for pedido de CSV, envia download e sai
+    // 2) Se for pedido de CSV, envia download e sai antes de qualquer output
     if ($action === 'csv') {
-        $fn = "pedidos_{$selFilial}_{$dataInicio}_a_{$dataFim}.csv";
+        $fn = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
         header('Content-Type: text/csv; charset=UTF-8');
         header("Content-Disposition: attachment; filename=\"{$fn}\"");
-        echo "\xEF\xBB\xBF"; // BOM
+        echo "\xEF\xBB\xBF"; // BOM UTF-8
 
-        $out = fopen('php://output','w');
+        $out = fopen('php://output', 'w');
         fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
-
         while ($row = $res2->fetch_assoc()) {
             $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
             fputcsv($out, [
@@ -87,11 +78,14 @@ if ($selFilial && $dataInicio && $dataFim) {
         exit;
     }
 
-    // Caso contrário, armazenamos em array para exibir na página
+    // 3) caso não seja CSV, guarda para preview em HTML
     $dataRows = $res2->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
+
+// === só a partir daqui pode incluir HTML e sidebar ===
+require_once __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -103,11 +97,6 @@ $conn->close();
   <link href="/assets/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  <aside class="bg-gray-800 w-60 p-6 flex-shrink-0">
-    <?php include __DIR__ . '/../../sidebar.php'; ?>
-  </aside>
 
   <main class="flex-1 p-6 bg-gray-900">
 
@@ -122,7 +111,7 @@ $conn->close();
         <select name="filial" required
                 class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
           <option value="">— Selecione —</option>
-          <?php foreach ($filiais as $f): 
+          <?php foreach ($filiais as $f):
             $v = htmlspecialchars($f['FILIAL'], ENT_QUOTES);
             $s = $v === $selFilial ? ' selected' : '';
           ?>
@@ -150,7 +139,6 @@ $conn->close();
     </form>
 
     <?php if (!empty($dataRows)): ?>
-      <!-- Botões de exportação -->
       <div class="max-w-4xl mx-auto flex justify-end space-x-2 mt-6">
         <a href="?<?= http_build_query([
               'filial'=>$selFilial,
@@ -167,7 +155,6 @@ $conn->close();
         </button>
       </div>
 
-      <!-- Tabela de preview (usada para o PDF) -->
       <div id="pdf-content" class="overflow-x-auto bg-gray-800 rounded-lg shadow mt-4 max-w-4xl mx-auto">
         <table class="min-w-full text-xs text-gray-100">
           <thead class="bg-gray-700 text-yellow-400">
@@ -198,7 +185,6 @@ $conn->close();
 
   </main>
 
-  <!-- html2pdf.js para exportar em PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
   <script>
     document.getElementById('btn-pdf')?.addEventListener('click', () => {
