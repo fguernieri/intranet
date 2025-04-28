@@ -1,4 +1,6 @@
 <?php
+// === modules/compras/exportar_pedido.php ===
+// ATENÇÃO: não deve haver nenhum output antes deste ponto
 
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
@@ -14,6 +16,7 @@ if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
 }
 
+// 1) Busca lista de filiais para o filtro (sem gerar output)
 $resFiliais = $conn->query("
     SELECT DISTINCT FILIAL FROM pedidos
     UNION
@@ -22,17 +25,17 @@ $resFiliais = $conn->query("
 ");
 $filiais = $resFiliais ? $resFiliais->fetch_all(MYSQLI_ASSOC) : [];
 
-// 1) Lê filtros
+// 2) Lê filtros
 $selFilial  = $_GET['filial']      ?? '';
 $dataInicio = $_GET['data_inicio'] ?? '';
 $dataFim    = $_GET['data_fim']    ?? '';
 $action     = $_GET['export']      ?? '';  // 'csv' para CSV
 
-if ($selFilial && $dataInicio && $dataFim) {
+// 3) Se for CSV, executa exportação e sai ANTES de qualquer HTML
+if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     $dtIni = $dataInicio . ' 00:00:00';
     $dtFim = $dataFim    . ' 23:59:59';
 
-    // SQL de agregação
     $sql = "
       SELECT
         t.INSUMO,
@@ -61,36 +64,39 @@ if ($selFilial && $dataInicio && $dataFim) {
     $stmt->execute();
     $res2 = $stmt->get_result();
 
-    // 2) Se for CSV, envia e sai antes de qualquer HTML
-    if ($action === 'csv') {
-        $fn = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
-        header('Content-Type: text/csv; charset=UTF-8');
-        header("Content-Disposition: attachment; filename=\"{$fn}\"");
-        echo "\xEF\xBB\xBF"; // BOM UTF-8
+    // Envia CSV
+    $filename = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
+    header('Content-Type: text/csv; charset=UTF-8');
+    header("Content-Disposition: attachment; filename=\"{$filename}\"");
+    echo "\xEF\xBB\xBF"; // BOM UTF-8
 
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
-        while ($row = $res2->fetch_assoc()) {
-            $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
-            fputcsv($out, [
-                $row['INSUMO'],
-                $row['CATEGORIA'],
-                $row['UNIDADE'],
-                $q,
-                $row['OBSERVACAO'] ?? '',
-            ], ';');
-        }
-        fclose($out);
-        exit;
+    $out = fopen('php://output', 'w');
+    fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
+    while ($row = $res2->fetch_assoc()) {
+        $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
+        fputcsv($out, [
+            $row['INSUMO'],
+            $row['CATEGORIA'],
+            $row['UNIDADE'],
+            $q,
+            $row['OBSERVACAO'] ?? '',
+        ], ';');
     }
+    fclose($out);
+    exit;
+}
 
-    // 3) Para preview em HTML
-    $dataRows = $res2->fetch_all(MYSQLI_ASSOC);
+// 4) Se não for CSV mas houver filtros preenchidos, busca dados para preview em HTML
+$dataRows = [];
+if ($selFilial && $dataInicio && $dataFim) {
+    // Reusa o mesmo SQL e statement do bloco CSV
+    $stmt->execute();
+    $dataRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
 
-// === A PARTIR DAQUI PODE VIR HTML E INCLUDES ===
+// 5) A partir daqui pode vir HTML e includes
 require_once __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
@@ -104,7 +110,9 @@ require_once __DIR__ . '/../../sidebar.php';
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
   <main class="flex-1 p-6 bg-gray-900">
-    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">Exportar Pedido</h1>
+    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">
+      Exportar Pedido
+    </h1>
 
     <!-- Formulário de filtros -->
     <form method="get" class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow space-y-4">
@@ -113,7 +121,7 @@ require_once __DIR__ . '/../../sidebar.php';
         <select name="filial" required
                 class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
           <option value="">— Selecione —</option>
-          <?php foreach ($filiais as $f): 
+          <?php foreach ($filiais as $f):
             $v = htmlspecialchars($f['FILIAL'], ENT_QUOTES);
             $s = $v === $selFilial ? ' selected' : '';
           ?>
@@ -121,16 +129,19 @@ require_once __DIR__ . '/../../sidebar.php';
           <?php endforeach; ?>
         </select>
       </div>
+
       <div>
         <label class="block text-sm font-semibold mb-1 text-white">Data Início:</label>
         <input type="date" name="data_inicio" value="<?= htmlspecialchars($dataInicio) ?>" required
                class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
       </div>
+
       <div>
         <label class="block text-sm font-semibold mb-1 text-white">Data Fim:</label>
         <input type="date" name="data_fim" value="<?= htmlspecialchars($dataFim) ?>" required
                class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
       </div>
+
       <button type="submit"
               class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded">
         Aplicar Filtro
@@ -138,12 +149,13 @@ require_once __DIR__ . '/../../sidebar.php';
     </form>
 
     <?php if (!empty($dataRows)): ?>
+      <!-- Botões de exportação -->
       <div class="max-w-4xl mx-auto flex justify-end space-x-2 mt-6">
         <a href="?<?= http_build_query([
-              'filial'=>$selFilial,
-              'data_inicio'=>$dataInicio,
-              'data_fim'=>$dataFim,
-              'export'=>'csv'
+              'filial'      => $selFilial,
+              'data_inicio' => $dataInicio,
+              'data_fim'    => $dataFim,
+              'export'      => 'csv'
             ]) ?>"
            class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">
           Exportar CSV
@@ -154,6 +166,7 @@ require_once __DIR__ . '/../../sidebar.php';
         </button>
       </div>
 
+      <!-- Preview de resultados -->
       <div id="pdf-content" class="overflow-x-auto bg-gray-800 rounded-lg shadow mt-4 max-w-4xl mx-auto">
         <table class="min-w-full text-xs text-gray-100">
           <thead class="bg-gray-700 text-yellow-400">
