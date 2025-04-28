@@ -1,6 +1,5 @@
 <?php
-// === modules/compras/exportar_pedido.php ===
-require_once __DIR__ . '/../../sidebar.php';
+
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
 if (empty($_SESSION['usuario_id'])) {
@@ -14,6 +13,14 @@ $conn->set_charset('utf8mb4');
 if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
 }
+
+$resFiliais = $conn->query("
+    SELECT DISTINCT FILIAL FROM pedidos
+    UNION
+    SELECT DISTINCT FILIAL FROM novos_insumos
+    ORDER BY FILIAL
+");
+$filiais = $resFiliais ? $resFiliais->fetch_all(MYSQLI_ASSOC) : [];
 
 // 1) Lê filtros
 $selFilial  = $_GET['filial']      ?? '';
@@ -54,7 +61,7 @@ if ($selFilial && $dataInicio && $dataFim) {
     $stmt->execute();
     $res2 = $stmt->get_result();
 
-    // 2) Se for pedido de CSV, envia download e sai antes de qualquer output
+    // 2) Se for CSV, envia e sai antes de qualquer HTML
     if ($action === 'csv') {
         $fn = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
         header('Content-Type: text/csv; charset=UTF-8');
@@ -77,13 +84,13 @@ if ($selFilial && $dataInicio && $dataFim) {
         exit;
     }
 
-    // 3) caso não seja CSV, guarda para preview em HTML
+    // 3) Para preview em HTML
     $dataRows = $res2->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
 
-// === só a partir daqui pode incluir HTML e sidebar ===
+// === A PARTIR DAQUI PODE VIR HTML E INCLUDES ===
 require_once __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
@@ -96,12 +103,8 @@ require_once __DIR__ . '/../../sidebar.php';
   <link href="/assets/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
-
   <main class="flex-1 p-6 bg-gray-900">
-
-    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">
-      Exportar Pedido
-    </h1>
+    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">Exportar Pedido</h1>
 
     <!-- Formulário de filtros -->
     <form method="get" class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow space-y-4">
@@ -110,7 +113,7 @@ require_once __DIR__ . '/../../sidebar.php';
         <select name="filial" required
                 class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
           <option value="">— Selecione —</option>
-          <?php foreach ($filiais as $f):
+          <?php foreach ($filiais as $f): 
             $v = htmlspecialchars($f['FILIAL'], ENT_QUOTES);
             $s = $v === $selFilial ? ' selected' : '';
           ?>
@@ -118,19 +121,16 @@ require_once __DIR__ . '/../../sidebar.php';
           <?php endforeach; ?>
         </select>
       </div>
-
       <div>
         <label class="block text-sm font-semibold mb-1 text-white">Data Início:</label>
         <input type="date" name="data_inicio" value="<?= htmlspecialchars($dataInicio) ?>" required
                class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
       </div>
-
       <div>
         <label class="block text-sm font-semibold mb-1 text-white">Data Fim:</label>
         <input type="date" name="data_fim" value="<?= htmlspecialchars($dataFim) ?>" required
                class="w-full bg-gray-700 border border-gray-600 text-white p-2 rounded">
       </div>
-
       <button type="submit"
               class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded">
         Aplicar Filtro
@@ -181,7 +181,6 @@ require_once __DIR__ . '/../../sidebar.php';
         </table>
       </div>
     <?php endif; ?>
-
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
