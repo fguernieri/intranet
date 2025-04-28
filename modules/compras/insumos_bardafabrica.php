@@ -1,7 +1,7 @@
 <?php
 // === modules/compras/insumos_7tragos.php ===
 // Página de pedido de insumos para a filial 7TRAGOS (totalmente standalone).
-
+require_once __DIR__ . '/../../sidebar.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
 session_start();
 if (empty($_SESSION['usuario_id'])) {
@@ -58,11 +58,6 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  <aside class="bg-gray-800 w-60 p-6 flex-shrink-0">
-    <?php include __DIR__ . '/../../sidebar.php'; ?>
-  </aside>
 
   <main class="flex-1 bg-gray-900 p-6 relative">
     <button onclick="location.href='select_filial.php'"

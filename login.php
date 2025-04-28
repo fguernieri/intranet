@@ -57,7 +57,7 @@ $erro = isset($_GET['erro']) ? true : false;
     </form>
 
     <div class="mt-3 sm:mt-4 text-center">
-      <a href="#" class="text-gray-400 hover:text-yellow-400 transition text-sm sm:text-base">Esqueceu a senha?!</a>
+      <a href="#" class="text-gray-400 hover:text-yellow-400 transition text-sm sm:text-base">Esqueceu a senha?!!?</a>
     </div>
   </div>
 

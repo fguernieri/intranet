@@ -1,7 +1,6 @@
 <?php
 // === modules/compras/exportar_pedido.php ===
-// ATENÇÃO: não deve haver nenhum output (espaço, HTML, include) antes deste <?php
-
+require_once __DIR__ . '/../../sidebar.php';
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
 if (empty($_SESSION['usuario_id'])) {

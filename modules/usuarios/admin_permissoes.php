@@ -88,7 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_perms'])) {
     header("Location: admin_permissoes.php?user_id=$user_id&ok=1");
     exit;
 }
-$stmt = $pdo->query("SELECT * FROM vendedores WHERE ativo = 1 ORDER BY nome");
+// Verifica se o checkbox "show_inativos" veio marcado
+$show_inativos = isset($_GET['show_inativos']);
+// Define o filtro: 0 = inativos, 1 = ativos (padrão)
+$status = $show_inativos ? 0 : 1;
+
+// Prepara e executa a query com filtro dinâmico
+$stmt = $pdo->prepare("SELECT * FROM vendedores WHERE ativo = :status ORDER BY nome");
+$stmt->execute(['status' => $status]);
 $vendedores = $stmt->fetchAll();
 
 // Dados para listagem
@@ -104,14 +111,12 @@ if ($user_id) {
 }
 
 $ok = isset($_GET['ok']);
-ob_end_flush();
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
   <meta charset="UTF-8">
   <title>Admin - Gerência de Usuários & Permissões</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -271,6 +276,23 @@ ob_end_flush();
 <section class="mt-8">
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-bold mb-4">Vendedores</h2>
+    <!-- Toggle para mostrar inativos -->
+    <div>
+    <form method="GET" ">
+      <label class="custom-switch">
+        <input
+          type="checkbox"
+          name="show_inativos"
+          value="1"
+          onchange="this.form.submit()"
+          class="custom-switch-input"
+          <?= isset($_GET['show_inativos']) ? 'checked' : '' ?>
+        >
+        <span class="custom-switch-slider"></span>
+        <span class="custom-switch-label">Mostrar inativos</span>
+      </label>
+    </form>
+    </div>  
     <a href="vendedor_form.php" class="btn-acao">
       + Novo Vendedor
     </a>
@@ -372,3 +394,13 @@ ob_end_flush();
 </main>
 </body>
 </html>
+<?php
+// 3) No final do arquivo, quando todo o HTML já foi "imprimido" no buffer:
+$htmlCompleto = ob_get_clean();  // pega tudo e limpa o buffer
+
+// (opcional) você pode manipular $htmlCompleto: str_replace, minify, etc.
+// $htmlCompleto = str_replace('foo', 'bar', $htmlCompleto);
+
+// finalmente envia ao cliente:
+echo $htmlCompleto;
+?>
