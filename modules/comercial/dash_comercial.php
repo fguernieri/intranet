@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../auth.php';
 $pdoMain = $pdo; // conexão principal (intranet)
 
 // 2) Conexão DW — para dados de pedidos
-require_once __DIR__ . '/../../config/db_dw.php';
+require_once '../../config/db_dw.php';
 
 // 3) Permissões de vendedores vindas da sessão
 $permissoes = $_SESSION['vendedores_permitidos'] ?? [];
@@ -64,11 +64,11 @@ SELECT
   DataFaturamento AS DataFaturamento,
   ValorFaturado   AS ValorFaturado,
   FormaPagamento  AS FormaPagamento
-FROM PedidosComercial
+FROM pedidosfat
 " . ($whereClauses ? ' WHERE ' . implode(' AND ', $whereClauses) : '');
 
 //$stmt  = $pdoMain->prepare($sql);
-$stmt  = $pdo_dw->prepare($sql);
+$stmt  = $pdoMain->prepare($sql);
 $stmt->execute($queryParams);
 $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
