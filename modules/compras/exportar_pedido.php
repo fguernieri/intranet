@@ -13,19 +13,23 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/db_config.php';
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
 if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error);
+    error_log("Conexão falhou: " . $conn->connect_error);
+    die("Erro ao conectar ao banco de dados.");
 }
 
-// 1) Lê filtros
-$selFilial   = $_GET['filial']      ?? '';
-$dataInicio  = $_GET['data_inicio'] ?? '';
-$dataFim     = $_GET['data_fim']    ?? '';
-$action      = $_GET['export']      ?? '';
+// 1) Lê filtros com validação e sanitização
+$selFilial   = filter_input(INPUT_GET, 'filial', FILTER_SANITIZE_STRING);
+$dataInicio  = filter_input(INPUT_GET, 'data_inicio', FILTER_SANITIZE_STRING);
+$dataFim     = filter_input(INPUT_GET, 'data_fim', FILTER_SANITIZE_STRING);
+$action      = filter_input(INPUT_GET, 'export', FILTER_SANITIZE_STRING);
 
-// Monta strings de data só se forem válidas
-if ($selFilial && $dataInicio && $dataFim) {
-    $dtIni = $dataInicio . ' 00:00:00';
-    $dtFim = $dataFim    . ' 23:59:59';
+// Valida datas
+if ($dataInicio && $dataFim) {
+    $dtIni = DateTime::createFromFormat('Y-m-d', $dataInicio) ? $dataInicio . ' 00:00:00' : null;
+    $dtFim = DateTime::createFromFormat('Y-m-d', $dataFim) ? $dataFim . ' 23:59:59' : null;
+    if (!$dtIni || !$dtFim) {
+        die("Datas inválidas.");
+    }
 }
 
 // Consulta SQL (usada tanto no CSV quanto no preview)
@@ -52,6 +56,10 @@ $sql = "
 // 2) Exportação CSV — roda antes de qualquer include/HTML
 if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Erro ao preparar consulta: " . $conn->error);
+        die("Erro ao preparar consulta.");
+    }
     $stmt->bind_param(
         'ssssss',
         $selFilial, $dtIni, $dtFim,
@@ -60,6 +68,11 @@ if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     $stmt->execute();
     $res2 = $stmt->get_result();
 
+    if (!$res2) {
+        error_log("Erro ao executar consulta: " . $stmt->error);
+        die("Erro ao executar consulta.");
+    }
+
     $filename = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
     header('Content-Type: text/csv; charset=UTF-8');
     header("Content-Disposition: attachment; filename=\"{$filename}\"");
@@ -67,7 +80,7 @@ if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
 
     $out = fopen('php://output', 'w');
     // Cabeçalho
-    fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
+    fputcsv($out, ['Insumo', 'Categoria', 'Unidade', 'Quantidade', 'Observação'], ';');
 
     // Linhas
     while ($row = $res2->fetch_assoc()) {
@@ -85,7 +98,7 @@ if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     exit; // interrompe antes de qualquer saída de template
 }
 
-// 3) Busca lista de filiais para o filtro
+// 3) Busca lista de filiais para o filtro (para o <select>) 
 $resFiliais = $conn->query("
     SELECT DISTINCT FILIAL FROM pedidos
     UNION
@@ -98,6 +111,10 @@ $filiais = $resFiliais ? $resFiliais->fetch_all(MYSQLI_ASSOC) : [];
 $dataRows = [];
 if ($selFilial && $dataInicio && $dataFim) {
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Erro ao preparar consulta: " . $conn->error);
+        die("Erro ao preparar consulta.");
+    }
     $stmt->bind_param(
         'ssssss',
         $selFilial, $dtIni, $dtFim,
