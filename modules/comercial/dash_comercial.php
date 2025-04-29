@@ -123,6 +123,11 @@ foreach ($pedidos as $p) {
     }
 }
 $clientesCount = array_map('count', $clientesPorV);
+
+$sql = "SELECT MAX(data_hora) AS UltimaAtualizacao FROM fAtualizacoes";
+$stmt = $pdo_dw->query($sql);
+$UltimaAtualizacao = $stmt->fetchColumn();
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -155,7 +160,8 @@ $clientesCount = array_map('count', $clientesPorV);
         <div class="grid-cols-2 gap-6">
           <div><label class="block mb-2 text-sm font-semibold">📅 Data Início</label><input type="date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm"></div>
           <div><label class="block mb-2 text-sm font-semibold">📅 Data Fim</label><input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm"></div>
-          <div class="mb-4 p-2"><p><strong>Período disponível:</strong> <?= $data_inicial? date('d/m/Y',$data_inicial):'' ?> a <?= $data_final? date('d/m/Y',$data_final):'' ?></p></div>
+          <div class="mb-4 p-2"><p><strong>Período disponível:</strong> <?= $data_inicial? date('d/m/Y',$data_inicial):'' ?> a <?= $data_final? date('d/m/Y',$data_final):'' ?></p>
+			<p>Última Atualização em: <?=date('d/m/Y H:i:s', strtotime($UltimaAtualizacao))?></p></div>
           <div class="flex justify-end"><button type="submit" class="btn-acao">Aplicar Filtros</button></div>
         </div>
       </form>
