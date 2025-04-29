@@ -188,7 +188,7 @@ require_once __DIR__ . '/../../sidebar.php';
               'export'      => 'csv'
             ]) ?>"
            class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">
-          Exportar CSV
+          Exportar Para Excel
         </a>
         <button id="btn-pdf"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
