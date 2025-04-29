@@ -1,6 +1,6 @@
 <?php
 // === modules/compras/exportar_pedido.php ===
-// ATENÇÃO: não deve haver nenhum output antes deste ponto
+// ATENÇÃO: não deve haver nenhum output (nem espaço em branco) antes desta tag
 
 session_start();
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
@@ -16,45 +16,41 @@ if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
 }
 
-// 1) Busca lista de filiais para o filtro (sem gerar output)
-$resFiliais = $conn->query("
-    SELECT DISTINCT FILIAL FROM pedidos
-    UNION
-    SELECT DISTINCT FILIAL FROM novos_insumos
-    ORDER BY FILIAL
-");
-$filiais = $resFiliais ? $resFiliais->fetch_all(MYSQLI_ASSOC) : [];
+// 1) Lê filtros
+$selFilial   = $_GET['filial']      ?? '';
+$dataInicio  = $_GET['data_inicio'] ?? '';
+$dataFim     = $_GET['data_fim']    ?? '';
+$action      = $_GET['export']      ?? '';
 
-// 2) Lê filtros
-$selFilial  = $_GET['filial']      ?? '';
-$dataInicio = $_GET['data_inicio'] ?? '';
-$dataFim    = $_GET['data_fim']    ?? '';
-$action     = $_GET['export']      ?? '';  // 'csv' para CSV
-
-// 3) Se for CSV, executa exportação e sai ANTES de qualquer HTML
-if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
+// Monta strings de data só se forem válidas
+if ($selFilial && $dataInicio && $dataFim) {
     $dtIni = $dataInicio . ' 00:00:00';
     $dtFim = $dataFim    . ' 23:59:59';
+}
 
-    $sql = "
-      SELECT
-        t.INSUMO,
-        t.CATEGORIA,
-        t.UNIDADE,
-        SUM(t.QUANTIDADE) AS QUANTIDADE,
-        GROUP_CONCAT(NULLIF(t.OBSERVACAO, '') SEPARATOR ' - ') AS OBSERVACAO
-      FROM (
-        SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
-          FROM pedidos
-         WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
-        UNION ALL
-        SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
-          FROM novos_insumos
-         WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
-      ) AS t
-      GROUP BY t.INSUMO, t.CATEGORIA, t.UNIDADE
-      ORDER BY t.INSUMO
-    ";
+// Consulta SQL (usada tanto no CSV quanto no preview)
+$sql = "
+  SELECT
+    t.INSUMO,
+    t.CATEGORIA,
+    t.UNIDADE,
+    SUM(t.QUANTIDADE) AS QUANTIDADE,
+    GROUP_CONCAT(NULLIF(t.OBSERVACAO, '') SEPARATOR ' - ') AS OBSERVACAO
+  FROM (
+    SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
+      FROM pedidos
+     WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
+    UNION ALL
+    SELECT INSUMO, CATEGORIA, UNIDADE, QUANTIDADE, OBSERVACAO, DATA_HORA
+      FROM novos_insumos
+     WHERE FILIAL = ? AND DATA_HORA BETWEEN ? AND ?
+  ) AS t
+  GROUP BY t.INSUMO, t.CATEGORIA, t.UNIDADE
+  ORDER BY t.INSUMO
+";
+
+// 2) Exportação CSV — roda antes de qualquer include/HTML
+if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
         'ssssss',
@@ -64,14 +60,16 @@ if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
     $stmt->execute();
     $res2 = $stmt->get_result();
 
-    // Envia CSV
     $filename = sprintf("pedidos_%s_%s_a_%s.csv", $selFilial, $dataInicio, $dataFim);
     header('Content-Type: text/csv; charset=UTF-8');
     header("Content-Disposition: attachment; filename=\"{$filename}\"");
     echo "\xEF\xBB\xBF"; // BOM UTF-8
 
     $out = fopen('php://output', 'w');
+    // Cabeçalho
     fputcsv($out, ['Insumo','Categoria','Unidade','Quantidade','Observação'], ';');
+
+    // Linhas
     while ($row = $res2->fetch_assoc()) {
         $q = number_format((float)$row['QUANTIDADE'], 2, ',', '.');
         fputcsv($out, [
@@ -82,21 +80,36 @@ if ($action === 'csv' && $selFilial && $dataInicio && $dataFim) {
             $row['OBSERVACAO'] ?? '',
         ], ';');
     }
+
     fclose($out);
-    exit;
+    exit; // interrompe antes de qualquer saída de template
 }
 
-// 4) Se não for CSV mas houver filtros preenchidos, busca dados para preview em HTML
+// 3) Busca lista de filiais para o filtro
+$resFiliais = $conn->query("
+    SELECT DISTINCT FILIAL FROM pedidos
+    UNION
+    SELECT DISTINCT FILIAL FROM novos_insumos
+    ORDER BY FILIAL
+");
+$filiais = $resFiliais ? $resFiliais->fetch_all(MYSQLI_ASSOC) : [];
+
+// 4) Se forem fornecidos filtros, faz o preview em HTML
 $dataRows = [];
 if ($selFilial && $dataInicio && $dataFim) {
-    // Reusa o mesmo SQL e statement do bloco CSV
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param(
+        'ssssss',
+        $selFilial, $dtIni, $dtFim,
+        $selFilial, $dtIni, $dtFim
+    );
     $stmt->execute();
     $dataRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
 $conn->close();
 
-// 5) A partir daqui pode vir HTML e includes
+// 5) A partir daqui pode vir o template e HTML
 require_once __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
@@ -167,7 +180,8 @@ require_once __DIR__ . '/../../sidebar.php';
       </div>
 
       <!-- Preview de resultados -->
-      <div id="pdf-content" class="overflow-x-auto bg-gray-800 rounded-lg shadow mt-4 max-w-4xl mx-auto">
+      <div id="pdf-content"
+           class="overflow-x-auto bg-gray-800 rounded-lg shadow mt-4 max-w-4xl mx-auto">
         <table class="min-w-full text-xs text-gray-100">
           <thead class="bg-gray-700 text-yellow-400">
             <tr>
