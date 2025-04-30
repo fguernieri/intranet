@@ -142,7 +142,7 @@ if (file_exists($logPath)) {
     </div>
     <footer>
       <p class="text-sm text-gray-400 mt-auto">
-        Última atualização:<br>
+        db:<br>
         <?= htmlspecialchars($lastUpdate) ?>
       </p>
     </footer>
