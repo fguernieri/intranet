@@ -165,46 +165,181 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           <div class="flex justify-end"><button type="submit" class="btn-acao">Aplicar Filtros</button></div>
         </div>
       </form>
-      <!-- Cards de resumo -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div class="card1"><p>💵 Total Faturado</p><p>R$ <?= number_format($totalFaturado,2,',','.') ?></p></div>
-              <div class="card1"><p>📦 Total de Pedidos</p><p><?= $totalPedidos ?></p></div>
-              <div class="card1"><p>🏪 Clientes Únicos</p><p><?= $totalClientes ?></p></div>
-              <div class="card1"><p>🌎 Estados com Pedido</p><p><?= $totalEstados ?></p></div>
-            </div>
-
       <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <?php $charts=[ 'chartVendedor'=>'Total por Vendedor','chartPagamento'=>'Total por Forma de Pagamento','chartData'=>'Faturamento por Data','chartPedidosDia'=>'Pedidos por Dia','chartClientes'=>'Clientes Únicos por Vendedor','chartEstado'=>'Pedidos por Estado' ];
-        foreach($charts as $id=>$label):?>
-          <div class="rounded-xl bg-white/5 p-4 shadow-md"><p class="font-medium mb-2"><?= $label ?></p><div id="<?= $id ?>"></div></div>
-        <?php endforeach;?>
+        <?php 
+          $charts = [
+            'chartVendedor' => 'Total por Vendedor',
+            'chartPagamento' => 'Total por Forma de Pagamento',
+            'chartData' => 'Faturamento por Data',
+            'chartPedidosDia' => 'Pedidos por Dia',
+            'chartClientes' => 'Clientes Únicos por Vendedor',
+            'chartEstado' => 'Pedidos por Estado'
+          ];
+
+          $sortableCharts = ['chartVendedor', 'chartClientes', 'chartEstado', 'chartPedidosDia', 'chartData'];
+
+          foreach ($charts as $id => $label): ?>
+            <div class="rounded-xl bg-white/5 p-4 shadow-md">
+              <div class="flex justify-between items-center mb-2">
+                <p class="font-medium text-white"><?= $label ?></p>
+                <?php if (in_array($id, $sortableCharts)): ?>
+                  <select 
+                    data-target="<?= $id ?>" 
+                    class="sort-dropdown bg-gray-800 text-white text-xs rounded px-2 py-1 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="default">Original</option>
+                    <option value="asc">A-Z</option>
+                    <option value="desc">Z-A</option>
+                    <option value="value_asc">↑ Valor</option>
+                    <option value="value_desc">↓ Valor</option>
+                  </select>
+                <?php endif; ?>
+              </div>
+              <div id="<?= $id ?>"></div>
+            </div>
+        <?php endforeach; ?>
       </div>
-    </main>
-  </div>
-  <script>
-    const arredondar=arr=>arr.map(v=>parseFloat(parseFloat(v).toFixed(0)));
-    const categoriesVendedor=<?= json_encode(array_keys($porVendedor))?>.map(v=>v.split(' ')[0]);
-    const dataVendedor=arredondar(<?= json_encode(array_values($porVendedor))?>);
-    const categoriesPagamento=<?= json_encode(array_keys($porPagamento))?>;
-    const dataPagamento=<?= json_encode(array_values($porPagamento))?>;
-    const categoriesData=<?= json_encode(array_keys($porData))?>;
-    const dataData=arredondar(<?= json_encode(array_values($porData))?>);
-    const categoriesDia=<?= json_encode(array_keys($pedidosPorDia))?>;
-    const dataDia=<?= json_encode(array_values($pedidosPorDia))?>;
-    const categoriesClientes=<?= json_encode(array_keys($clientesCount))?>.map(v=>v.split(' ')[0]);
-    const dataClientes=<?= json_encode(array_values($clientesCount))?>;
-    const categoriesEstado=<?= json_encode(array_keys($pedidosPorEstado))?>;
-    const dataEstado=<?= json_encode(array_values($pedidosPorEstado))?>;
-    function renderApex(s,o){new ApexCharts(document.querySelector(s),o).render();}
-    window.addEventListener('load',()=>{
-      renderApex('#chartVendedor',{chart:{type:'bar',height:300,background:'transparent'},theme:{mode:'dark'},series:[{name:'Total por Vendedor',data:dataVendedor}],xaxis:{categories:categoriesVendedor}});
-      renderApex('#chartPagamento',{chart:{type:'donut',height:300,background:'transparent'},theme:{mode:'dark'},series:dataPagamento,labels:categoriesPagamento});
-      renderApex('#chartData',{chart:{type:'line',height:300,background:'transparent'},theme:{mode:'dark'},series:[{name:'Faturamento',data:dataData}],xaxis:{categories:categoriesData}});
-      renderApex('#chartPedidosDia',{chart:{type:'bar',height:300,background:'transparent'},theme:{mode:'dark'},series:[{name:'Pedidos por Dia',data:dataDia}],xaxis:{categories:categoriesDia}});
-      renderApex('#chartClientes',{chart:{type:'bar',height:300,background:'transparent'},theme:{mode:'dark'},series:[{name:'Clientes Únicos',data:dataClientes}],xaxis:{categories:categoriesClientes}});
-      renderApex('#chartEstado',{chart:{type:'bar',height:300,background:'transparent'},theme:{mode:'dark'},series:[{name:'Pedidos por Estado',data:dataEstado}],xaxis:{categories:categoriesEstado}});
-    });
-  </script>
+      <script>
+        // 💸 Arredondamento para valores inteiros
+        const arredondar = arr => arr.map(v => parseFloat(parseFloat(v).toFixed(0)));
+
+        // 📊 Mapa com dados dos gráficos categóricos
+        const chartDataMap = {
+          chartVendedor: {
+            labels: <?= json_encode(array_keys($porVendedor)) ?>.map(v => v.split(' ')[0]),
+            values: arredondar(<?= json_encode(array_values($porVendedor)) ?>),
+            type: 'bar'
+          },
+          chartClientes: {
+            labels: <?= json_encode(array_keys($clientesCount)) ?>.map(v => v.split(' ')[0]),
+            values: <?= json_encode(array_values($clientesCount)) ?>,
+            type: 'bar'
+          },
+          chartEstado: {
+            labels: <?= json_encode(array_keys($pedidosPorEstado)) ?>,
+            values: <?= json_encode(array_values($pedidosPorEstado)) ?>,
+            type: 'bar'
+          },
+          chartPedidosDia: {
+            labels: <?= json_encode(array_keys($pedidosPorDia)) ?>,
+            values: <?= json_encode(array_values($pedidosPorDia)) ?>,
+            type: 'bar'
+          },
+          chartData: {
+            labels: <?= json_encode(array_keys($porData)) ?>,
+            values: arredondar(<?= json_encode(array_values($porData)) ?>),
+            type: 'line'
+          }
+        };
+
+        // 🎯 Ordenação padrão por gráfico
+        const defaultSorts = {
+          chartVendedor: 'value_desc',
+          chartClientes: 'value_desc',
+          chartEstado: 'value_desc',
+          chartPedidosDia: 'asc',
+          chartData: 'asc'
+        };
+
+        // 🍩 Donut chart (forma de pagamento) - sem ordenação
+        const donutChart = {
+          id: 'chartPagamento',
+          type: 'donut',
+          labels: <?= json_encode(array_keys($porPagamento)) ?>,
+          values: <?= json_encode(array_values($porPagamento)) ?>
+        };
+
+        // 📈 Renderiza qualquer gráfico
+        function renderApex(selector, options) {
+          const el = document.querySelector(selector);
+          if (el) {
+            el.innerHTML = ''; // limpar antes de re-renderizar
+            new ApexCharts(el, options).render();
+          }
+        }
+
+        // 🔁 Ordena e renderiza gráficos com eixo X categórico
+        function sortAndRenderChart(chartId, sortBy) {
+          const { labels, values, type } = chartDataMap[chartId];
+          let combined = labels.map((label, i) => ({ label, value: values[i] }));
+
+          switch (sortBy) {
+            case 'asc':
+              combined.sort((a, b) => a.label.localeCompare(b.label));
+              break;
+            case 'desc':
+              combined.sort((a, b) => b.label.localeCompare(a.label));
+              break;
+            case 'value_asc':
+              combined.sort((a, b) => a.value - b.value);
+              break;
+            case 'value_desc':
+              combined.sort((a, b) => b.value - a.value);
+              break;
+            default:
+              // ordem original
+              combined = labels.map((label, i) => ({ label, value: values[i] }));
+          }
+
+          const sortedLabels = combined.map(x => x.label);
+          const sortedValues = combined.map(x => x.value);
+
+          renderApex(`#${chartId}`, {
+            chart: { type, height: 300, background: 'transparent' },
+            theme: { mode: 'dark' },
+            series: [{ name: 'Valor', data: sortedValues }],
+            xaxis: { categories: sortedLabels },
+            tooltip: {
+              y: {
+                formatter: val => new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(val)
+              }
+            }
+          });
+        }
+
+        // 🚀 Inicializa gráficos ao carregar a página
+        window.addEventListener('load', () => {
+          // Gráficos com ordenação dinâmica
+          Object.keys(chartDataMap).forEach(chartId => {
+            const defaultSort = defaultSorts[chartId] || 'default';
+            sortAndRenderChart(chartId, defaultSort);
+
+            // Atualiza o <select> com o valor padrão
+            const dropdown = document.querySelector(`.sort-dropdown[data-target="${chartId}"]`);
+            if (dropdown) dropdown.value = defaultSort;
+          });
+
+          // Donut chart
+          renderApex(`#${donutChart.id}`, {
+            chart: { type: 'donut', height: 300, background: 'transparent' },
+            theme: { mode: 'dark' },
+            series: donutChart.values,
+            labels: donutChart.labels,
+            tooltip: {
+              y: {
+                formatter: val => new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(val)
+              }
+            }
+          });
+        });
+
+        // 🎯 Escuta mudanças em todos os dropdowns
+        document.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
+            dropdown.addEventListener('change', e => {
+              const chartId = e.target.dataset.target;
+              const sortBy = e.target.value;
+              sortAndRenderChart(chartId, sortBy);
+            });
+          });
+        });
+    </script>
+
 </body>
 </html>
