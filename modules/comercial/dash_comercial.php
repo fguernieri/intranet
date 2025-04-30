@@ -165,6 +165,14 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           <div class="flex justify-end"><button type="submit" class="btn-acao">Aplicar Filtros</button></div>
         </div>
       </form>
+      
+      <!-- Cards de resumo -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card1"><p>💵 Total Faturado</p><p>R$ <?= number_format($totalFaturado,2,',','.') ?></p></div>
+        <div class="card1"><p>📦 Total de Pedidos</p><p><?= $totalPedidos ?></p></div>
+        <div class="card1"><p>🏪 Clientes Únicos</p><p><?= $totalClientes ?></p></div>
+        <div class="card1"><p>🌎 Estados com Pedido</p><p><?= $totalEstados ?></p></div>
+      </div>
       <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <?php 
