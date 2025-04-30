@@ -160,8 +160,8 @@ $UltimaAtualizacao = $stmt->fetchColumn();
         <div class="grid-cols-2 gap-6">
           <div><label class="block mb-2 text-sm font-semibold">📅 Data Início</label><input type="date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm"></div>
           <div><label class="block mb-2 text-sm font-semibold">📅 Data Fim</label><input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm"></div>
-          <div class="mb-4 p-2"><p><strong>Período disponível:</strong> <?= $data_inicial? date('d/m/Y',$data_inicial):'' ?> a <?= $data_final? date('d/m/Y',$data_final):'' ?></p>
-			<p>Última Atualização em: <?=date('d/m/Y H:i:s', strtotime($UltimaAtualizacao))?></p></div>
+          <div class="p-2"><p><strong>Período disponível:</strong> <?= $data_inicial? date('d/m/Y',$data_inicial):'' ?> a <?= $data_final? date('d/m/Y',$data_final):'' ?></p></div>
+          <div><p class="p-2 text-sm text-gray-400 mt-auto">Última Atualização em: <?=date('d/m/Y H:i:s', strtotime($UltimaAtualizacao))?></p></div>
           <div class="flex justify-end"><button type="submit" class="btn-acao">Aplicar Filtros</button></div>
         </div>
       </form>
@@ -183,9 +183,9 @@ $UltimaAtualizacao = $stmt->fetchColumn();
     </main>
   </div>
   <script>
-    const arredondar=arr=>arr.map(v=>parseFloat(parseFloat(v).toFixed(2)));
+    const arredondar=arr=>arr.map(v=>parseFloat(parseFloat(v).toFixed(0)));
     const categoriesVendedor=<?= json_encode(array_keys($porVendedor))?>.map(v=>v.split(' ')[0]);
-    const dataVendedor=<?= json_encode(array_values($porVendedor))?>;
+    const dataVendedor=arredondar(<?= json_encode(array_values($porVendedor))?>);
     const categoriesPagamento=<?= json_encode(array_keys($porPagamento))?>;
     const dataPagamento=<?= json_encode(array_values($porPagamento))?>;
     const categoriesData=<?= json_encode(array_keys($porData))?>;
