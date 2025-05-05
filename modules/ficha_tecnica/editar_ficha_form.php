@@ -67,7 +67,7 @@ $ingredientes = $stmtIng->fetchAll();
       <!-- Imagem -->
       <div>
         <label class="block mb-2 text-cyan-300 font-medium">Imagem (deixe em branco para não alterar)</label>
-        <input type="file" name="imagem"
+        <input type="file" name="imagem" accept=".jpg,.jpeg,.png"
                class="w-full p-3 bg-gray-800 border border-gray-700 rounded file:text-white file:bg-cyan-600 file:border-none file:rounded file:px-4 file:py-2">
       </div>
 

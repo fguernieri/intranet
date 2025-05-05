@@ -4,6 +4,8 @@ require_once '../../config/db.php';
 include '../../sidebar.php';
 
 
+
+
 $id = $_GET['id'] ?? null;
 if (!$id) {
     echo "ID inválido.";
@@ -30,6 +32,7 @@ $ingredientes = $stmtIng->fetchAll();
   <title><?= htmlspecialchars($ficha['nome_prato']) ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     @media print {
       body {
@@ -59,6 +62,18 @@ $ingredientes = $stmtIng->fetchAll();
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
 
   <div class="print-container max-w-4xl mx-auto space-y-6">
+  
+    <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
+    <div id="alerta" class="fixed right-1 top-4 justify-right transform bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity z-50">
+        Ficha salva com sucesso!
+    </div>
+    <script>
+        setTimeout(() => {
+            const alerta = document.getElementById('alerta');
+            if (alerta) alerta.style.opacity = '0';
+        }, 4000);
+    </script>
+    <?php endif; ?>
 
     <!-- Botão Voltar -->
     <div class="no-print mb-4">

@@ -1,6 +1,34 @@
 <?php
 require_once '../../config/db.php';
 
+// --- INÍCIO: Compressão de imagem JPG/PNG para < 500KB ---
+function compressImage($sourcePath, $destinationPath, $maxFileSize = 512000) {
+    $info = getimagesize($sourcePath);
+    $mime = $info['mime'];
+    $quality = 85;
+
+    if ($mime == 'image/jpeg' || $mime == 'image/jpg') {
+        $image = imagecreatefromjpeg($sourcePath);
+        do {
+            ob_start();
+            imagejpeg($image, null, $quality);
+            $data = ob_get_clean();
+            $quality -= 5;
+        } while (strlen($data) > $maxFileSize && $quality > 10);
+        file_put_contents($destinationPath, $data);
+        imagedestroy($image);
+    } elseif ($mime == 'image/png') {
+        $image = imagecreatefrompng($sourcePath);
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $resized = imagescale($image, $width * 0.9, $height * 0.9);
+        imagepng($resized, $destinationPath, 9);
+        imagedestroy($image);
+        imagedestroy($resized);
+    }
+}
+// --- FIM: Compressão de imagem ---
+
 try {
     // Coleta dados principais
     $nome = $_POST['nome_prato'];
@@ -22,13 +50,23 @@ try {
     $imagem_nome = null;
 
     if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
-        $ext = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
+        $tmp_name = $_FILES['imagem']['tmp_name'];
+        $mime_type = mime_content_type($tmp_name);
+        $ext = strtolower(pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION));
+
+        if ($mime_type === 'image/heic' || $ext === 'heic') {
+            throw new Exception('Imagens HEIC não são suportadas. Por favor, envie JPG ou PNG.');
+        }
+
         $imagem_nome = uniqid('prato_') . '.' . $ext;
         $destino = 'uploads/' . $imagem_nome;
 
-        if (!move_uploaded_file($_FILES['imagem']['tmp_name'], $destino)) {
+        if (!move_uploaded_file($tmp_name, $destino)) {
             throw new Exception('Erro ao mover a imagem para a pasta uploads.');
         }
+
+        // ✅ Comprime a imagem
+        compressImage($destino, $destino);
     }
 
     // Inserir a ficha
@@ -69,7 +107,7 @@ try {
     }
 
     // ✅ Redireciona após sucesso
-    header("Location: visualizar_ficha.php?id=" . $ficha_id);
+    header("Location: visualizar_ficha.php?id=" . $ficha_id ."&sucesso=1");
     exit;
 
 } catch (Exception $e) {

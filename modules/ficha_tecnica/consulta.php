@@ -60,7 +60,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	<?php endif; ?>
 
 
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-6xl mx-auto py-6">
     <h1 class="text-3xl font-bold text-cyan-400 text-center mb-8">Consulta de Fichas Técnicas</h1>
 
     <!-- Campo de busca + botões -->
