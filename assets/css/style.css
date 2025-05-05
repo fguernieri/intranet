@@ -62,7 +62,7 @@
   font-weight: bold;
 }
 
-card1.no-hover:hover {
+.card1.no-hover:hover {
   transform: none !important;
 }
 

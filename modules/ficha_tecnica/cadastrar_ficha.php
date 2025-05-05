@@ -55,6 +55,73 @@ include __DIR__ . '/../../sidebar.php';
         <input type="text" name="usuario" required class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
       </div>
 
+      <!-- Card com fundo amarelo claro para busca de insumo -->
+      <div class="card1 no-hover col-span-2">
+        <label for="busca_insumo" class="block text-sm font-semibold text-white mb-1">Buscar insumo por nome:</label>
+        <div class="mb-4">
+          <input type="text" id="busca_insumo" oninput="buscarInsumo()" class="border border-gray-500 rounded px-3 py-2 w-full text-gray-900 bg-white" placeholder="Digite o nome do insumo">
+        </div>
+
+        <!-- Tabela de resultados -->
+        <div id="tabela_resultados" class="hidden overflow-x-auto">
+          <table class="w-full bg-gray-500 border border-gray-300">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="px-4 py-2 text-left">Descrição</th>
+                <th class="px-4 py-2 text-left">Código</th>
+                <th class="px-4 py-2 text-left">Unidade</th>
+              </tr>
+            </thead>
+            <tbody id="corpo_tabela"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <script>
+      function buscarInsumo() {
+        const termo = document.getElementById('busca_insumo').value;
+        if (termo.length < 2) {
+          document.getElementById('tabela_resultados').classList.add('hidden');
+          return;
+        }
+        fetch('buscar_insumos.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'termo=' + encodeURIComponent(termo)
+        })
+        .then(res => res.json())
+        .then(dados => {
+          const codigosUnicos = new Set();
+          const resultados = dados.filter(insumo => {
+            if (codigosUnicos.has(insumo.codigo)) return false;
+            codigosUnicos.add(insumo.codigo);
+            return true;
+          });
+
+          const tabela = document.getElementById('tabela_resultados');
+          const corpo = document.getElementById('corpo_tabela');
+          corpo.innerHTML = '';
+
+          if (resultados.length > 0) {
+            resultados.forEach(insumo => {
+              const row = document.createElement('tr');
+              row.classList.add('border-t');
+              row.innerHTML = `
+                <td class="px-4 py-2 text-gray-900">${insumo.Insumo}</td>
+                <td class="px-4 py-2 text-gray-900">${insumo.codigo}</td>
+                <td class="px-4 py-2 text-gray-900">${insumo.unidade}</td>
+              `;
+              corpo.appendChild(row);
+            });
+            tabela.classList.remove('hidden');
+          } else {
+            tabela.classList.add('hidden');
+          }
+        });
+      }
+      </script>
+      
+      
       <!-- Ingredientes -->
       <div class="col-span-1 md:col-span-2">
         <h2 class="text-xl font-bold text-cyan-300 mb-4">Ingredientes</h2>
