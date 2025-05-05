@@ -1,5 +1,7 @@
 <?php
 require_once '../../config/db.php';
+require_once '../../config/db_dw.php';
+
 include '../../sidebar.php';
 
 
@@ -76,6 +78,29 @@ $ingredientes = $stmtIng->fetchAll();
         <label class="block mb-2 text-cyan-300 font-medium">Responsável</label>
         <input type="text" name="usuario" value="<?= htmlspecialchars($ficha['usuario']) ?>"
                class="w-full p-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+      </div>
+
+      <!-- Busca de Insumo -->
+      <div class="col-span-1 md:col-span-2 bg-gray-700 p-4 rounded-lg">
+        <label for="busca_insumo" class="block text-sm font-semibold text-white mb-2">
+          Buscar insumo por nome:
+        </label>
+        <input id="busca_insumo" type="text" oninput="buscarInsumo()"
+               class="w-full p-3 rounded bg-white text-gray-900 border border-gray-500"
+               placeholder="Digite pelo menos 2 caracteres">
+
+        <div id="tabela_resultados" class="mt-4 hidden overflow-x-auto">
+          <table class="w-full bg-gray-500 border border-gray-400 rounded-lg">
+            <thead>
+              <tr class="bg-gray-200 text-gray-800">
+                <th class="px-4 py-2 text-left">Descrição</th>
+                <th class="px-4 py-2 text-left">Código</th>
+                <th class="px-4 py-2 text-left">Unidade</th>
+              </tr>
+            </thead>
+            <tbody id="corpo_tabela"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Ingredientes -->
@@ -188,6 +213,7 @@ $ingredientes = $stmtIng->fetchAll();
       const container = document.getElementById('ingredientesContainer');
       const novaLinha = template.content.cloneNode(true);
       container.appendChild(novaLinha);
+      aplicarBuscaPorCodigo();
     }
 
     function excluirIngrediente(botao) {
@@ -195,6 +221,81 @@ $ingredientes = $stmtIng->fetchAll();
       linha.style.display = 'none';
       linha.querySelector('[name="excluir[]"]').value = "1";
     }
+    
+    // Função de busca por insumo
+    function buscarInsumo() {
+      const termo = document.getElementById('busca_insumo').value;
+      const tabela = document.getElementById('tabela_resultados');
+      const corpo = document.getElementById('corpo_tabela');
+
+      if (termo.length < 2) {
+        tabela.classList.add('hidden');
+        return;
+      }
+
+      fetch('buscar_insumos.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'termo=' + encodeURIComponent(termo)
+      })
+      .then(res => res.json())
+      .then(dados => {
+        const seen = new Set();
+        const resultados = dados.filter(item => {
+          if (seen.has(item.codigo)) return false;
+          seen.add(item.codigo);
+          return true;
+        });
+
+        corpo.innerHTML = '';
+        if (resultados.length) {
+          resultados.forEach(insumo => {
+            const tr = document.createElement('tr');
+            tr.className = 'border-t';
+            tr.innerHTML = `
+              <td class="px-4 py-2 text-gray-900">${insumo.Insumo}</td>
+              <td class="px-4 py-2 text-gray-900">${insumo.codigo}</td>
+              <td class="px-4 py-2 text-gray-900">${insumo.unidade}</td>
+            `;
+            corpo.appendChild(tr);
+          });
+          tabela.classList.remove('hidden');
+        } else {
+          tabela.classList.add('hidden');
+        }
+      });
+    }
+    
+    // Busca por código de insumo em campos dinâmicos
+    function aplicarBuscaPorCodigo() {
+      document.querySelectorAll("input[name='codigo[]']").forEach(input => {
+        if (!input.dataset.listener) {
+          input.addEventListener('blur', function() {
+            const codigoDiv   = this.parentElement;
+            const codigoValor = this.value.trim();
+            if (!codigoValor) return;
+
+            fetch('buscar_insumos.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: 'codigo=' + encodeURIComponent(codigoValor)
+            })
+            .then(res => res.json())
+            .then(dados => {
+              if (!dados.length) return;
+
+              const descDiv    = codigoDiv.nextElementSibling;
+              const unidadeDiv = descDiv.nextElementSibling.nextElementSibling;
+
+              descDiv.querySelector("input[name='descricao[]']").value = dados[0].Insumo;
+              unidadeDiv.querySelector("select[name='unidade[]']").value = dados[0].unidade;
+            });
+          });
+          input.dataset.listener = true;
+        }
+      });
+    }
+    document.addEventListener('DOMContentLoaded', aplicarBuscaPorCodigo);
   </script>
 
 </body>
