@@ -1,6 +1,34 @@
 <?php
+
+// --- INÍCIO: Compressão de imagem JPG/PNG para < 500KB ---
+function compressImage($sourcePath, $destinationPath, $maxFileSize = 512000) {
+    $info = getimagesize($sourcePath);
+    $mime = $info['mime'];
+    $quality = 85;
+
+    if ($mime == 'image/jpeg' || $mime == 'image/jpg') {
+        $image = imagecreatefromjpeg($sourcePath);
+        do {
+            ob_start();
+            imagejpeg($image, null, $quality);
+            $data = ob_get_clean();
+            $quality -= 5;
+        } while (strlen($data) > $maxFileSize && $quality > 10);
+        file_put_contents($destinationPath, $data);
+        imagedestroy($image);
+    } elseif ($mime == 'image/png') {
+        $image = imagecreatefrompng($sourcePath);
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $resized = imagescale($image, $width * 0.9, $height * 0.9);
+        imagepng($resized, $destinationPath, 9);
+        imagedestroy($image);
+        imagedestroy($resized);
+    }
+}
+// --- FIM: Compressão de imagem ---
+
 require_once '../../config/db.php';
-include '../../sidebar.php';
 
 try {
     $id = $_POST['id'];
@@ -13,7 +41,6 @@ try {
     $quantidades = $_POST['quantidade'];
     $unidades = $_POST['unidade'];
 
-    // Buscar dados anteriores
     $stmt = $pdo->prepare("SELECT * FROM ficha_tecnica WHERE id = :id");
     $stmt->execute([':id' => $id]);
     $anterior = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -22,63 +49,44 @@ try {
         throw new Exception('Ficha técnica não encontrada.');
     }
 
-    // Tratamento de imagem
-    $imagem_nome = $anterior['imagem']; // padrão: manter imagem anterior
+    $imagem_nome = $anterior['imagem'];
 
     if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
-        $ext = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
+        $tmp_name = $_FILES['imagem']['tmp_name'];
+        $mime_type = mime_content_type($tmp_name);
+        $ext = strtolower(pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION));
+
+        if ($mime_type === 'image/heic' || $ext === 'heic') {
+            throw new Exception('Imagens HEIC não são suportadas. Por favor, envie JPG ou PNG.');
+        }
+
         $imagem_nome = uniqid('prato_') . '.' . $ext;
         $destino = 'uploads/' . $imagem_nome;
 
-        if (!move_uploaded_file($_FILES['imagem']['tmp_name'], $destino)) {
+        if (!move_uploaded_file($tmp_name, $destino)) {
             throw new Exception('Erro ao mover a imagem para a pasta uploads.');
         }
 
-        // Remover imagem antiga
-        if ($anterior['imagem'] && $anterior['imagem'] !== $imagem_nome) {
-            $anterior_path = '../uploads/' . $anterior['imagem'];
-            if (file_exists($anterior_path)) {
-                unlink($anterior_path);
-            }
-        }
+        compressImage($destino, $destino);
     }
 
-    // Atualizar ficha
-    $stmt = $pdo->prepare("UPDATE ficha_tecnica 
-        SET nome_prato = :nome, rendimento = :rendimento, modo_preparo = :modo_preparo, imagem = :imagem, usuario = :usuario 
-        WHERE id = :id");
+    $stmt = $pdo->prepare("UPDATE ficha_tecnica SET nome_prato = :nome, rendimento = :rendimento, modo_preparo = :modo, imagem = :imagem, usuario = :usuario WHERE id = :id");
     $stmt->execute([
         ':nome' => $nome,
         ':rendimento' => $rendimento,
-        ':modo_preparo' => $modo_preparo,
+        ':modo' => $modo_preparo,
         ':imagem' => $imagem_nome,
         ':usuario' => $usuario,
         ':id' => $id
     ]);
 
-    // Verificar alterações e registrar no histórico
-    foreach (['nome_prato', 'rendimento', 'modo_preparo', 'imagem', 'usuario'] as $campo) {
-        if ($anterior[$campo] != $$campo) {
-            $stmt = $pdo->prepare("INSERT INTO historico (ficha_id, campo_alterado, valor_antigo, valor_novo, usuario)
-                VALUES (:ficha_id, :campo, :antigo, :novo, :usuario)");
-            $stmt->execute([
-                ':ficha_id' => $id,
-                ':campo' => $campo,
-                ':antigo' => $anterior[$campo],
-                ':novo' => $$campo,
-                ':usuario' => $usuario
-            ]);
-        }
-    }
+    $stmt = $pdo->prepare("DELETE FROM ingredientes WHERE ficha_id = :id");
+    $stmt->execute([':id' => $id]);
 
-    // Remover ingredientes antigos
-    $pdo->prepare("DELETE FROM ingredientes WHERE ficha_id = :id")->execute([':id' => $id]);
-
-    // Inserir ingredientes novos
     for ($i = 0; $i < count($ingredientes); $i++) {
-        if (!empty($ingredientes[$i])) {
+        if (!empty($ingredientes[$i]) && !empty($quantidades[$i]) && !empty($unidades[$i])) {
             $stmt = $pdo->prepare("INSERT INTO ingredientes (ficha_id, codigo, descricao, quantidade, unidade)
-                VALUES (:ficha_id, :codigo, :descricao, :quantidade, :unidade)");
+                                   VALUES (:ficha_id, :codigo, :descricao, :quantidade, :unidade)");
             $stmt->execute([
                 ':ficha_id' => $id,
                 ':codigo' => $codigos[$i],
@@ -86,21 +94,12 @@ try {
                 ':quantidade' => $quantidades[$i],
                 ':unidade' => $unidades[$i]
             ]);
-
-            // Log no histórico
-            $stmt = $pdo->prepare("INSERT INTO historico (ficha_id, campo_alterado, valor_antigo, valor_novo, usuario)
-                VALUES (:ficha_id, 'ingrediente_adicionado', '', :desc, :usuario)");
-            $stmt->execute([
-                ':ficha_id' => $id,
-                ':desc' => $ingredientes[$i] . ' (' . $quantidades[$i] . ' ' . $unidades[$i] . ')',
-                ':usuario' => $usuario
-            ]);
         }
     }
 
-    header("Location: visualizar_ficha.php?id=" . $id);
+    header("Location: visualizar_ficha.php?id=" . $id . "&sucesso=1");
     exit;
 
 } catch (Exception $e) {
-    echo "Erro ao salvar edição: " . $e->getMessage();
+    echo "Erro ao editar ficha: " . $e->getMessage();
 }
