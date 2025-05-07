@@ -142,10 +142,24 @@ foreach ($pedidos as $p) {
     }
 }
 
+
 $metasV = [];
 foreach (array_keys($porVendedor) as $vendedor) {
   $metasV[$vendedor] = isset($metas[$vendedor]) ? (float)$metas[$vendedor] : 0;
 }
+
+// Calcula somatório de meta
+$metaFaturamentoTotal = 0;
+foreach ($filteredVend as $vendedor) {
+    if (isset($metasV[$vendedor])) {
+        $metaFaturamentoTotal += $metasV[$vendedor];
+    }
+}
+
+// Calcula % atingido da meta
+$percentualMeta = $metaFaturamentoTotal > 0
+    ? ($totalFaturado / $metaFaturamentoTotal) * 100
+    : 0;
 
 $clientesCount = array_map('count', $clientesPorV);
 
@@ -192,13 +206,19 @@ $UltimaAtualizacao = $stmt->fetchColumn();
       </form>
       
       <!-- Cards de resumo -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
         <div class="card1"><p>💵 Total Faturado</p><p>R$ <?= number_format($totalFaturado,2,',','.') ?></p></div>
+        <div class="card1">
+          <p>🎯 Meta de Faturamento</p>
+          <p>
+            <span class="text-lg font-bold text-white">R$ <?= number_format($metaFaturamentoTotal/ 1000, 0, '', '') . 'k' ?></span>
+            <span class="text-sm text-gray-400 ml-1">(<?= number_format($percentualMeta, 1, ',', '.') ?>%)</span>
+          </p>
+        </div>        
         <div class="card1"><p>📦 Total de Pedidos</p><p><?= $totalPedidos ?></p></div>
         <div class="card1"><p>🏪 Clientes Únicos</p><p><?= $totalClientes ?></p></div>
         <div class="card1"><p>🌎 Estados com Pedido</p><p><?= $totalEstados ?></p></div>
-      </div>
-      <!-- Charts -->
+      </div>      <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <?php 
           $charts = [
