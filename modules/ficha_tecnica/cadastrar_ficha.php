@@ -14,97 +14,123 @@ include __DIR__ . '/../../sidebar.php';
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex">
 
-  <div class="w-full max-w-6xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+  <div class="max-w-6xl mx-auto p-4 md:p-8">
+    <div class="bg-gray-800 p-4 md:p-8 rounded-lg shadow-lg">
 
-    <!-- Voltar -->
-    <div class="mb-6">
-      <a href="consulta.php"
-         class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg shadow no-underline font-semibold">
-        ⬅️ Voltar para Consulta
-      </a>
-    </div>
-
-    <h1 class="text-3xl font-bold text-cyan-400 mb-8 text-center">
-      Cadastrar Nova Ficha Técnica
-    </h1>
-
-    <form action="salvar_ficha.php" method="POST" enctype="multipart/form-data"
-          class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      <!-- Dados principais -->
-      <div>
-        <label class="block text-cyan-300 mb-2 font-medium">Nome do Prato</label>
-        <input type="text" name="nome_prato" required
-               class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+      <div class="mb-4">
+        <a href="consulta.php"
+           class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg shadow font-semibold">
+          ⬅️ Voltar para Consulta
+        </a>
       </div>
 
-      <div>
-        <label class="block text-cyan-300 mb-2 font-medium">Rendimento</label>
-        <input type="text" name="rendimento" required
-               class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-      </div>
+      <h1 class="text-2xl md:text-3xl font-bold text-cyan-400 mb-6 text-center">
+        Cadastrar Nova Ficha Técnica
+      </h1>
 
-      <div>
-        <label class="block text-cyan-300 mb-2 font-medium">Imagem (opcional)</label>
-        <input type="file" name="imagem" accept=".jpg,.jpeg,.png"
-               class="w-full p-2 bg-gray-800 border border-gray-700 rounded file:text-white file:bg-cyan-500 file:rounded file:px-4 file:py-1 file:font-semibold">
-      </div>
-
-      <div>
-        <label class="block text-cyan-300 mb-2 font-medium">Responsável</label>
-        <input type="text" name="usuario" required
-               class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-      </div>
-
-      <!-- Busca de Insumo -->
-      <div class="col-span-1 md:col-span-2 bg-gray-700 p-4 rounded-lg">
-        <label for="busca_insumo" class="block text-sm font-semibold text-white mb-2">
-          Buscar insumo por nome:
-        </label>
-        <input id="busca_insumo" type="text" oninput="buscarInsumo()"
-               class="w-full p-3 rounded bg-white text-gray-900 border border-gray-500"
-               placeholder="Digite pelo menos 2 caracteres">
-
-        <div id="tabela_resultados" class="mt-4 hidden overflow-x-auto">
-          <table class="w-full bg-gray-500 border border-gray-400 rounded-lg">
-            <thead>
-              <tr class="bg-gray-200 text-gray-800">
-                <th class="px-4 py-2 text-left">Descrição</th>
-                <th class="px-4 py-2 text-left">Código</th>
-                <th class="px-4 py-2 text-left">Unidade</th>
-              </tr>
-            </thead>
-            <tbody id="corpo_tabela"></tbody>
-          </table>
+      <form action="salvar_ficha.php" method="POST" enctype="multipart/form-data" class="grid gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-cyan-300 mb-1 font-medium">Cód Cloudify</label>
+            <input type="text" name="codigo_cloudify" id="codigo_cloudify"
+                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-cyan-300 mb-1 font-medium">Nome do Prato</label>
+            <input type="text" name="nome_prato" id="nome_prato" required
+                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+          </div>
+          <div>
+            <label class="block text-cyan-300 mb-1 font-medium">Integração</label>
+            <input type="text" class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+          </div>
         </div>
-      </div>
 
-      <!-- Ingredientes -->
-      <div class="col-span-1 md:col-span-2">
-        <h2 class="text-xl font-bold text-cyan-300 mb-4">Ingredientes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-cyan-300 mb-1 font-medium">Rendimento</label>
+            <input type="text" name="rendimento" required
+                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-cyan-300 mb-1 font-medium">Imagem (opcional)</label>
+            <input type="file" name="imagem" accept=".jpg,.jpeg,.png"
+                   class="w-full p-2 bg-gray-800 border border-gray-700 rounded file:text-white file:bg-cyan-500 file:px-4 file:py-1 file:font-semibold">
+          </div>
+        </div>
 
-        <div id="ingredientesContainer" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Template de ingrediente -->
-          <template id="ingredienteTemplate">
+        <div>
+          <label class="block text-cyan-300 mb-1 font-medium">Responsável</label>
+          <input type="text" name="usuario" required
+                 class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+        </div>
+
+        <div class="bg-gray-700 p-4 rounded-lg">
+          <label for="busca_insumo" class="block text-sm font-semibold text-white mb-2">
+            Buscar insumo por nome:
+          </label>
+          <input id="busca_insumo" type="text" oninput="buscarInsumo()"
+                 class="w-full p-3 rounded bg-white text-gray-900 border border-gray-500"
+                 placeholder="Digite pelo menos 2 caracteres">
+
+          <div id="tabela_resultados" class="mt-4 hidden overflow-x-auto">
+            <table class="w-full bg-gray-500 border border-gray-400 rounded-lg">
+              <thead>
+                <tr class="bg-gray-200 text-gray-800">
+                  <th class="px-4 py-2 text-left">Descrição</th>
+                  <th class="px-4 py-2 text-left">Código</th>
+                  <th class="px-4 py-2 text-left">Unidade</th>
+                </tr>
+              </thead>
+              <tbody id="corpo_tabela"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-cyan-300 mb-4">Ingredientes</h2>
+
+          <div id="ingredientesContainer" class="grid gap-4 md:grid-cols-5">
             <div>
               <label class="block text-cyan-300 mb-1">Código (opcional)</label>
-              <input type="text" name="codigo[]"
-                     class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="codigo[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
             </div>
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-cyan-300 mb-1">Descrição</label>
-              <input type="text" name="descricao[]" required
-                     class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="descricao[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Quantidade</label>
-              <input type="number" step="0.01" name="quantidade[]" required
-                     class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Unidade</label>
-              <select name="unidade[]" required
-                      class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white">
+              <select name="unidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white">
+                <option value="">Selecione</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">l</option>
+                <option value="unidade">unidade</option>
+              </select>
+            </div>
+          </div>
+          <template id="ingredienteTemplate">
+            <div>
+              <label class="block text-cyan-300 mb-1">Código (opcional)</label>
+              <input type="text" name="codigo[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-cyan-300 mb-1">Descrição</label>
+              <input type="text" name="descricao[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+            </div>
+            <div>
+              <label class="block text-cyan-300 mb-1">Quantidade</label>
+              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+            </div>
+            <div>
+              <label class="block text-cyan-300 mb-1">Unidade</label>
+              <select name="unidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white">
                 <option value="">Selecione</option>
                 <option value="g">g</option>
                 <option value="kg">kg</option>
@@ -115,45 +141,32 @@ include __DIR__ . '/../../sidebar.php';
             </div>
           </template>
 
-          <!-- Primeira linha padrão -->
-          <script>
-            document.addEventListener('DOMContentLoaded', () => {
-              const container = document.getElementById('ingredientesContainer');
-              const tpl = document.getElementById('ingredienteTemplate');
-              container.appendChild(tpl.content.cloneNode(true));
-            });
-          </script>
 
+          <div class="mt-4">
+            <button type="button" onclick="addIngrediente()"
+                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg shadow font-semibold">
+              ➕ ingredientes
+            </button>
+          </div>
         </div>
 
-        <div class="mt-4">
-          <button type="button" onclick="addIngrediente()"
-                  class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow font-semibold">
-            ➕ Adicionar Ingrediente
+        <div>
+          <label class="block text-cyan-300 mb-2 font-medium">Modo de Preparo</label>
+          <textarea name="modo_preparo" rows="6" required
+                    class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500"></textarea>
+        </div>
+
+        <div class="flex justify-center">
+          <button type="submit"
+                  class="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 rounded-lg shadow font-semibold">
+            📎 Cadastrar Ficha
           </button>
         </div>
-      </div>
-
-      <!-- Modo de preparo -->
-      <div class="col-span-1 md:col-span-2">
-        <label class="block text-cyan-300 mb-2 font-medium">Modo de Preparo</label>
-        <textarea name="modo_preparo" rows="6" required
-                  class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
-      </div>
-
-      <!-- Botão salvar -->
-      <div class="col-span-1 md:col-span-2 flex justify-center">
-        <button type="submit"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 rounded-lg shadow font-semibold">
-          💾 Cadastrar Ficha
-        </button>
-      </div>
-    </form>
-
+      </form>
+    </div>
   </div>
 
   <script>
-    // Função de busca por insumo
     function buscarInsumo() {
       const termo = document.getElementById('busca_insumo').value;
       const tabela = document.getElementById('tabela_resultados');
@@ -197,7 +210,6 @@ include __DIR__ . '/../../sidebar.php';
       });
     }
 
-    // Adicionar novo ingrediente
     function addIngrediente() {
       const container = document.getElementById('ingredientesContainer');
       const tpl = document.getElementById('ingredienteTemplate');
@@ -206,7 +218,6 @@ include __DIR__ . '/../../sidebar.php';
       aplicarBuscaPorCodigo();
     }
 
-    // Busca por código de insumo em campos dinâmicos
     function aplicarBuscaPorCodigo() {
       document.querySelectorAll("input[name='codigo[]']").forEach(input => {
         if (!input.dataset.listener) {
@@ -228,7 +239,6 @@ include __DIR__ . '/../../sidebar.php';
               const unidadeDiv = descDiv.nextElementSibling.nextElementSibling;
 
               descDiv.querySelector("input[name='descricao[]']").value = dados[0].Insumo;
-              unidadeDiv.querySelector("select[name='unidade[]']").value = dados[0].unidade;
             });
           });
           input.dataset.listener = true;
@@ -236,7 +246,31 @@ include __DIR__ . '/../../sidebar.php';
       });
     }
 
-    document.addEventListener('DOMContentLoaded', aplicarBuscaPorCodigo);
+    document.addEventListener('DOMContentLoaded', () => {
+      aplicarBuscaPorCodigo();
+
+      const codInput = document.getElementById('codigo_cloudify');
+      const nomeInput = document.getElementById('nome_prato');
+
+      if (codInput && nomeInput) {
+        codInput.addEventListener('blur', function () {
+          const codigo = this.value.trim();
+          if (!codigo) return;
+
+          fetch('buscar_prato.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'codigo_cloudify=' + encodeURIComponent(codigo)
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.nome_prato) {
+              nomeInput.value = data.nome_prato;
+            }
+          });
+        });
+      }
+    });
   </script>
 </body>
 </html>
