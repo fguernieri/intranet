@@ -33,37 +33,38 @@ include __DIR__ . '/../../sidebar.php';
           <div>
             <label class="block text-cyan-300 mb-1 font-medium">Cód Cloudify</label>
             <input type="text" name="codigo_cloudify" id="codigo_cloudify"
-                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+                   class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
           </div>
           <div class="md:col-span-2">
             <label class="block text-cyan-300 mb-1 font-medium">Nome do Prato</label>
             <input type="text" name="nome_prato" id="nome_prato" required
-                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+                   class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
           </div>
           <div>
             <label class="block text-cyan-300 mb-1 font-medium">Integração</label>
-            <input type="text" class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+            <input type="text" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="block text-cyan-300 mb-1 font-medium">Rendimento</label>
             <input type="text" name="rendimento" required
-                   class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+                   class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
           </div>
           <div class="md:col-span-2">
             <label class="block text-cyan-300 mb-1 font-medium">Imagem (opcional)</label>
             <input type="file" name="imagem" accept=".jpg,.jpeg,.png"
-                   class="w-full p-2 bg-gray-800 border border-gray-700 rounded file:text-white file:bg-cyan-500 file:px-4 file:py-1 file:font-semibold">
+                   class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg file:text-white file:bg-cyan-500 file:px-4 file:py-1 file:font-semibold">
           </div>
-        </div>
-
-        <div>
+          <div>
           <label class="block text-cyan-300 mb-1 font-medium">Responsável</label>
           <input type="text" name="usuario" required
-                 class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+                 class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+          </div>
+
         </div>
+
 
         <div class="bg-gray-700 p-4 rounded-lg">
           <label for="busca_insumo" class="block text-sm font-semibold text-white mb-2">
@@ -93,19 +94,19 @@ include __DIR__ . '/../../sidebar.php';
           <div id="ingredientesContainer" class="grid gap-4 md:grid-cols-5">
             <div>
               <label class="block text-cyan-300 mb-1">Código (opcional)</label>
-              <input type="text" name="codigo[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="codigo[]" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div class="md:col-span-2">
               <label class="block text-cyan-300 mb-1">Descrição</label>
-              <input type="text" name="descricao[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="descricao[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Quantidade</label>
-              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Unidade</label>
-              <select name="unidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white">
+              <select name="unidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
                 <option value="">Selecione</option>
                 <option value="g">g</option>
                 <option value="kg">kg</option>
@@ -118,19 +119,19 @@ include __DIR__ . '/../../sidebar.php';
           <template id="ingredienteTemplate">
             <div>
               <label class="block text-cyan-300 mb-1">Código (opcional)</label>
-              <input type="text" name="codigo[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="codigo[]" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div class="md:col-span-2">
               <label class="block text-cyan-300 mb-1">Descrição</label>
-              <input type="text" name="descricao[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="text" name="descricao[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Quantidade</label>
-              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Unidade</label>
-              <select name="unidade[]" required class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white">
+              <select name="unidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
                 <option value="">Selecione</option>
                 <option value="g">g</option>
                 <option value="kg">kg</option>
@@ -153,7 +154,7 @@ include __DIR__ . '/../../sidebar.php';
         <div>
           <label class="block text-cyan-300 mb-2 font-medium">Modo de Preparo</label>
           <textarea name="modo_preparo" rows="6" required
-                    class="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500"></textarea>
+                    class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500"></textarea>
         </div>
 
         <div class="flex justify-center">
