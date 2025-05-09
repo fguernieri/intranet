@@ -10,11 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // 2) Filial: primeiro tenta o POST, senão session
-$filial  = $_POST['7TRAGOS']          ??;
+$filial  = $_POST['7TRAGOS'] ?? ($_SESSION['filial'] ?? '');
 $usuario = $_SESSION['usuario_nome'] ?? '';
+
 if (! $filial) {
     die('Filial não informada');
 }
+
 
 // 3) Conexão ao banco
 require_once $_SERVER['DOCUMENT_ROOT'] . '/db_config.php';
