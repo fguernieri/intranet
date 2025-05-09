@@ -49,36 +49,59 @@ $ingredientes = $stmtIng->fetchAll();
       Editar Ficha Técnica: <?= htmlspecialchars($ficha['nome_prato']) ?>
     </h1>
 
-    <form action="salvar_edicao.php" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form action="salvar_edicao.php" method="POST" enctype="multipart/form-data" class="space-y-6">
       <input type="hidden" name="id" value="<?= $ficha['id'] ?>">
 
-      <!-- Nome do prato -->
+     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Código Cloudify -->
       <div>
-        <label class="block mb-2 text-cyan-300 font-medium">Nome do Prato</label>
-        <input type="text" name="nome_prato" value="<?= htmlspecialchars($ficha['nome_prato']) ?>"
-               class="w-full p-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+        <label class="block text-cyan-300 mb-1 font-medium">Cód Cloudify</label>
+        <input type="text" name="codigo_cloudify" id="codigo_cloudify"
+               value="<?= htmlspecialchars($ficha['codigo_cloudify'] ?? '') ?>"
+               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
       </div>
 
+      <!-- Nome do Prato -->
+      <div class="md:col-span-2">
+        <label class="block text-cyan-300 mb-1 font-medium">Nome do Prato</label>
+        <input type="text" name="nome_prato" id="nome_prato" required
+               value="<?= htmlspecialchars($ficha['nome_prato']) ?>"
+               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+      </div>
+
+      <!-- Integração -->
+      <div>
+        <label class="block text-cyan-300 mb-1 font-medium">Integração</label>
+        <input type="text" name="integracao"
+               value="<?= htmlspecialchars($ficha['integracao'] ?? '') ?>"
+               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <!-- Rendimento -->
       <div>
-        <label class="block mb-2 text-cyan-300 font-medium">Rendimento</label>
-        <input type="text" name="rendimento" value="<?= htmlspecialchars($ficha['rendimento']) ?>"
-               class="w-full p-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+        <label class="block text-cyan-300 mb-1 font-medium">Rendimento</label>
+        <input type="text" name="rendimento" required
+               value="<?= htmlspecialchars($ficha['rendimento']) ?>"
+               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
       </div>
 
       <!-- Imagem -->
-      <div>
-        <label class="block mb-2 text-cyan-300 font-medium">Imagem (deixe em branco para não alterar)</label>
+      <div class="md:col-span-2">
+        <label class="block text-cyan-300 mb-1 font-medium">Imagem (opcional)</label>
         <input type="file" name="imagem" accept=".jpg,.jpeg,.png"
-               class="w-full p-3 bg-gray-800 border border-gray-700 rounded file:text-white file:bg-cyan-600 file:border-none file:rounded file:px-4 file:py-2">
+               class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg file:text-white file:bg-cyan-500 file:px-4 file:py-1 file:font-semibold">
       </div>
 
       <!-- Responsável -->
       <div>
-        <label class="block mb-2 text-cyan-300 font-medium">Responsável</label>
-        <input type="text" name="usuario" value="<?= htmlspecialchars($ficha['usuario']) ?>"
-               class="w-full p-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
+        <label class="block text-cyan-300 mb-1 font-medium">Responsável</label>
+        <input type="text" name="usuario" required
+               value="<?= htmlspecialchars($ficha['usuario']) ?>"
+               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
       </div>
+    </div>
 
       <!-- Busca de Insumo -->
       <div class="col-span-1 md:col-span-2 bg-gray-700 p-4 rounded-lg">
@@ -295,7 +318,33 @@ $ingredientes = $stmtIng->fetchAll();
         }
       });
     }
-    document.addEventListener('DOMContentLoaded', aplicarBuscaPorCodigo);
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const codInput = document.getElementById('codigo_cloudify');
+      const nomeInput = document.getElementById('nome_prato');
+
+      if (codInput && nomeInput) {
+        codInput.addEventListener('blur', function () {
+          const codigo = this.value.trim();
+          if (!codigo) return;
+
+          fetch('buscar_prato.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'codigo_cloudify=' + encodeURIComponent(codigo)
+          })
+          .then(res => res.json())
+          .then(data => {
+            console.log("Retorno:", data); // Para depuração
+            if (data && data.nome_prato) {
+              nomeInput.value = data.nome_prato;
+            }
+          })
+          .catch(err => console.error("Erro:", err));
+        });
+      }
+    });
+
   </script>
 
 </body>
