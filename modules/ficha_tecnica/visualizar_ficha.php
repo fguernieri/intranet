@@ -98,6 +98,7 @@ $ingredientes = $stmtIng->fetchAll();
       <p><span class="font-semibold text-cyan-400">Prato:</span> <?= htmlspecialchars($ficha['nome_prato']) ?></p>
       <p><span class="font-semibold text-cyan-400">Rendimento:</span> <?= htmlspecialchars($ficha['rendimento']) ?></p>
       <p><span class="font-semibold text-cyan-400">Responsável:</span> <?= htmlspecialchars($ficha['usuario']) ?></p>
+      <p><span class="font-semibold text-cyan-400">Código Cloudify:</span> <?= htmlspecialchars($ficha['codigo_cloudify']) ?></p>
       <p><span class="font-semibold text-cyan-400">Data:</span> <?= date('d/m/Y H:i', strtotime($ficha['data_criacao'])) ?></p>
     </div>
 

@@ -1,7 +1,10 @@
 <?php
 require_once '../../config/db.php';
+session_start();
 
-// --- INÍCIO: Compressão de imagem JPG/PNG para < 500KB ---
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// --- Compressão de imagem ---
 function compressImage($sourcePath, $destinationPath, $maxFileSize = 512000) {
     $info = getimagesize($sourcePath);
     $mime = $info['mime'];
@@ -27,87 +30,89 @@ function compressImage($sourcePath, $destinationPath, $maxFileSize = 512000) {
         imagedestroy($resized);
     }
 }
-// --- FIM: Compressão de imagem ---
+// --- Fim da compressão ---
 
 try {
-    // Coleta dados principais
-    $nome = $_POST['nome_prato'];
-    $rendimento = $_POST['rendimento'];
-    $modo_preparo = $_POST['modo_preparo'];
-    $usuario = $_POST['usuario'];
+    $nome            = $_POST['nome_prato'];
+    $rendimento      = $_POST['rendimento'];
+    $modo_preparo    = $_POST['modo_preparo'];
+    $responsavel     = $_POST['usuario']; // este vai para ficha
+    $codigo_cloudify = $_POST['codigo_cloudify'] ?? null;
+    $usuario_logado  = $_SESSION['usuario_nome'] ?? 'sistema'; // este vai para histórico
 
     $ingredientes = $_POST['descricao'] ?? [];
-    $codigos = $_POST['codigo'] ?? [];
-    $quantidades = $_POST['quantidade'] ?? [];
-    $unidades = $_POST['unidade'] ?? [];
+    $codigos      = $_POST['codigo'] ?? [];
+    $quantidades  = $_POST['quantidade'] ?? [];
+    $unidades     = $_POST['unidade'] ?? [];
 
-    // ✅ Verifica se ao menos 1 ingrediente foi enviado
     if (count($ingredientes) === 0 || empty($ingredientes[0])) {
         throw new Exception('É necessário adicionar pelo menos um ingrediente.');
     }
 
-    // Upload da imagem
+    // 📷 Upload da imagem
     $imagem_nome = null;
 
     if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
-        $tmp_name = $_FILES['imagem']['tmp_name'];
+        $tmp_name  = $_FILES['imagem']['tmp_name'];
         $mime_type = mime_content_type($tmp_name);
-        $ext = strtolower(pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION));
+        $ext       = strtolower(pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION));
 
         if ($mime_type === 'image/heic' || $ext === 'heic') {
-            throw new Exception('Imagens HEIC não são suportadas. Por favor, envie JPG ou PNG.');
+            throw new Exception('Imagens HEIC não são suportadas. Envie JPG ou PNG.');
         }
 
         $imagem_nome = uniqid('prato_') . '.' . $ext;
-        $destino = 'uploads/' . $imagem_nome;
+        $destino     = 'uploads/' . $imagem_nome;
 
         if (!move_uploaded_file($tmp_name, $destino)) {
             throw new Exception('Erro ao mover a imagem para a pasta uploads.');
         }
 
-        // ✅ Comprime a imagem
         compressImage($destino, $destino);
     }
 
-    // Inserir a ficha
-    $stmt = $pdo->prepare("INSERT INTO ficha_tecnica (nome_prato, rendimento, modo_preparo, imagem, usuario)
-                           VALUES (:nome, :rendimento, :modo, :imagem, :usuario)");
+    // 📝 Inserir ficha técnica
+    $stmt = $pdo->prepare("INSERT INTO ficha_tecnica 
+        (nome_prato, rendimento, modo_preparo, imagem, usuario, codigo_cloudify)
+        VALUES (:nome, :rendimento, :modo, :imagem, :usuario, :cloudify)");
     $stmt->execute([
-        ':nome' => $nome,
-        ':rendimento' => $rendimento,
-        ':modo' => $modo_preparo,
-        ':imagem' => $imagem_nome,
-        ':usuario' => $usuario
+        ':nome'      => $nome,
+        ':rendimento'=> $rendimento,
+        ':modo'      => $modo_preparo,
+        ':imagem'    => $imagem_nome,
+        ':usuario'   => $responsavel,
+        ':cloudify'  => $codigo_cloudify
     ]);
 
     $ficha_id = $pdo->lastInsertId();
 
-    // Registrar criação da ficha no histórico
-    $stmt = $pdo->prepare("INSERT INTO historico (ficha_id, campo_alterado, valor_antigo, valor_novo, usuario)
-                           VALUES (:ficha_id, 'criação', '', 'Ficha técnica criada', :usuario)");
+    // 🧠 Histórico de criação
+    $stmt = $pdo->prepare("INSERT INTO historico 
+        (ficha_id, campo_alterado, valor_antigo, valor_novo, usuario)
+        VALUES (:ficha_id, 'criação', '', 'Ficha técnica criada', :usuario)");
     $stmt->execute([
         ':ficha_id' => $ficha_id,
-        ':usuario' => $usuario
+        ':usuario'  => $usuario_logado
     ]);
 
-    // Inserir ingredientes
+    // ➕ Ingredientes
     for ($i = 0; $i < count($ingredientes); $i++) {
-        // ✅ Só salva se todos os campos estiverem preenchidos
         if (!empty($ingredientes[$i]) && !empty($quantidades[$i]) && !empty($unidades[$i])) {
-            $stmt = $pdo->prepare("INSERT INTO ingredientes (ficha_id, codigo, descricao, quantidade, unidade)
-                                   VALUES (:ficha_id, :codigo, :descricao, :quantidade, :unidade)");
+            $stmt = $pdo->prepare("INSERT INTO ingredientes 
+                (ficha_id, codigo, descricao, quantidade, unidade)
+                VALUES (:ficha_id, :codigo, :descricao, :quantidade, :unidade)");
             $stmt->execute([
-                ':ficha_id' => $ficha_id,
-                ':codigo' => $codigos[$i],
-                ':descricao' => $ingredientes[$i],
+                ':ficha_id'   => $ficha_id,
+                ':codigo'     => $codigos[$i],
+                ':descricao'  => $ingredientes[$i],
                 ':quantidade' => $quantidades[$i],
-                ':unidade' => $unidades[$i]
+                ':unidade'    => $unidades[$i]
             ]);
         }
     }
 
-    // ✅ Redireciona após sucesso
-    header("Location: visualizar_ficha.php?id=" . $ficha_id ."&sucesso=1");
+    // 🔁 Redireciona para visualização
+    header("Location: visualizar_ficha.php?id=$ficha_id&sucesso=1");
     exit;
 
 } catch (Exception $e) {
