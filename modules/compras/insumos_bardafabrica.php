@@ -149,9 +149,9 @@ if (
           <thead class="bg-gray-700 text-yellow-400">
             <tr>
               <th class="p-2 text-left">Insumo</th>
-              <th class="p-2 text-left">Categoria</th>
-              <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
+              <th class="p-2 text-left">Unidade</th>
+              <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
             </tr>
           </thead>
@@ -163,8 +163,6 @@ if (
             ?>
             <tr class="hover:bg-gray-700" data-cat="<?=$cat?>">
               <td class="p-2"><?=$ins?></td>
-              <td class="p-2"><?=$cat?></td>
-              <td class="p-2"><?=$uni?></td>
               <td class="p-2 text-center">
                 <div class="inline-flex items-center space-x-1">
                   <div class="qty-btn decrement">−</div>
@@ -176,6 +174,8 @@ if (
                   <div class="qty-btn increment">+</div>
                 </div>
               </td>
+              <td class="p-2"><?=$uni?></td>
+              <td class="p-2"><?=$cat?></td>
               <td class="p-2">
                 <input type="text" name="observacao[]" maxlength="200"
                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
@@ -197,9 +197,9 @@ if (
           <thead class="bg-gray-700 text-yellow-400">
             <tr>
               <th class="p-2 text-left">Insumo</th>
-              <th class="p-2 text-left">Categoria</th>
-              <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
+              <th class="p-2 text-left">Unidade</th>
+              <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
               <th class="p-2 text-center">Excluir</th>
             </tr>
@@ -210,14 +210,13 @@ if (
                 <input type="text" name="new_insumo[]" required
                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
               </td>
-              <td class="p-2">
-                <select name="new_categoria[]" required
-                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
-                  <option value="">Selecione</option>
-                  <?php foreach ($categorias as $cat): ?>
-                    <option value="<?=htmlspecialchars($cat,ENT_QUOTES)?>"><?=htmlspecialchars($cat,ENT_QUOTES)?></option>
-                  <?php endforeach; ?>
-                </select>
+              <td class="p-2 text-center">
+                <div class="inline-flex items-center space-x-1">
+                  <div class="qty-btn decrement">−</div>
+                  <input type="number" name="new_quantidade[]" min="0" step="0.01" value="0" required
+                         class="qtd-input bg-gray-600 text-white text-xs p-1 rounded">
+                  <div class="qty-btn increment">+</div>
+                </div>
               </td>
               <td class="p-2">
                 <select name="new_unidade[]" required
@@ -228,13 +227,14 @@ if (
                   <?php endforeach; ?>
                 </select>
               </td>
-              <td class="p-2 text-center">
-                <div class="inline-flex items-center space-x-1">
-                  <div class="qty-btn decrement">−</div>
-                  <input type="number" name="new_quantidade[]" min="0" step="0.01" value="0" required
-                         class="qtd-input bg-gray-600 text-white text-xs p-1 rounded">
-                  <div class="qty-btn increment">+</div>
-                </div>
+              <td class="p-2">
+                <select name="new_categoria[]" required
+                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
+                  <option value="">Selecione</option>
+                  <?php foreach ($categorias as $cat): ?>
+                    <option value="<?=htmlspecialchars($cat,ENT_QUOTES)?>"><?=htmlspecialchars($cat,ENT_QUOTES)?></option>
+                  <?php endforeach; ?>
+                </select>
               </td>
               <td class="p-2">
                 <input type="text" name="new_observacao[]" maxlength="200"
@@ -263,8 +263,9 @@ if (
             <thead class="bg-gray-700 text-yellow-400">
               <tr>
                 <th class="p-2 text-left">Insumo</th>
-                <th class="p-2 text-left">Unidade</th>
                 <th class="p-2 text-center">Qtde</th>
+                <th class="p-2 text-left">Unidade</th>
+                <th class="p-2 text-left">Categoria</th>
                 <th class="p-2 text-left">Observação</th>
               </tr>
             </thead>
@@ -329,7 +330,7 @@ if (
       const term = document.getElementById('search-input').value.trim().toLowerCase();
       rows.forEach(r=>{
         const catOK = !cats.length || cats.includes(r.dataset.cat);
-        const txtOK = !term || r.children[0].textContent.toLowerCase().includes(term);
+        const txtOK = !term || r.children[0].textContent.toLowerCase().includes(term); // Insumo é o primeiro filho (children[0])
         r.style.display = (catOK && txtOK) ? '' : 'none';
       });
     }
@@ -384,20 +385,24 @@ if (
       document.querySelectorAll('#insumo-body tr').forEach(r=>{
         const q = parseFloat(r.querySelector('input[name="quantidade[]"]').value);
         if(q>0) lines.push({
-          insumo: r.children[0].textContent.trim(),
-          unidade: r.children[2].textContent.trim(),
-          quantidade: q.toFixed(2),
-          obs: r.querySelector('input[name="observacao[]"]').value.trim()
+          insumo:     r.children[0].textContent.trim(), // Insumo
+          quantidade: q.toFixed(2),                     // Quantidade
+          unidade:    r.children[2].textContent.trim(), // Unidade
+          categoria:  r.children[3].textContent.trim(), // Categoria
+          obs:        r.querySelector('input[name="observacao[]"]').value.trim()
         });
       });
       // novos
       document.querySelectorAll('#new-items-body tr').forEach(r=>{
-        const ins=r.querySelector('input[name="new_insumo[]"]').value.trim();
-        const q=parseFloat(r.querySelector('input[name="new_quantidade[]"]').value);
-        const uni=r.querySelector('select[name="new_unidade[]"]').value;
+        const ins = r.querySelector('input[name="new_insumo[]"]').value.trim();
+        const q   = parseFloat(r.querySelector('input[name="new_quantidade[]"]').value);
+        const uni = r.querySelector('select[name="new_unidade[]"]').value;
+        const cat = r.querySelector('select[name="new_categoria[]"]').value;
         if(ins&&q>0) lines.push({
-          insumo: ins, unidade: uni,
+          insumo: ins,
           quantidade: q.toFixed(2),
+          unidade: uni,
+          categoria: cat,
           obs: r.querySelector('input[name="new_observacao[]"]').value.trim()
         });
       });
@@ -410,9 +415,10 @@ if (
         const tr = document.createElement('tr');
         tr.innerHTML = `
   <td class="p-2 text-left">${item.insumo}</td>
-  <td class="p-2 text-left">${item.unidade}</td>
   <td class="p-2 text-center">${item.quantidade}</td>
-  <td class="p-2 text-left">${item.obs}</td>
+  <td class="p-2 text-left">${item.unidade}</td>
+  <td class="p-2 text-left">${item.categoria}</td>
+  <td class="p-2 text-left">${item.obs || ''}</td>
 `;
         previewBody.appendChild(tr);
       });
@@ -455,7 +461,7 @@ if (
         form.querySelectorAll(`[name="${f}[]"]`).forEach(i=> fd2.append(f+'[]', i.value));
       });
       await fetch('salvar_novos_insumos.php',{method:'POST',body:fd2});
-      window.location.href='insumos_7tragos.php?status=ok';
+      window.location.href='insumos_bardafabrica.php?status=ok'; // Alterado para redirecionar para a própria página
     };
 
     // scroll flutuante
