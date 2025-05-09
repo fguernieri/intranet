@@ -69,25 +69,25 @@ $alteracoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       <!-- 💻 Tabela Desktop -->
       <div class="overflow-x-auto bg-gray-800 rounded shadow hidden md:block">
-        <table class="min-w-full text-sm text-center">
+        <table class="min-w-full table-fixed text-sm text-center">
           <thead class="bg-gray-700 text-cyan-300">
             <tr>
-              <th class="p-3">Nome do Prato</th>
-              <th class="p-3">Campo Alterado</th>
-              <th class="p-3">Valor Antigo</th>
-              <th class="p-3">Valor Novo</th>
-              <th class="p-3">Usuário</th>
-              <th class="p-3">Data</th>
+              <th class="p-3 w-1/6">Prato</th>
+              <th class="p-3 w-1/6">Campo</th>
+              <th class="p-3 w-1/4">Valor Antigo</th>
+              <th class="p-3 w-1/4">Valor Novo</th>
+              <th class="p-3 w-1/6">Usuário</th>
+              <th class="p-3 w-1/6">Data</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-700">
+          <tbody class="divide-y divide-gray-700 text-gray-200">
             <?php foreach ($alteracoes as $alt): ?>
               <tr class="hover:bg-gray-700">
-                <td class="p-2"><?= htmlspecialchars($alt['nome_prato']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($alt['campo_alterado']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($alt['valor_antigo']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($alt['valor_novo']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($alt['usuario']) ?></td>
+                <td class="p-2 break-words"><?= htmlspecialchars($alt['nome_prato']) ?></td>
+                <td class="p-2 break-words"><?= htmlspecialchars($alt['campo_alterado']) ?></td>
+                <td class="p-2 whitespace-pre-wrap break-words max-w-[250px]"><?= htmlspecialchars($alt['valor_antigo']) ?></td>
+                <td class="p-2 whitespace-pre-wrap break-words max-w-[250px]"><?= htmlspecialchars($alt['valor_novo']) ?></td>
+                <td class="p-2 break-words"><?= htmlspecialchars($alt['usuario']) ?></td>
                 <td class="p-2"><?= date('d/m/Y H:i', strtotime($alt['data_alteracao'])) ?></td>
               </tr>
             <?php endforeach; ?>
