@@ -343,6 +343,9 @@ $ingredientes = $stmtIng->fetchAll();
           .catch(err => console.error("Erro:", err));
         });
       }
+      
+      // 👇 Esta linha resolve o problema para os campos já carregados
+      aplicarBuscaPorCodigo();
     });
 
   </script>
