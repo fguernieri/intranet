@@ -218,7 +218,9 @@ $UltimaAtualizacao = $stmt->fetchColumn();
         <div class="card1"><p>📦 Total de Pedidos</p><p><?= $totalPedidos ?></p></div>
         <div class="card1"><p>🏪 Clientes Únicos</p><p><?= $totalClientes ?></p></div>
         <div class="card1"><p>🌎 Estados com Pedido</p><p><?= $totalEstados ?></p></div>
-      </div>      <!-- Charts -->
+      </div>      
+      
+      <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <?php 
           $charts = [
@@ -259,6 +261,47 @@ $UltimaAtualizacao = $stmt->fetchColumn();
             </div>
         <?php endforeach; ?>
       </div>
+      
+          <!-- Tabela de Pedidos com Ordenação e Seção Retrátil -->
+    <section class="mt-10">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-semibold text-yellow-400 text-center w-full">📦 Tabela de Pedidos</h3>
+        <button onclick="toggleTabelaPedidos()" class="ml-4 text-sm bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-3 py-1 rounded">
+          Mostrar/Ocultar
+        </button>
+      </div>
+
+      <div id="tabelaPedidosWrapper" class="overflow-auto rounded-lg shadow">
+        <table class="sortable min-w-full divide-y divide-gray-700 bg-gray-800 text-white text-sm">
+          <thead class="bg-gray-700">
+            <tr>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(0)">📦 Pedido</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(1)">👤 Cliente</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(2)">🗺 Estado</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(3)">🧑‍💼 Vendedor</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(4)">📅 Data Faturamento</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(5)">💰 Valor</th>
+            </tr>
+          </thead>
+          <tbody data-sort-dir="asc">
+            <?php foreach ($pedidos as $row): ?>
+            <tr class="hover:bg-gray-700">
+              <td class="px-4 py-2"><?= $row['NumeroPedido'] ?? '' ?></td>
+              <td class="px-4 py-2"><?= $row['CodCliente'] ?? '' ?></td>
+              <td class="px-4 py-2"><?= htmlspecialchars($row['Estado'] ?? '') ?></td>
+              <td class="px-4 py-2"><?= htmlspecialchars($row['Vendedor'] ?? '') ?></td>
+              <td class="px-4 py-2">
+                <?= $row['DataFaturamento'] ? htmlspecialchars(date('d/m/Y', strtotime($row['DataFaturamento']))) : '' ?>
+              </td>
+              <td class="px-4 py-2">R$ <?= isset($row['ValorFaturado']) ? number_format((float)$row['ValorFaturado'], 2, ',', '.') : '0,00' ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+      
       <script>
         // 💸 Arredondamento para valores inteiros
         const arredondar = arr => arr.map(v => parseFloat(parseFloat(v).toFixed(0)));
@@ -434,8 +477,42 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           });
         });
       });
+      
+      // Scripts Tabela pedidos
+      function sortTable(col) {
+        const table = document.querySelector("table.sortable tbody");
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const isNumeric = col === 5 || col === 0;
 
+        const sortedRows = rows.sort((a, b) => {
+          const aText = a.children[col].innerText.trim();
+          const bText = b.children[col].innerText.trim();
+
+          if (isNumeric) {
+            const aNum = parseFloat(aText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            const bNum = parseFloat(bText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            return aNum - bNum;
+          } else if (col === 4) {
+            return new Date(aText.split('/').reverse().join('-')) - new Date(bText.split('/').reverse().join('-'));
+          } else {
+            return aText.localeCompare(bText);
+          }
+        });
+
+        const direction = table.getAttribute("data-sort-dir") === "asc" ? "desc" : "asc";
+        table.setAttribute("data-sort-dir", direction);
+        if (direction === "desc") sortedRows.reverse();
+
+        rows.forEach(row => table.removeChild(row));
+        sortedRows.forEach(row => table.appendChild(row));
+      }
+
+      function toggleTabelaPedidos() {
+        const el = document.getElementById("tabelaPedidosWrapper");
+        el.classList.toggle("hidden");
+      }
     </script>
+    
 
 </body>
 </html>
