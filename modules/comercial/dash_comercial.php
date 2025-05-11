@@ -489,9 +489,16 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           const bText = b.children[col].innerText.trim();
 
           if (isNumeric) {
-            const aNum = parseFloat(aText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
-            const bNum = parseFloat(bText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            const normalize = str => parseFloat(
+              str.replace(/[^\d,.-]/g, '') // remove "R$", espaços, etc.
+                 .replace(/\./g, '')       // remove ponto de milhar
+                 .replace(',', '.')        // troca vírgula decimal por ponto
+            ) || 0;
+
+            const aNum = normalize(aText);
+            const bNum = normalize(bText);
             return aNum - bNum;
+            
           } else if (col === 4) {
             return new Date(aText.split('/').reverse().join('-')) - new Date(bText.split('/').reverse().join('-'));
           } else {
