@@ -6,7 +6,7 @@ $termo = $_POST['termo'] ?? '';
 
 if ($codigo) {
     $stmt = $pdo_dw->prepare("SELECT `Nome` as Insumo, `Cód. Ref.` AS codigo, `Unidade` AS unidade
-                              FROM produtosbares
+                              FROM ProdutosBares
                               WHERE `Cód. Ref.` = :codigo
                               LIMIT 1");
     $stmt->execute([':codigo' => $codigo]);
@@ -20,7 +20,7 @@ if (strlen($termo) < 2) {
 }
 
 $stmt = $pdo_dw->prepare("SELECT `Nome` as Insumo, `Cód. Ref.` AS codigo, `Unidade` AS unidade
-                           FROM produtosbares
+                           FROM ProdutosBares
                            WHERE `Nome` LIKE :termo
                            LIMIT 20");
 $stmt->execute([':termo' => '%' . $termo . '%']);
