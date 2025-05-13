@@ -152,7 +152,7 @@ $ingredientes = $stmtIng->fetchAll();
                 <label class="text-cyan-300 block mb-1">Unidade</label>
                 <select name="unidade[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white" required>
                   <?php
-                    $unidades = ['g', 'kg', 'ml', 'l', 'unidade'];
+                    $unidades = ['g', 'KG', 'ml', 'LT', 'UND'];
                     foreach ($unidades as $un) {
                       $selected = $un === $ing['unidade'] ? 'selected' : '';
                       echo "<option value=\"$un\" $selected>$un</option>";
@@ -216,11 +216,12 @@ $ingredientes = $stmtIng->fetchAll();
       <div>
         <label class="text-cyan-300 block mb-1">Unidade</label>
         <select name="unidade[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white" required>
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-          <option value="ml">ml</option>
-          <option value="l">l</option>
-          <option value="unidade">unidade</option>
+                <option value="">Selecione</option>
+                <option value="g">g</option>
+                <option value="KG">KG</option>
+                <option value="ml">ml</option>
+                <option value="LT">LT</option>
+                <option value="UND">UND</option>
         </select>
       </div>
       <div class="flex justify-center items-end pb-2">
