@@ -109,10 +109,10 @@ include __DIR__ . '/../../sidebar.php';
               <select name="unidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
                 <option value="">Selecione</option>
                 <option value="g">g</option>
-                <option value="kg">kg</option>
+                <option value="KG">KG</option>
                 <option value="ml">ml</option>
-                <option value="l">l</option>
-                <option value="unidade">unidade</option>
+                <option value="LT">LT</option>
+                <option value="UND">UND</option>
               </select>
             </div>
           </div>
@@ -134,10 +134,10 @@ include __DIR__ . '/../../sidebar.php';
               <select name="unidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
                 <option value="">Selecione</option>
                 <option value="g">g</option>
-                <option value="kg">kg</option>
+                <option value="KG">KG</option>
                 <option value="ml">ml</option>
-                <option value="l">l</option>
-                <option value="unidade">unidade</option>
+                <option value="LT">LT</option>
+                <option value="UND">UND</option>
               </select>
             </div>
           </template>
@@ -240,6 +240,7 @@ include __DIR__ . '/../../sidebar.php';
               const unidadeDiv = descDiv.nextElementSibling.nextElementSibling;
 
               descDiv.querySelector("input[name='descricao[]']").value = dados[0].Insumo;
+              unidadeDiv.querySelector("select[name='unidade[]']").value = dados[0].unidade;
             });
           });
           input.dataset.listener = true;
