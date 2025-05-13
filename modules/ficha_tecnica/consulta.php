@@ -121,7 +121,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <table class="min-w-full text-sm text-center">
           <thead class="bg-gray-700 text-cyan-300">
             <tr>
-              <th class="p-3">ID</th>
+              <th class="p-3">Cód Cloudify</th>
               <th class="p-3">Nome do Prato</th>
               <th class="p-3">Rendimento</th>
               <th class="p-3">Data</th>
@@ -131,7 +131,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <tbody class="divide-y divide-gray-700">
             <?php foreach ($fichas as $ficha): ?>
               <tr class="hover:bg-gray-700">
-                <td class="p-2"><?= $ficha['id'] ?></td>
+                <td class="p-2"><?= $ficha['codigo_cloudify'] ?></td>
                 <td class="p-2"><?= htmlspecialchars($ficha['nome_prato']) ?></td>
                 <td class="p-2"><?= $ficha['rendimento'] ?></td>
                 <td class="p-2"><?= date('d/m/Y', strtotime($ficha['data_criacao'])) ?></td>
