@@ -109,7 +109,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="mt-3 flex flex-wrap gap-2">
               <a href="visualizar_ficha.php?id=<?= $ficha['id'] ?>" class="text-cyan-400 hover:underline text-sm">Ver</a>
               <a href="editar_ficha_form.php?id=<?= $ficha['id'] ?>" class="text-yellow-400 hover:underline text-sm">Editar</a>
-              <a href="compara_ficha.php?id=<?= $ficha['codigo_cloudify'] ?>" class="text-green-600 hover:underline text-sm">Comparar</a>
+              <a href="compara_ficha.php?cod=<?= $ficha['codigo_cloudify'] ?>" class="text-green-600 hover:underline text-sm">Comparar</a>
               <a href="historico.php?id=<?= $ficha['id'] ?>" class="text-purple-400 hover:underline text-sm">Histórico</a>
               <a href="excluir_ficha.php?id=<?= $ficha['id'] ?>" class="text-red-500 hover:underline text-sm">Excluir</a>
             </div>
@@ -139,7 +139,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td class="p-2 space-x-2">
                   <a href="visualizar_ficha.php?id=<?= $ficha['id'] ?>" class="text-cyan-400 hover:underline">Ver</a>
                   <a href="editar_ficha_form.php?id=<?= $ficha['id'] ?>" class="text-yellow-400 hover:underline">Editar</a>
-                  <a href="compara_ficha.php?id=<?= $ficha['codigo_cloudify'] ?>" class="text-green-600 hover:underline text-sm">Comparar</a>
+                  <a href="compara_ficha.php?cod=<?= $ficha['codigo_cloudify'] ?>" class="text-green-600 hover:underline text-sm">Comparar</a>
                   <a href="historico.php?id=<?= $ficha['id'] ?>" class="text-purple-400 hover:underline">Histórico</a>
                   <a href="excluir_ficha.php?id=<?= $ficha['id'] ?>" class="text-red-500 hover:underline">Excluir</a>
                 </td>
