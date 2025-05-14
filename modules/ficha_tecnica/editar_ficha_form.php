@@ -211,7 +211,7 @@ $ingredientes = $stmtIng->fetchAll();
       </div>
       <div>
         <label class="text-cyan-300 block mb-1">Quantidade</label>
-        <input type="number" step="0.01" name="quantidade[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+        <input type="number" step="0.001" name="quantidade[]" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
       </div>
       <div>
         <label class="text-cyan-300 block mb-1">Unidade</label>
