@@ -102,7 +102,7 @@ include __DIR__ . '/../../sidebar.php';
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Quantidade</label>
-              <input type="number" step="0.01" name="quantidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
+              <input type="number" step="0.001" name="quantidade[]" required class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700">
             </div>
             <div>
               <label class="block text-cyan-300 mb-1">Unidade</label>
