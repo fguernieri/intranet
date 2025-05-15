@@ -177,14 +177,19 @@ $ingredientes = $stmtIng->fetchAll();
         </div>
       </div>
 
-      <!-- Modo de preparo -->
-      <div class="col-span-1 md:col-span-2">
-        <label class="block mb-2 text-cyan-300 font-medium">Modo de Preparo</label>
-        <textarea name="modo_preparo" rows="6"
-                  class="w-full p-3 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  required><?= htmlspecialchars($ficha['modo_preparo']) ?></textarea>
-      </div>
-
+      
+      <!-- Campo de Modo de Preparo com TinyMCE -->
+      <div class="mt-6 ">
+      <label for="modo_preparo" class="block mb-4 text-xl font-bold text-cyan-300">Modo de Preparo</label>
+        <?php
+          $editor_id = 'modo_preparo';
+          $editor_name = 'modo_preparo';
+          $editor_label = 'Modo de Preparo';
+          $editor_value = $ficha['modo_preparo']; // ou valor vindo do banco
+          include $_SERVER['DOCUMENT_ROOT'] . '/components/editor.php';
+        ?>
+      </div>     
+      
       <!-- Botão salvar -->
       <div class="col-span-1 md:col-span-2 flex justify-center">
         <button type="submit"

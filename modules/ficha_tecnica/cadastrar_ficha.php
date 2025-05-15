@@ -1,6 +1,7 @@
 <?php
 
-include __DIR__ . '/../../sidebar.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
+
 ?>
 
 <!DOCTYPE html>
@@ -19,17 +20,17 @@ include __DIR__ . '/../../sidebar.php';
 
       <div class="mb-4">
         <a href="consulta.php"
-           class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg shadow font-semibold">
+           class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 md:px-6 md:py-3 mt-6 mb-4 rounded-lg shadow font-semibold">
           ⬅️ Voltar para Consulta
         </a>
       </div>
 
-      <h1 class="text-2xl md:text-3xl font-bold text-cyan-400 mb-6 text-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-cyan-400 mt-6 mb-4 text-center">
         Cadastrar Nova Ficha Técnica
       </h1>
 
       <form action="salvar_ficha.php" method="POST" enctype="multipart/form-data" class="grid gap-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 mt-6 md:grid-cols-4 gap-4">
           <div>
             <label class="block text-cyan-300 mb-1 font-medium">Cód Cloudify</label>
             <input type="text" name="codigo_cloudify" id="codigo_cloudify"
@@ -89,7 +90,7 @@ include __DIR__ . '/../../sidebar.php';
         </div>
 
         <div>
-          <h2 class="text-xl font-bold text-cyan-300 mb-4">Ingredientes</h2>
+          <h2 class="text-xl font-bold text-cyan-300 mt-6 mb-4">Ingredientes</h2>
 
           <div id="ingredientesContainer" class="grid gap-4 md:grid-cols-5">
             <div>
@@ -142,7 +143,6 @@ include __DIR__ . '/../../sidebar.php';
             </div>
           </template>
 
-
           <div class="mt-4">
             <button type="button" onclick="addIngrediente()"
                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg shadow font-semibold">
@@ -151,15 +151,21 @@ include __DIR__ . '/../../sidebar.php';
           </div>
         </div>
 
-        <div>
-          <label class="block text-cyan-300 mb-2 font-medium">Modo de Preparo</label>
-          <textarea name="modo_preparo" rows="6" required
-                    class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500"></textarea>
-        </div>
-
+        <!-- Campo de Modo de Preparo com TinyMCE -->
+        <div class="mt-6 ">
+        <label for="modo_preparo" class="block mb-4 text-xl font-bold text-cyan-300">Modo de Preparo</label>
+          <?php
+            $editor_id = 'modo_preparo';
+            $editor_name = 'modo_preparo';
+            $editor_label = 'Modo de Preparo';
+            $editor_value = ''; // ou valor vindo do banco
+            include $_SERVER['DOCUMENT_ROOT'] . '/components/editor.php';
+          ?>
+        </div>     
+        
         <div class="flex justify-center">
           <button type="submit"
-                  class="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 rounded-lg shadow font-semibold">
+                  class="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-3 mb-2 rounded-lg shadow font-semibold">
             📎 Cadastrar Ficha
           </button>
         </div>
