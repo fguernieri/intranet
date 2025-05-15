@@ -128,10 +128,18 @@ $ingredientes = $stmtIng->fetchAll();
       </div>
     </div>
 
-    <div class="bg-gray-800 rounded shadow p-6">
-      <h2 class="text-xl font-bold text-cyan-300 mb-2">Modo de Preparo</h2>
-      <p class="whitespace-pre-line text-gray-300"><?= nl2br(htmlspecialchars($ficha['modo_preparo'])) ?></p>
-    </div>
+    <!-- Campo de Modo de Preparo com TinyMCE -->
+    <div class="mt-6 ">
+    <label for="modo_preparo" class="block mb-4 text-xl font-bold text-cyan-300">Modo de Preparo</label>
+      <?php
+        $editor_id = 'modo_preparo';
+        $editor_name = 'modo_preparo';
+        $editor_label = 'Modo de Preparo';
+        $editor_value = $ficha['modo_preparo']; // ou valor vindo do banco
+        include $_SERVER['DOCUMENT_ROOT'] . '/components/editor.php';
+      ?>
+    </div>     
+      
   </div>
 
   <!-- Botão flutuante de imprimir -->
