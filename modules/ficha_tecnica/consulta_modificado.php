@@ -101,7 +101,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($fichas as $ficha): ?>
               <tr class="hover:bg-gray-700">
                 <td class="p-2">
-                  <div id="farol-<?= $ficha['id'] ?>" class="w-4 h-4 rounded-full bg-gray-400 mx-auto"></div>
+                  <div id="farol-<?= $ficha['codigo_cloudify'] ?>" class="w-4 h-4 rounded-full bg-gray-400 mx-auto"></div>
                 </td>
                 <td class="p-2"><?= $ficha['codigo_cloudify'] ?></td>
                 <td class="p-2"><?= htmlspecialchars($ficha['nome_prato']) ?></td>
@@ -129,19 +129,22 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 async function rodarFarol() {
-  const pratos = document.querySelectorAll('[id^="farol-"]');
-  for (const el of pratos) {
-    const id = el.id.split('-')[1];
+  const farois = document.querySelectorAll('[id^="farol-"]');
+  for (const el of farois) {
+    const cod = el.id.replace('farol-', '');
+
     try {
-      const res = await fetch(`consulta_farol.php?prato_id=${id}`);
+      const res = await fetch(`./consulta_farol.php?cod_cloudify=${encodeURIComponent(cod)}`);
       const data = await res.json();
+
       let cor = 'bg-gray-400';
       if (data.status === 'verde') cor = 'bg-green-500';
       else if (data.status === 'amarelo') cor = 'bg-yellow-400';
       else if (data.status === 'vermelho') cor = 'bg-red-500';
+
       el.className = `w-4 h-4 rounded-full ${cor} mx-auto`;
     } catch (e) {
-      console.error(`Erro no farol do prato ID ${id}`, e);
+      console.error(`Erro no farol para código ${cod}`, e);
     }
   }
 }
