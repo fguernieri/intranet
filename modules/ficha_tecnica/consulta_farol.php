@@ -1,28 +1,71 @@
 <?php
-require_once '../../config/db.php';
-require_once '../../config/db_dw.php';
+require_once '../../config/db.php';      // Intranet (ficha_tecnica + ingredientes)
+require_once '../../config/db_dw.php';   // Cloudify (insumos_bastards)
 
 header('Content-Type: application/json');
 
-$cod = $_GET['cod_cloudify'] ?? '';
+$codigo = isset($_GET['cod_cloudify']) ? trim($_GET['cod_cloudify']) : '';
+$ficha_intranet = [];
+$ficha_cloudify = [];
 $status = 'cinza';
 
-if ($cod !== '') {
-    $stmt1 = $pdo->prepare("SELECT id FROM ficha_tecnica WHERE codigo_cloudify = ?");
-    $stmt1->execute([$cod]);
-    $hasIntranet = $stmt1->fetch();
+if ($codigo !== '') {
+    // Ficha INTRANET
+    $sql_intranet = "
+        SELECT codigo AS codigo_insumo, descricao AS nome_insumo, unidade, quantidade
+        FROM ingredientes
+        WHERE ficha_id = (
+            SELECT id FROM ficha_tecnica WHERE codigo_cloudify = :codigo
+        )";
+    $stmt = $pdo->prepare($sql_intranet);
+    $stmt->execute([':codigo' => $codigo]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $ficha_intranet[$row['codigo_insumo']] = $row;
+    }
 
-    $stmt2 = $pdo_dw->prepare("SELECT id FROM insumos_bastards WHERE codigo_cloudify = ?");
-    $stmt2->execute([$cod]);
-    $hasCloud = $stmt2->fetch();
+    // Ficha CLOUDIFY
+    $sql_cloud = "
+        SELECT `Cód. ref..1` AS codigo_insumo, `Insumo` AS nome_insumo, `Und.` AS unidade, `Qtde.` AS quantidade
+        FROM insumos_bastards
+        WHERE `Cód. ref.` = :codigo";
+    $stmt2 = $pdo_dw->prepare($sql_cloud);
+    $stmt2->execute([':codigo' => $codigo]);
+    foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $ficha_cloudify[$row['codigo_insumo']] = $row;
+    }
 
-    if ($hasIntranet && $hasCloud) {
-        $status = 'verde';
-    } elseif ($hasIntranet || $hasCloud) {
-        $status = 'amarelo';
-    } else {
+    // Se alguma das fichas estiver vazia, vermelho
+    if (empty($ficha_intranet) || empty($ficha_cloudify)) {
         $status = 'vermelho';
+    } else {
+        $todos_codigos = array_unique(array_merge(
+            array_keys($ficha_intranet),
+            array_keys($ficha_cloudify)
+        ));
+
+        $diferencas = false;
+        foreach ($todos_codigos as $cod) {
+            $a = $ficha_intranet[$cod] ?? null;
+            $b = $ficha_cloudify[$cod] ?? null;
+
+            if ($a && $b) {
+                if (
+                    trim($a['nome_insumo']) !== trim($b['nome_insumo']) ||
+                    trim($a['unidade']) !== trim($b['unidade']) ||
+                    floatval($a['quantidade']) != floatval($b['quantidade'])
+                ) {
+                    $diferencas = true;
+                    break;
+                }
+            } else {
+                $diferencas = true;
+                break;
+            }
+        }
+
+        $status = $diferencas ? 'amarelo' : 'verde';
     }
 }
 
 echo json_encode(['status' => $status]);
+exit;
