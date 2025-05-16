@@ -119,7 +119,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </tbody>
         </table>
       </div>
-      <button onclick="rodarFarol()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mt-4">
+      <button id="btn-farol" onclick="rodarFarol()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mt-4">
         🚦 Rodar Farol
       </button>
     <?php else: ?>
@@ -128,13 +128,39 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
 <script>
+const frasesLoader = [
+  "☕ Preparando insumos com carinho...",
+  "🧪 Analisando diferença molecular dos ingredientes...",
+  "💾 Injetando dados no Cloudify...",
+  "🧠 Calculando divergência lógica...",
+  "🚨 Procurando fichas zumbis...",
+  "🔍 Escaneando gramaturas...",
+  "🥷 Invadindo banco de dados sigilosos...",
+  "🤖 Farolizando as fichas técnicas..."
+];
+
 async function rodarFarol() {
+  const btn = document.getElementById('btn-farol');
+  const loader = document.getElementById('loader-overlay');
+  const texto = document.getElementById('loader-text');
+
+  loader.classList.remove('hidden');
+  btn.disabled = true;
+  btn.classList.add('opacity-50', 'cursor-not-allowed');
+
   const farois = document.querySelectorAll('[id^="farol-"]');
+
+  let i = 0;
+  const fraseInterval = setInterval(() => {
+    texto.innerText = frasesLoader[i % frasesLoader.length];
+    i++;
+  }, 1500);
+
   for (const el of farois) {
     const cod = el.id.replace('farol-', '');
 
     try {
-      const res = await fetch(`./consulta_farol.php?cod_cloudify=${encodeURIComponent(cod)}`);
+      const res = await fetch('./consulta_farol.php?cod_cloudify=' + encodeURIComponent(cod));
       const data = await res.json();
 
       let cor = 'bg-gray-400';
@@ -147,8 +173,25 @@ async function rodarFarol() {
       console.error(`Erro no farol para código ${cod}`, e);
     }
   }
+
+  clearInterval(fraseInterval);
+  loader.classList.add('hidden');
+  btn.disabled = false;
+  btn.classList.remove('opacity-50', 'cursor-not-allowed');
 }
 </script>
+
+<!-- Loader Overlay -->
+<div id="loader-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden">
+  <div class="flex flex-col items-center">
+    <svg class="animate-spin h-10 w-10 text-cyan-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <span class="text-cyan-200 font-medium text-sm">Atualizando faróis...</span>
+  </div>
+</div>
+
 
 </body>
 </html>
