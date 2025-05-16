@@ -1,4 +1,4 @@
-<?php<?php
+<?php
 if (isset($_GET['check_farol']) && isset($_GET['prato_id'])) {
     require_once '../../config/db.php';
     require_once '../../config/db_dw.php';
