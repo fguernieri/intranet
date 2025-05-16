@@ -4,8 +4,6 @@ require_once '../../config/db.php';
 include '../../sidebar.php';
 
 
-
-
 $id = $_GET['id'] ?? null;
 if (!$id) {
     echo "ID inválido.";
