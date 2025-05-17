@@ -38,6 +38,8 @@ function normalize($s) {
 $map = [
     '7TRAGOS'        => 'insumos_7tragos.php',
     'BAR DA FABRICA' => 'insumos_bardafabrica.php',
+    'WE ARE BASTARDS' => 'insumos_wearebastards.php',
+    'CROSS' => 'insumos_cross.php',
     // caso tenha mais filiais personalize aqui...
 ];
 ?>
