@@ -15,7 +15,7 @@ if (empty($_SESSION['usuario_id'])) {
 }
 
 // fixa a filial
-$filial  = 'BAR DA FABRICA';
+$filial  = 'CROSS';
 $usuario = $_SESSION['usuario_nome'] ?? '';
 
 // conexão
