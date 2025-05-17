@@ -52,7 +52,7 @@ $bloqueado = true;
 
 // Permitido: sábado 00:00 até quarta 00:00
 if (
-    ($dia == 5) || // sábado qualquer hora
+    ($dia == 4) || // sábado qualquer hora
     ($dia == 0) || // domingo qualquer hora
     ($dia == 1) || // segunda qualquer hora
     ($dia == 2) || // terça qualquer hora
