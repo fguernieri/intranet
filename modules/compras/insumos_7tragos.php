@@ -52,7 +52,7 @@ $bloqueado = true;
 
 // Permitido: sábado 00:00 até quarta 00:00
 if (
-    ($dia == 5) || // sábado qualquer hora
+    ($dia == 4) || // sábado qualquer hora
     ($dia == 0) || // domingo qualquer hora
     ($dia == 1) || // segunda qualquer hora
     ($dia == 2) || // terça qualquer hora
@@ -139,7 +139,7 @@ if (
              class="bg-gray-700 text-white text-xs p-2 rounded" style="width:12rem">
     </div>
 
-    <form id="pedido-form" action="salvar_pedido_bardafabrica.php" method="post">
+    <form id="pedido-form" action="salvar_pedido_7tragos.php" method="post">
       <input type="hidden" name="filial"  value="<?=htmlspecialchars($filial,ENT_QUOTES)?>">
       <input type="hidden" name="usuario" value="<?=htmlspecialchars($usuario,ENT_QUOTES)?>">
 
@@ -438,7 +438,7 @@ if (
       el.style.color = '#000';
       el.querySelectorAll('*').forEach(x=> x.style.color='#000');
       html2pdf().set({
-        margin:0.5, filename:'pedido_insumos_bardafabrica.pdf',
+        margin:0.5, filename:'pedido_insumos_7tragos.pdf',
         html2canvas:{scale:2},
         jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
       }).from(el).save().then(()=>{
@@ -454,14 +454,14 @@ if (
       btn.innerText = 'Enviando...';
       const form = document.getElementById('pedido-form');
       const fd1 = new FormData(form);
-      await fetch('salvar_pedido_bardafabrica.php',{method:'POST',body:fd1});
+      await fetch('salvar_pedido_7tragos.php',{method:'POST',body:fd1});
       const fd2 = new FormData();
       ['filial','usuario'].forEach(n=> fd2.append(n, form.querySelector(`[name="${n}"]`).value));
       ['new_insumo','new_categoria','new_unidade','new_quantidade','new_observacao'].forEach(f=>{
         form.querySelectorAll(`[name="${f}[]"]`).forEach(i=> fd2.append(f+'[]', i.value));
       });
       await fetch('salvar_novos_insumos.php',{method:'POST',body:fd2});
-      window.location.href='insumos_bardafabrica.php?status=ok'; // Alterado para redirecionar para a própria página
+      window.location.href='insumos_7tragos.php?status=ok'; // Alterado para redirecionar para a própria página
     };
 
     // scroll flutuante
