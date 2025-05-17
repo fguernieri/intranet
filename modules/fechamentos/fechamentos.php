@@ -3,6 +3,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+include __DIR__ . '/../../sidebar.php';
+
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 if (isset($_GET['limpar']) && $_GET['limpar'] == '1') {
@@ -115,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['arquivo'])) {
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
   <div class="flex min-h-screen">
-        <?php include __DIR__ . '/../../sidebar.php'; ?>
 
     <main class="flex-1 p-10">
 
