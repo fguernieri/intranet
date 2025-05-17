@@ -48,11 +48,12 @@ $now = new DateTime();
 $dia = (int)$now->format('w'); // 0=domingo, 1=segunda, ..., 6=sábado
 $hora = (int)$now->format('H');
 $min  = (int)$now->format('i');
-$bloqueado = true;
+$bloqueado = false;
 
 // Permitido: sábado 00:00 até quarta 00:00
 if (
-    ($dia == 4) || // sábado qualquer hora
+    ($dia == 6) || // sábado qualquer hora
+    ($dia == 5) || // sábado qualquer hora
     ($dia == 0) || // domingo qualquer hora
     ($dia == 1) || // segunda qualquer hora
     ($dia == 2) || // terça qualquer hora
