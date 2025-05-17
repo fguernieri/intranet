@@ -3,8 +3,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include __DIR__ . '/../../sidebar.php';
-
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 if (isset($_GET['limpar']) && $_GET['limpar'] == '1') {
@@ -106,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['arquivo'])) {
     $dadosFiltrados = filtrarPorMesEProduto($dados, $mesSelecionado, $palavrasChave, $dados[0]);
 }
 ?>
-
 <!DOCTYPE html>
+
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -116,9 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['arquivo'])) {
     <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
-  <div class="flex min-h-screen">
+  <div class="flex min-h-screen w-full">
+    <aside>
+      <?php include __DIR__ . '/../../sidebar.php'; ?>
+    </aside>
 
-    <main class="flex-1 p-10">
+
+    <main class="flex-1 p-10 overflow-auto">
 
       <h1 class="text-2xl font-bold mb-6">Fechamento Bulldog</h1>
 
