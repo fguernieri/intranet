@@ -131,6 +131,13 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <button id="btn-farol" onclick="rodarFarol()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded mt-4">
         🚦 Rodar Farol
       </button>
+      <button 
+        onclick="abrirModalImportacao()"
+        class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded"
+      >
+        📥 Importar CSV Insumos
+      </button>
+
     <?php else: ?>
       <p class="text-center text-gray-400 mt-10">Nenhuma ficha encontrada com o filtro: <strong><?= htmlspecialchars($filtro) ?></strong></p>
     <?php endif; ?>
@@ -188,6 +195,22 @@ async function rodarFarol() {
   btn.disabled = false;
   btn.classList.remove('opacity-50', 'cursor-not-allowed');
 }
+
+function abrirModalImportacao() {
+  const modal = document.getElementById('modal-importacao');
+  const iframe = document.getElementById('iframe-importacao');
+  iframe.src = 'import_csv.php';
+  modal.classList.remove('hidden');
+}
+
+function fecharModalImportacao() {
+  const modal = document.getElementById('modal-importacao');
+  const iframe = document.getElementById('iframe-importacao');
+  modal.classList.add('hidden');
+  iframe.src = ''; // limpa o conteúdo
+  location.reload(); // 🔄 força o refresh da página principal
+}
+
 </script>
 
 <!-- Terminal-style funny loader -->
@@ -204,6 +227,24 @@ async function rodarFarol() {
   </div>
 </div>
 
+<!-- Modal Overlay Importação CSV-->
+<div id="modal-importacao" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center">
+  <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-3xl w-full h-[80%] flex flex-col">
+    
+    <!-- Header -->
+    <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
+      <h2 class="text-lg font-semibold">📥 Importar CSV de Insumos</h2>
+      <button onclick="fecharModalImportacao()" class="text-red-400 hover:text-red-600 text-2xl leading-none">&times;</button>
+    </div>
+    
+    <!-- Iframe -->
+    <iframe 
+      src="" 
+      id="iframe-importacao" 
+      class="flex-1 w-full border-none"
+    ></iframe>
+  </div>
+</div>
 
 </body>
 </html>
