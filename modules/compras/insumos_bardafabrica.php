@@ -1,9 +1,14 @@
 <?php
-// === modules/compras/insumos_7tragos.php ===
-// Página de pedido de insumos para a filial 7TRAGOS (totalmente standalone).
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+// === modules/compras/insumos_bardafabrica.php ===
+// Página de pedido de insumos para a filial BAR DA FABRICA (totalmente standalone).
 require_once __DIR__ . '/../../sidebar.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (empty($_SESSION['usuario_id'])) {
     header('Location: /login.php');
     exit;
@@ -36,13 +41,32 @@ $conn->close();
 
 $categorias = array_values(array_unique(array_column($insumos, 'CATEGORIA')));
 $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
+
+// BLOQUEIO POR DIA/HORA
+date_default_timezone_set('America/Sao_Paulo');
+$now = new DateTime();
+$dia = (int)$now->format('w'); // 0=domingo, 1=segunda, ..., 6=sábado
+$hora = (int)$now->format('H');
+$min  = (int)$now->format('i');
+$bloqueado = false;
+
+// Permitido: sábado 00:00 até quarta 00:00
+if (
+    ($dia == 6) || // sábado qualquer hora
+    ($dia == 0) || // domingo qualquer hora
+    ($dia == 1) || // segunda qualquer hora
+    ($dia == 2) || // terça qualquer hora
+    ($dia == 3 && $hora == 0 && $min == 0) // quarta exatamente 00:00
+) {
+    $bloqueado = false;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Pedido de Insumos — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
+  <title>PEDIDO DE COMPRA — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/assets/css/style.css" rel="stylesheet">
   <style>
@@ -58,15 +82,39 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
-
   <main class="flex-1 bg-gray-900 p-6 relative">
+    <?php if ($bloqueado): ?>
+      <div class="mx-auto mb-4 mt-2 px-4 py-2 bg-red-700 text-white text-center rounded font-semibold text-sm shadow w-fit max-w-full">
+        PREENCHIMENTO SOMENTE DAS 00:00 DE SÁBADO ATÉ AS 09:00 DE SEGUNDA.
+      </div>
+    <?php endif; ?>
+
     <button onclick="location.href='select_filial.php'"
             class="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded">
       ← Outra filial
     </button>
 
+    <header class="mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold">
+        Bem-vindo, <?= htmlspecialchars($usuario); ?>
+      </h1>
+      <p class="text-gray-400 text-sm">
+        <?php
+          $hoje = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+          $fmt = new IntlDateFormatter(
+            'pt_BR',
+            IntlDateFormatter::FULL,
+            IntlDateFormatter::NONE,
+            'America/Sao_Paulo',
+            IntlDateFormatter::GREGORIAN
+          );
+          echo $fmt->format($hoje);
+        ?>
+      </p>
+    </header>
+
     <h1 class="text-3xl font-bold text-yellow-400 text-center mb-6">
-      Pedido de Insumos — <?= htmlspecialchars($filial, ENT_QUOTES) ?>
+      PEDIDO DE COMPRA — <?= htmlspecialchars($filial, ENT_QUOTES) ?>
     </h1>
 
     <!-- filtros + pesquisa -->
@@ -101,9 +149,9 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
           <thead class="bg-gray-700 text-yellow-400">
             <tr>
               <th class="p-2 text-left">Insumo</th>
-              <th class="p-2 text-left">Categoria</th>
-              <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
+              <th class="p-2 text-left">Unidade</th>
+              <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
             </tr>
           </thead>
@@ -115,8 +163,6 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
             ?>
             <tr class="hover:bg-gray-700" data-cat="<?=$cat?>">
               <td class="p-2"><?=$ins?></td>
-              <td class="p-2"><?=$cat?></td>
-              <td class="p-2"><?=$uni?></td>
               <td class="p-2 text-center">
                 <div class="inline-flex items-center space-x-1">
                   <div class="qty-btn decrement">−</div>
@@ -128,6 +174,8 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
                   <div class="qty-btn increment">+</div>
                 </div>
               </td>
+              <td class="p-2"><?=$uni?></td>
+              <td class="p-2"><?=$cat?></td>
               <td class="p-2">
                 <input type="text" name="observacao[]" maxlength="200"
                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
@@ -149,9 +197,9 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
           <thead class="bg-gray-700 text-yellow-400">
             <tr>
               <th class="p-2 text-left">Insumo</th>
-              <th class="p-2 text-left">Categoria</th>
-              <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
+              <th class="p-2 text-left">Unidade</th>
+              <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
               <th class="p-2 text-center">Excluir</th>
             </tr>
@@ -162,14 +210,13 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
                 <input type="text" name="new_insumo[]" required
                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
               </td>
-              <td class="p-2">
-                <select name="new_categoria[]" required
-                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
-                  <option value="">Selecione</option>
-                  <?php foreach ($categorias as $cat): ?>
-                    <option value="<?=htmlspecialchars($cat,ENT_QUOTES)?>"><?=htmlspecialchars($cat,ENT_QUOTES)?></option>
-                  <?php endforeach; ?>
-                </select>
+              <td class="p-2 text-center">
+                <div class="inline-flex items-center space-x-1">
+                  <div class="qty-btn decrement">−</div>
+                  <input type="number" name="new_quantidade[]" min="0" step="0.01" value="0" required
+                         class="qtd-input bg-gray-600 text-white text-xs p-1 rounded">
+                  <div class="qty-btn increment">+</div>
+                </div>
               </td>
               <td class="p-2">
                 <select name="new_unidade[]" required
@@ -180,13 +227,14 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
                   <?php endforeach; ?>
                 </select>
               </td>
-              <td class="p-2 text-center">
-                <div class="inline-flex items-center space-x-1">
-                  <div class="qty-btn decrement">−</div>
-                  <input type="number" name="new_quantidade[]" min="0" step="0.01" value="0" required
-                         class="qtd-input bg-gray-600 text-white text-xs p-1 rounded">
-                  <div class="qty-btn increment">+</div>
-                </div>
+              <td class="p-2">
+                <select name="new_categoria[]" required
+                        class="w-full bg-gray-600 text-white text-xs p-2 rounded">
+                  <option value="">Selecione</option>
+                  <?php foreach ($categorias as $cat): ?>
+                    <option value="<?=htmlspecialchars($cat,ENT_QUOTES)?>"><?=htmlspecialchars($cat,ENT_QUOTES)?></option>
+                  <?php endforeach; ?>
+                </select>
               </td>
               <td class="p-2">
                 <input type="text" name="new_observacao[]" maxlength="200"
@@ -215,8 +263,9 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
             <thead class="bg-gray-700 text-yellow-400">
               <tr>
                 <th class="p-2 text-left">Insumo</th>
-                <th class="p-2 text-left">Unidade</th>
                 <th class="p-2 text-center">Qtde</th>
+                <th class="p-2 text-left">Unidade</th>
+                <th class="p-2 text-left">Categoria</th>
                 <th class="p-2 text-left">Observação</th>
               </tr>
             </thead>
@@ -239,12 +288,41 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
   <script>
+    // BLOQUEIO DE CAMPOS (front-end)
+    const bloqueado = <?php echo $bloqueado ? 'true' : 'false'; ?>;
+    document.addEventListener('DOMContentLoaded', ()=>{
+      if(bloqueado){
+        // Desabilita todos os campos do formulário
+        document.querySelectorAll('#pedido-form input, #pedido-form select, #pedido-form textarea, #pedido-form button').forEach(el=>{
+          el.disabled = true;
+        });
+        // Reabilita os botões de scroll
+        document.getElementById('btn-scroll-top').disabled = false;
+        document.getElementById('btn-scroll-bottom').disabled = false;
+      }
+    });
+
     // filtro + pesquisa
     const rows = Array.from(document.querySelectorAll('#insumo-body tr'));
-    document.getElementById('btn-filter').onclick = e => {
-      e.preventDefault();
-      document.getElementById('dropdown-menu').classList.toggle('hidden');
-    };
+    const btnFilter = document.getElementById('btn-filter');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+
+    // Troca clique por hover
+    let dropdownTimeout;
+    function showDropdown() {
+      clearTimeout(dropdownTimeout);
+      dropdownMenu.classList.remove('hidden');
+    }
+    function hideDropdown() {
+      dropdownTimeout = setTimeout(() => {
+        dropdownMenu.classList.add('hidden');
+      }, 150); // pequeno delay para evitar sumir ao mover rápido
+    }
+    btnFilter.addEventListener('mouseenter', showDropdown);
+    btnFilter.addEventListener('mouseleave', hideDropdown);
+    dropdownMenu.addEventListener('mouseenter', showDropdown);
+    dropdownMenu.addEventListener('mouseleave', hideDropdown);
+
     document.querySelectorAll('.cat-checkbox').forEach(chk => chk.onchange = filterRows);
     document.getElementById('search-input').oninput = filterRows;
     function filterRows() {
@@ -252,7 +330,7 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
       const term = document.getElementById('search-input').value.trim().toLowerCase();
       rows.forEach(r=>{
         const catOK = !cats.length || cats.includes(r.dataset.cat);
-        const txtOK = !term || r.children[0].textContent.toLowerCase().includes(term);
+        const txtOK = !term || r.children[0].textContent.toLowerCase().includes(term); // Insumo é o primeiro filho (children[0])
         r.style.display = (catOK && txtOK) ? '' : 'none';
       });
     }
@@ -260,13 +338,15 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
     // +/- buttons
     function attachQtyButtons(container=document) {
       container.querySelectorAll('.decrement').forEach(btn=>{
-        btn.onclick = ()=>{ 
-          const inp = btn.parentElement.querySelector('input[type=number]'); 
+        btn.onclick = ()=>{
+          if (bloqueado) return; // impede decremento se bloqueado
+          const inp = btn.parentElement.querySelector('input[type=number]');
           let v = parseFloat(inp.value)||0; inp.value = Math.max(0,v-1).toFixed(2);
         };
       });
       container.querySelectorAll('.increment').forEach(btn=>{
         btn.onclick = ()=>{
+          if (bloqueado) return; // impede incremento se bloqueado
           const inp = btn.parentElement.querySelector('input[type=number]');
           let v = parseFloat(inp.value)||0; inp.value = (v+1).toFixed(2);
         };
@@ -305,20 +385,24 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
       document.querySelectorAll('#insumo-body tr').forEach(r=>{
         const q = parseFloat(r.querySelector('input[name="quantidade[]"]').value);
         if(q>0) lines.push({
-          insumo: r.children[0].textContent.trim(),
-          unidade: r.children[2].textContent.trim(),
-          quantidade: q.toFixed(2),
-          obs: r.querySelector('input[name="observacao[]"]').value.trim()
+          insumo:     r.children[0].textContent.trim(), // Insumo
+          quantidade: q.toFixed(2),                     // Quantidade
+          unidade:    r.children[2].textContent.trim(), // Unidade
+          categoria:  r.children[3].textContent.trim(), // Categoria
+          obs:        r.querySelector('input[name="observacao[]"]').value.trim()
         });
       });
       // novos
       document.querySelectorAll('#new-items-body tr').forEach(r=>{
-        const ins=r.querySelector('input[name="new_insumo[]"]').value.trim();
-        const q=parseFloat(r.querySelector('input[name="new_quantidade[]"]').value);
-        const uni=r.querySelector('select[name="new_unidade[]"]').value;
+        const ins = r.querySelector('input[name="new_insumo[]"]').value.trim();
+        const q   = parseFloat(r.querySelector('input[name="new_quantidade[]"]').value);
+        const uni = r.querySelector('select[name="new_unidade[]"]').value;
+        const cat = r.querySelector('select[name="new_categoria[]"]').value;
         if(ins&&q>0) lines.push({
-          insumo: ins, unidade: uni,
+          insumo: ins,
           quantidade: q.toFixed(2),
+          unidade: uni,
+          categoria: cat,
           obs: r.querySelector('input[name="new_observacao[]"]').value.trim()
         });
       });
@@ -329,12 +413,13 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
       }
       lines.forEach(item=>{
         const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td class="p-2 text-left">${item.insumo}</td>
-          <td class="p-2 text-left">${item.unidade}</td>
-          <td class="p-2 text-center">${item.quantidade}</td>
-          <td class="p-2 text-left">${item.obs}</td>
-        `;
+        tr.innerHTML = `
+  <td class="p-2 text-left">${item.insumo}</td>
+  <td class="p-2 text-center">${item.quantidade}</td>
+  <td class="p-2 text-left">${item.unidade}</td>
+  <td class="p-2 text-left">${item.categoria}</td>
+  <td class="p-2 text-left">${item.obs || ''}</td>
+`;
         previewBody.appendChild(tr);
       });
       document.getElementById('preview-modal').classList.remove('hidden');
@@ -364,6 +449,9 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
 
     // envia pedido existente + novos via fetch e redireciona
     document.getElementById('confirm-preview').onclick = async ()=>{
+      const btn = document.getElementById('confirm-preview');
+      btn.disabled = true;
+      btn.innerText = 'Enviando...';
       const form = document.getElementById('pedido-form');
       const fd1 = new FormData(form);
       await fetch('salvar_pedido_bardafabrica.php',{method:'POST',body:fd1});
@@ -373,7 +461,7 @@ $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
         form.querySelectorAll(`[name="${f}[]"]`).forEach(i=> fd2.append(f+'[]', i.value));
       });
       await fetch('salvar_novos_insumos.php',{method:'POST',body:fd2});
-      window.location.href='insumos_7tragos.php?status=ok';
+      window.location.href='insumos_bardafabrica.php?status=ok'; // Alterado para redirecionar para a própria página
     };
 
     // scroll flutuante

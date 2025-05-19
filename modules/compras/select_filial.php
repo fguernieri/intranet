@@ -38,6 +38,8 @@ function normalize($s) {
 $map = [
     '7TRAGOS'        => 'insumos_7tragos.php',
     'BAR DA FABRICA' => 'insumos_bardafabrica.php',
+    'WE ARE BASTARDS' => 'insumos_wearebastards.php',
+    'CROSS' => 'insumos_cross.php',
     // caso tenha mais filiais personalize aqui...
 ];
 ?>
@@ -58,34 +60,50 @@ $map = [
 
   <main class="flex-1 p-6 bg-gray-900">
 
-    <h1 class="text-3xl font-bold text-yellow-400 text-center mb-8">
-      Selecione a Filial
+  <header class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold">
+      Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome'] ?? 'Usuário'); ?>
     </h1>
-
-    <div class="max-w-md mx-auto flex flex-wrap gap-2 justify-center">
-      <?php foreach ($filiais as $row):
-        $f    = $row['FILIAL'];
-        $norm = normalize($f);
-        // escolhe o destino ou usa o insumos.php genérico
-        $target = $map[$norm] ?? 'insumos.php';
-        // classes base (mesmo tamanho)
-        $base = 'text-sm font-semibold py-2 px-4 rounded shadow';
-        // cores específicas
-        if ($norm === '7TRAGOS') {
-            $cls = 'bg-black hover:bg-gray-800 text-white';
-        } elseif ($norm === 'BAR DA FABRICA') {
-            $cls = 'bg-blue-800 hover:bg-blue-900 text-white';
-        } else {
-            $cls = 'bg-yellow-500 hover:bg-yellow-600 text-gray-900';
-        }
+    <p class="text-gray-400 text-sm">
+      <?php
+        $hoje = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+        $fmt = new IntlDateFormatter(
+          'pt_BR',
+          IntlDateFormatter::FULL,
+          IntlDateFormatter::NONE,
+          'America/Sao_Paulo',
+          IntlDateFormatter::GREGORIAN
+        );
+        echo $fmt->format($hoje);
       ?>
-        <a href="<?= htmlspecialchars($target) ?>"
-           class="<?= "$cls $base" ?>"
-        ><?= htmlspecialchars($f) ?></a>
-      <?php endforeach; ?>
-    </div>
+    </p>
+  </header>
 
-  </main>
+  <h3 class="text-xl font-bold text-yellow-400 text-center mb-8">
+    Selecione a Filial
+  </h3>
+
+  <div class="max-w-md mx-auto flex flex-wrap gap-2 justify-center">
+    <?php foreach ($filiais as $row):
+      $f    = $row['FILIAL'];
+      $norm = normalize($f);
+      $target = $map[$norm] ?? 'insumos.php';
+      $base = 'text-sm font-semibold py-2 px-4 rounded shadow';
+      if ($norm === '7TRAGOS') {
+          $cls = 'bg-black hover:bg-gray-800 text-white';
+      } elseif ($norm === 'BAR DA FABRICA') {
+          $cls = 'bg-blue-800 hover:bg-blue-900 text-white';
+      } else {
+          $cls = 'bg-yellow-500 hover:bg-yellow-600 text-gray-900';
+      }
+    ?>
+      <a href="<?= htmlspecialchars($target) ?>"
+         class="<?= "$cls $base" ?>"
+      ><?= htmlspecialchars($f) ?></a>
+    <?php endforeach; ?>
+  </div>
+
+</main>
 
   <!-- Botão "Exportar Pedidos" fixo e menor -->
   <div class="fixed bottom-4 right-4">

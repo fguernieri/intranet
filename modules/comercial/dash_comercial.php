@@ -102,6 +102,25 @@ $pedidosPorDia    = [];
 $pedidosPorEstado = [];
 $clientesPorV     = [];
 
+// Buscar metas de faturamento
+require_once __DIR__ . '/../../config/db.php'; // conexão de metas
+$pdoMetas = $pdo;
+
+$anoMeta = date('Y', strtotime($startDate));
+$mesMeta = date('m', strtotime($startDate));
+
+$sql_meta = "
+  SELECT v.nome, mv.valor
+  FROM metas_valores mv
+  JOIN metas_tipos mt ON mv.id_tipo = mt.id
+  JOIN vendedores v ON v.id = mv.id_vendedor
+  WHERE mv.ano = ? AND mv.mes = ? AND mt.slug = 'faturamento'
+";
+$stmt_meta = $pdoMetas->prepare($sql_meta);
+$stmt_meta->execute([$anoMeta, $mesMeta]);
+$metas = $stmt_meta->fetchAll(PDO::FETCH_KEY_PAIR);
+
+
 foreach ($pedidos as $p) {
     $ven = $p['Vendedor'];
     $fp  = $p['FormaPagamento'] ?? 'N/A';
@@ -122,6 +141,26 @@ foreach ($pedidos as $p) {
         }
     }
 }
+
+
+$metasV = [];
+foreach (array_keys($porVendedor) as $vendedor) {
+  $metasV[$vendedor] = isset($metas[$vendedor]) ? (float)$metas[$vendedor] : 0;
+}
+
+// Calcula somatório de meta
+$metaFaturamentoTotal = 0;
+foreach ($filteredVend as $vendedor) {
+    if (isset($metasV[$vendedor])) {
+        $metaFaturamentoTotal += $metasV[$vendedor];
+    }
+}
+
+// Calcula % atingido da meta
+$percentualMeta = $metaFaturamentoTotal > 0
+    ? ($totalFaturado / $metaFaturamentoTotal) * 100
+    : 0;
+
 $clientesCount = array_map('count', $clientesPorV);
 
 $sql = "SELECT MAX(data_hora) AS UltimaAtualizacao FROM fAtualizacoes";
@@ -167,12 +206,20 @@ $UltimaAtualizacao = $stmt->fetchColumn();
       </form>
       
       <!-- Cards de resumo -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
         <div class="card1"><p>💵 Total Faturado</p><p>R$ <?= number_format($totalFaturado,2,',','.') ?></p></div>
+        <div class="card1">
+          <p>🎯 Meta de Faturamento</p>
+          <p>
+            <span class="text-lg font-bold text-white">R$ <?= number_format($metaFaturamentoTotal/ 1000, 0, '', '') . 'k' ?></span>
+            <span class="text-sm text-gray-400 ml-1">(<?= number_format($percentualMeta, 1, ',', '.') ?>%)</span>
+          </p>
+        </div>        
         <div class="card1"><p>📦 Total de Pedidos</p><p><?= $totalPedidos ?></p></div>
         <div class="card1"><p>🏪 Clientes Únicos</p><p><?= $totalClientes ?></p></div>
         <div class="card1"><p>🌎 Estados com Pedido</p><p><?= $totalEstados ?></p></div>
-      </div>
+      </div>      
+      
       <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <?php 
@@ -190,7 +237,14 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           foreach ($charts as $id => $label): ?>
             <div class="rounded-xl bg-white/5 p-4 shadow-md">
               <div class="flex justify-between items-center mb-2">
-                <p class="font-medium text-white"><?= $label ?></p>
+                <div class="flex justify-between items-center">
+                  <p class="font-medium text-white p-2"><?= $label ?></p>
+                  <label class="flex items-center space-x-2">
+                    <input type="checkbox" class="form-checkbox toggle-meta" data-target="<?= $id ?>" />
+                    <span class="text-sm">Exibir metas</span>
+                  </label>
+                </div>
+
                 <?php if (in_array($id, $sortableCharts)): ?>
                   <select 
                     data-target="<?= $id ?>" 
@@ -207,9 +261,53 @@ $UltimaAtualizacao = $stmt->fetchColumn();
             </div>
         <?php endforeach; ?>
       </div>
+      
+          <!-- Tabela de Pedidos com Ordenação e Seção Retrátil -->
+    <section class="mt-10">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-semibold text-yellow-400 text-center w-full">📦 Tabela de Pedidos</h3>
+        <button onclick="toggleTabelaPedidos()" class="ml-4 text-sm bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-3 py-1 rounded">
+          Mostrar/Ocultar
+        </button>
+      </div>
+
+      <div id="tabelaPedidosWrapper" class="overflow-auto rounded-lg shadow">
+        <table class="sortable min-w-full divide-y divide-gray-700 bg-gray-800 text-white text-sm">
+          <thead class="bg-gray-700">
+            <tr>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(0)">📦 Pedido</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(1)">👤 Cliente</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(2)">🗺 Estado</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(3)">🧑‍💼 Vendedor</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(4)">📅 Data Faturamento</th>
+              <th class="px-4 py-2 cursor-pointer" onclick="sortTable(5)">💰 Valor</th>
+            </tr>
+          </thead>
+          <tbody data-sort-dir="asc">
+            <?php foreach ($pedidos as $row): ?>
+            <tr class="hover:bg-gray-700">
+              <td class="px-4 py-2"><?= $row['NumeroPedido'] ?? '' ?></td>
+              <td class="px-4 py-2"><?= $row['CodCliente'] ?? '' ?></td>
+              <td class="px-4 py-2"><?= htmlspecialchars($row['Estado'] ?? '') ?></td>
+              <td class="px-4 py-2"><?= htmlspecialchars($row['Vendedor'] ?? '') ?></td>
+              <td class="px-4 py-2">
+                <?= $row['DataFaturamento'] ? htmlspecialchars(date('d/m/Y', strtotime($row['DataFaturamento']))) : '' ?>
+              </td>
+              <td class="px-4 py-2">R$ <?= isset($row['ValorFaturado']) ? number_format((float)$row['ValorFaturado'], 2, ',', '.') : '0,00' ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+      
       <script>
         // 💸 Arredondamento para valores inteiros
         const arredondar = arr => arr.map(v => parseFloat(parseFloat(v).toFixed(0)));
+        
+        // metas
+        const metasVendedor = <?= json_encode($metasV) ?>;
 
         // 📊 Mapa com dados dos gráficos categóricos
         const chartDataMap = {
@@ -258,45 +356,34 @@ $UltimaAtualizacao = $stmt->fetchColumn();
         };
 
         // 📈 Renderiza qualquer gráfico
-        function renderApex(selector, options) {
+        function renderApex(selector, options, metas = null, toggle = null) {
           const el = document.querySelector(selector);
-          if (el) {
-            el.innerHTML = ''; // limpar antes de re-renderizar
-            new ApexCharts(el, options).render();
-          }
-        }
+          if (!el) return;
 
-        // 🔁 Ordena e renderiza gráficos com eixo X categórico
-        function sortAndRenderChart(chartId, sortBy) {
-          const { labels, values, type } = chartDataMap[chartId];
-          let combined = labels.map((label, i) => ({ label, value: values[i] }));
+          const series = [{ name: 'Faturamento', data: options.series }];
 
-          switch (sortBy) {
-            case 'asc':
-              combined.sort((a, b) => a.label.localeCompare(b.label));
-              break;
-            case 'desc':
-              combined.sort((a, b) => b.label.localeCompare(a.label));
-              break;
-            case 'value_asc':
-              combined.sort((a, b) => a.value - b.value);
-              break;
-            case 'value_desc':
-              combined.sort((a, b) => b.value - a.value);
-              break;
-            default:
-              // ordem original
-              combined = labels.map((label, i) => ({ label, value: values[i] }));
+          if (metas && toggle?.checked) {
+            series.push({ name: 'Meta', data: metas });
           }
 
-          const sortedLabels = combined.map(x => x.label);
-          const sortedValues = combined.map(x => x.value);
-
-          renderApex(`#${chartId}`, {
-            chart: { type, height: 300, background: 'transparent' },
+          el.innerHTML = '';
+          new ApexCharts(el, {
+            chart: {
+              type: options.type,
+              height: 300,
+              background: 'transparent'
+            },
             theme: { mode: 'dark' },
-            series: [{ name: 'Valor', data: sortedValues }],
-            xaxis: { categories: sortedLabels },
+            series,
+            xaxis: { categories: options.labels },
+            plotOptions: {
+              bar: {
+                horizontal: false,
+                columnWidth: '40%',
+                dataLabels: { position: 'top' }
+              }
+            },
+            dataLabels: { enabled: false },
             tooltip: {
               y: {
                 formatter: val => new Intl.NumberFormat('pt-BR', {
@@ -305,8 +392,41 @@ $UltimaAtualizacao = $stmt->fetchColumn();
                 }).format(val)
               }
             }
-          });
+          }).render();
         }
+
+        function sortAndRenderChart(chartId, sortBy) {
+          const { labels, values, type } = chartDataMap[chartId];
+          let combined = labels.map((label, i) => ({ label, value: values[i] }));
+
+          switch (sortBy) {
+            case 'asc':        combined.sort((a, b) => a.label.localeCompare(b.label)); break;
+            case 'desc':       combined.sort((a, b) => b.label.localeCompare(a.label)); break;
+            case 'value_asc':  combined.sort((a, b) => a.value - b.value); break;
+            case 'value_desc': combined.sort((a, b) => b.value - a.value); break;
+          }
+
+          const sortedLabels = combined.map(x => x.label);
+          const sortedValues = combined.map(x => x.value);
+
+          const toggle = document.querySelector(`.toggle-meta[data-target="${chartId}"]`);
+          let metas = null;
+
+          if (chartId === 'chartVendedor') {
+            const nomeCompletoOriginal = Object.keys(metasVendedor); // eg. 'HAANY MEDEIROS'
+            metas = sortedLabels.map(primeiroNome => {
+              const fullName = nomeCompletoOriginal.find(n => n.startsWith(primeiroNome)) || '';
+              return metasVendedor[fullName] ?? 0;
+            });
+          }
+
+          renderApex(`#${chartId}`, {
+            type,
+            labels: sortedLabels,
+            series: sortedValues
+          }, metas, toggle);
+        }
+
 
         // 🚀 Inicializa gráficos ao carregar a página
         window.addEventListener('load', () => {
@@ -337,17 +457,69 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           });
         });
 
-        // 🎯 Escuta mudanças em todos os dropdowns
         document.addEventListener('DOMContentLoaded', () => {
-          document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
-            dropdown.addEventListener('change', e => {
-              const chartId = e.target.dataset.target;
-              const sortBy = e.target.value;
-              sortAndRenderChart(chartId, sortBy);
-            });
+        // Dropdowns de ordenação
+        document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
+          dropdown.addEventListener('change', e => {
+            const chartId = e.target.dataset.target;
+            const sortBy = e.target.value;
+            sortAndRenderChart(chartId, sortBy);
           });
         });
+
+        // Checkboxes de meta
+        document.querySelectorAll('.toggle-meta').forEach(toggle => {
+          toggle.addEventListener('change', e => {
+            const chartId = e.target.dataset.target;
+            const sortSelect = document.querySelector(`.sort-dropdown[data-target="${chartId}"]`);
+            const currentSort = sortSelect?.value || 'default';
+            sortAndRenderChart(chartId, currentSort);
+          });
+        });
+      });
+      
+      // Scripts Tabela pedidos
+      function sortTable(col) {
+        const table = document.querySelector("table.sortable tbody");
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const isNumeric = col === 5 || col === 0;
+
+        const sortedRows = rows.sort((a, b) => {
+          const aText = a.children[col].innerText.trim();
+          const bText = b.children[col].innerText.trim();
+
+          if (isNumeric) {
+            const normalize = str => parseFloat(
+              str.replace(/[^\d,.-]/g, '') // remove "R$", espaços, etc.
+                 .replace(/\./g, '')       // remove ponto de milhar
+                 .replace(',', '.')        // troca vírgula decimal por ponto
+            ) || 0;
+
+            const aNum = normalize(aText);
+            const bNum = normalize(bText);
+            return aNum - bNum;
+            
+          } else if (col === 4) {
+            return new Date(aText.split('/').reverse().join('-')) - new Date(bText.split('/').reverse().join('-'));
+          } else {
+            return aText.localeCompare(bText);
+          }
+        });
+
+        const direction = table.getAttribute("data-sort-dir") === "asc" ? "desc" : "asc";
+        table.setAttribute("data-sort-dir", direction);
+        if (direction === "desc") sortedRows.reverse();
+
+        rows.forEach(row => table.removeChild(row));
+        sortedRows.forEach(row => table.appendChild(row));
+      }
+
+      function toggleTabelaPedidos() {
+        const el = document.getElementById("tabelaPedidosWrapper");
+        el.classList.toggle("hidden");
+      }
     </script>
+    
 
 </body>
 </html>
