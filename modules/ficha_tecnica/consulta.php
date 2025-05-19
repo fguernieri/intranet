@@ -101,7 +101,16 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($fichas as $ficha): ?>
               <tr class="hover:bg-gray-700">
                 <td class="p-2">
-                  <div id="farol-<?= $ficha['codigo_cloudify'] ?>" class="w-4 h-4 rounded-full bg-gray-400 mx-auto"></div>
+                  <?php
+                    $cores_farol = [
+                      'cinza'    => 'bg-gray-400',
+                      'verde'    => 'bg-green-500',
+                      'amarelo'  => 'bg-yellow-400',
+                      'vermelho' => 'bg-red-500',
+                    ];
+                    $cor_classe = $cores_farol[$ficha['farol']] ?? 'bg-gray-400'; // default: cinza
+                  ?>
+                  <div id="farol-<?= $ficha['codigo_cloudify'] ?>" class="w-4 h-4 rounded-full mx-auto <?= $cor_classe ?>"></div>
                 </td>
                 <td class="p-2"><?= $ficha['codigo_cloudify'] ?></td>
                 <td class="p-2"><?= htmlspecialchars($ficha['nome_prato']) ?></td>

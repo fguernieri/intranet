@@ -65,7 +65,15 @@ if ($codigo !== '') {
 
         $status = $diferencas ? 'amarelo' : 'verde';
     }
-}
+    
+    // Atualizar o status do farol na tabela ficha_tecnica
+    $update_sql = "UPDATE ficha_tecnica SET farol = :farol WHERE codigo_cloudify = :codigo";
+    $update_stmt = $pdo->prepare($update_sql);
+    $update_stmt->execute([
+        ':farol' => $status,
+        ':codigo' => $codigo
+    ]);
 
+}
 echo json_encode(['status' => $status]);
 exit;
