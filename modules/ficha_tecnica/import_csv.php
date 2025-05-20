@@ -92,6 +92,7 @@ if (count($header) !== count($dbColumns)) {
 
 $proc = $up = $in = $err = 0;
 $line = 1;
+$csvMap = [];
 
 while (($cells = fgetcsv($handle, 0, "\t", '"')) !== false) {
     $line++;
@@ -116,6 +117,10 @@ while (($cells = fgetcsv($handle, 0, "\t", '"')) !== false) {
             $params[paramName($col)] = ($val === '' ? null : $val);
         }
     }
+
+    $codRef     = $params[paramName('Cód. ref.')];
+    $codInsumo  = $params[paramName('Cód. ref..1')];
+    $csvMap[$codRef][] = $codInsumo;
 
     $chkStmt->execute([
         paramName($keyCols[0]) => $params[paramName($keyCols[0])],
@@ -143,6 +148,28 @@ while (($cells = fgetcsv($handle, 0, "\t", '"')) !== false) {
 
 fclose($handle);
 
+// === REMOÇÃO DE INSUMOS QUE NÃO ESTÃO NO CSV ===
+foreach ($csvMap as $codRef => $insumosCsv) {
+    $placeholders = implode(',', array_fill(0, count($insumosCsv), '?'));
+    $params = $insumosCsv;
+    array_unshift($params, $codRef); // Primeiro parâmetro: Cód. ref.
+
+    $sqlDelete = "
+        DELETE FROM `$table`
+        WHERE `Cód. ref.` = ?
+          AND `Cód. ref..1` NOT IN ($placeholders)
+    ";
+
+    try {
+        $stmtDel = $pdo_dw->prepare($sqlDelete);
+        $stmtDel->execute($params);
+        $delCount = $stmtDel->rowCount();
+        file_put_contents($logFile, "Cód. ref. $codRef: $delCount registros excluídos por ausência no CSV\n", FILE_APPEND | LOCK_EX);
+    } catch (PDOException $e) {
+        file_put_contents($logFile, "Erro ao excluir do Cód. ref. $codRef: {$e->getMessage()}\n", FILE_APPEND | LOCK_EX);
+    }
+}
+
 file_put_contents($logFile, date('Y-m-d H:i:s')." - Fim: proc=$proc; upd=$up; ins=$in; err=$err\n", FILE_APPEND | LOCK_EX);
 
 ?>
@@ -154,7 +181,7 @@ file_put_contents($logFile, date('Y-m-d H:i:s')." - Fim: proc=$proc; upd=$up; in
 </head>
 <body>
   <h1>✅ Importação Finalizada</h1>
-  <p>Processados: <?= $proc ?> | Atualizados: <?= $up ?> | Inseridos: <?= $in ?> | Erros: <?= $err ?></p>
+  <p>Processados: <?= $proc ?> | Atualizados: <?= $up ?> | Inseridos: <?= $in ?> | Deletados: <?= $delCount ?> | Erros: <?= $err ?></p>
   <p>Log: <code><?= htmlspecialchars($logFile) ?></code></p>
   <p><a href="<?= $_SERVER['PHP_SELF'] ?>">📁 Importar outro CSV</a></p>
 </body>
