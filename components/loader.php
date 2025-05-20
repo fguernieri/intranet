@@ -43,7 +43,7 @@
 
   function ativarLoaderImport() {
     const stop = mostrarLoader();
-    setTimeout(stop, 15000); // fallback
+    setTimeout(stop, 150000); // fallback
     return true;
   }
 
