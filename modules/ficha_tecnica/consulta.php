@@ -137,6 +137,12 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
       >
         📥 Importar CSV Insumos
       </button>
+      <button 
+        onclick="abrirImportProdutos()"
+        class="bg-orange-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded"
+      >
+        📥 Importar XLSX Produtos
+      </button>
 
     <?php else: ?>
       <p class="text-center text-gray-400 mt-10">Nenhuma ficha encontrada com o filtro: <strong><?= htmlspecialchars($filtro) ?></strong></p>
@@ -211,6 +217,22 @@ function fecharModalImportacao() {
   location.reload(); // 🔄 força o refresh da página principal
 }
 
+function abrirImportProdutos() {
+  const modal = document.getElementById('modal-importacao');
+  const iframe = document.getElementById('iframe-importacao');
+  iframe.src = 'import_produtos.php';
+  modal.classList.remove('hidden');
+}
+
+function fecharImportProdutos() {
+  const modal = document.getElementById('modal-importacao');
+  const iframe = document.getElementById('iframe-importacao');
+  modal.classList.add('hidden');
+  iframe.src = ''; // limpa o conteúdo
+  location.reload(); // 🔄 força o refresh da página principal
+}
+
+
 </script>
 
 <!-- Terminal-style funny loader -->
@@ -227,13 +249,13 @@ function fecharModalImportacao() {
   </div>
 </div>
 
-<!-- Modal Overlay Importação CSV-->
+<!-- Modal Overlay Importação -->
 <div id="modal-importacao" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center">
   <div class="bg-white rounded-lg overflow-hidden shadow-lg max-w-3xl w-full h-[80%] flex flex-col">
     
     <!-- Header -->
     <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
-      <h2 class="text-lg font-semibold">📥 Importar CSV de Insumos</h2>
+      <h2 class="text-lg font-semibold">📥 Importar Dados</h2>
       <button onclick="fecharModalImportacao()" class="text-red-400 hover:text-red-600 text-2xl leading-none">&times;</button>
     </div>
     
