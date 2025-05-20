@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/config/session_config.php';
+
 session_start();
 
 // 1) Inclui a conexão principal e configurações
