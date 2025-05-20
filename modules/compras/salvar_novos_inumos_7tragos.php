@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // 2) Filial: primeiro tenta o POST, senão session
-$filial  = $_POST['7TRAGOS'] ?? ($_SESSION['filial'] ?? '');
+$filial  = $_POST['filial'] ?? ($_SESSION['filial'] ?? '');
 $usuario = $_SESSION['usuario_nome'] ?? '';
 
 if (! $filial) {

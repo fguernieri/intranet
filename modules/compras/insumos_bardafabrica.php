@@ -452,16 +452,81 @@ if (
       const btn = document.getElementById('confirm-preview');
       btn.disabled = true;
       btn.innerText = 'Enviando...';
+
       const form = document.getElementById('pedido-form');
-      const fd1 = new FormData(form);
-      await fetch('salvar_pedido_bardafabrica.php',{method:'POST',body:fd1});
-      const fd2 = new FormData();
-      ['filial','usuario'].forEach(n=> fd2.append(n, form.querySelector(`[name="${n}"]`).value));
-      ['new_insumo','new_categoria','new_unidade','new_quantidade','new_observacao'].forEach(f=>{
-        form.querySelectorAll(`[name="${f}[]"]`).forEach(i=> fd2.append(f+'[]', i.value));
+      const todosOsItens = [];
+
+      // Coleta itens existentes
+      document.querySelectorAll('#insumo-body tr').forEach(row => {
+        const quantidadeInput = row.querySelector('input[name="quantidade[]"]');
+        const quantidade = parseFloat(quantidadeInput.value);
+
+        if (quantidade > 0) {
+          todosOsItens.push({
+            insumo: row.querySelector('input[name="insumo[]"]').value,
+            categoria: row.querySelector('input[name="categoria[]"]').value,
+            unidade: row.querySelector('input[name="unidade[]"]').value,
+            quantidade: quantidade.toFixed(2),
+            observacao: row.querySelector('input[name="observacao[]"]').value.trim()
+          });
+        }
       });
-      await fetch('salvar_novos_insumos.php',{method:'POST',body:fd2});
-      window.location.href='insumos_bardafabrica.php?status=ok'; // Alterado para redirecionar para a própria página
+
+      // Coleta novos itens
+      document.querySelectorAll('#new-items-body tr').forEach(row => {
+        const insumoInput = row.querySelector('input[name="new_insumo[]"]');
+        const quantidadeInput = row.querySelector('input[name="new_quantidade[]"]');
+        
+        if (insumoInput && quantidadeInput) { // Garante que os elementos existem
+            const insumo = insumoInput.value.trim();
+            const quantidade = parseFloat(quantidadeInput.value);
+
+            if (insumo && quantidade > 0) {
+                todosOsItens.push({
+                    insumo: insumo,
+                    categoria: row.querySelector('select[name="new_categoria[]"]').value,
+                    unidade: row.querySelector('select[name="new_unidade[]"]').value,
+                    quantidade: quantidade.toFixed(2),
+                    observacao: row.querySelector('input[name="new_observacao[]"]').value.trim()
+                });
+            }
+        }
+      });
+
+      if (todosOsItens.length === 0) {
+        alert('Nenhum item com quantidade maior que zero para enviar.');
+        btn.disabled = false;
+        btn.innerText = 'Confirmar pedido';
+        document.getElementById('preview-modal').classList.add('hidden');
+        document.getElementById('preview-modal').classList.remove('flex');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('itensJson', JSON.stringify(todosOsItens));
+      // Os campos 'filial' e 'usuario' são pegos no PHP via sessão/hardcoded,
+      // então não é estritamente necessário enviá-los aqui se essa lógica for mantida no PHP.
+
+      try {
+        const response = await fetch('salvar_pedido_bardafabrica.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          window.location.href = 'insumos_bardafabrica.php?status=ok';
+        } else {
+          const errorText = await response.text();
+          alert(`Erro ao enviar o pedido: ${response.status} ${response.statusText}\n${errorText}`);
+          btn.disabled = false;
+          btn.innerText = 'Confirmar pedido';
+        }
+      } catch (error) {
+        alert('Erro de comunicação ao enviar o pedido. Verifique sua conexão.');
+        console.error('Erro no fetch:', error);
+        btn.disabled = false;
+        btn.innerText = 'Confirmar pedido';
+      }
     };
 
     // scroll flutuante
