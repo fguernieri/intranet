@@ -1,6 +1,8 @@
 <?php
 // listar_funcionarios.php
 require_once '../../config/db.php';
+include '../../sidebar.php';
+
 
 // Busca todos os funcionários
 $stmt = $pdo->query(
@@ -16,7 +18,6 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
-  <?php include '../../sidebar.php'; ?>
 
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md">
     <h2 class="text-xl font-bold mb-4">Lista de Funcionários</h2>
