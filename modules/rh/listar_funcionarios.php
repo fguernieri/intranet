@@ -16,11 +16,16 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="utf-8" />
   <title>Lista de Funcionários</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
 
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md">
-    <h2 class="text-xl font-bold mb-4">Lista de Funcionários</h2>
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Lista de Funcionários</h1>
+      <a href="form_funcionario.php" class="btn-acao py-2 px-4">+ Novo Funcionário</a>
+    </div>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">

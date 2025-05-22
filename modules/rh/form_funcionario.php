@@ -11,7 +11,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
   <title>Cadastro de Funcionário</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
-
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
 
@@ -29,7 +29,10 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
     </script>
     <?php endif; ?>
 
-    <h2 class="text-xl font-bold mb-4">Cadastro de Funcionário</h2>
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Cadastro de Funcionários</h1>
+      <a href="form_funcionario.php" class="btn-acao py-2 px-4">+ Novo Funcionário</a>
+    </div>
 
     <form action="salvar_funcionario.php" class="space-y-6" id="formFuncionario" method="POST">
     
@@ -215,7 +218,9 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
         </div>
       </fieldset>
 
-      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" type="submit">Salvar</button>
+      <button class="btn-acao" type="submit">Salvar</button>
+      <a href="listar_funcionarios.php" class="btn-acao-vermelho">Cancelar</a>
+
     </form>
   </div>
 
