@@ -1,5 +1,3 @@
-  <?php include '../../sidebar.php'; ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,6 +5,8 @@
   <title>Cadastro de Funcionário</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+  <?php include '../../sidebar.php'; ?>
+
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
   
