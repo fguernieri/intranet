@@ -5,11 +5,11 @@
   <title>Cadastro de Funcionário</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
-  <?php include '../../sidebar.php'; ?>
 
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
-  
+<?php include '../../sidebar.php'; ?>
+
   <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md">
     <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
     <div id="mensagemSucesso" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow text-sm">
