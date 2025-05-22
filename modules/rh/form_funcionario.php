@@ -1,3 +1,5 @@
+  <?php include '../../sidebar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,7 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
-  <?php include '../../sidebar.php'; ?>
   
   <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md">
     <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
