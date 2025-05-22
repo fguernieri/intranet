@@ -21,7 +21,7 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
 
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md">
+  <div class="mx-auto bg-white p-6 rounded-2xl shadow-md">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Lista de Funcionários</h1>
       <a href="form_funcionario.php" class="btn-acao py-2 px-4">+ Novo Funcionário</a>
@@ -30,11 +30,11 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nome</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">CPF</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cargo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Empresa</th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Admissão</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Nome</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">CPF</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Cargo</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Empresa</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Admissão</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -45,15 +45,15 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <?php else: ?>
             <?php foreach ($funcionarios as $func): ?>
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <a href="form_funcionario.php?nome=<?php echo urlencode($func['nome_completo']); ?>" class="text-blue-600 hover:underline">
+                <td class="p-3 whitespace-nowrap">
+                  <a href="form_funcionario.php?nome=<?php echo urlencode($func['nome_completo']); ?>" class="text-blue-600 text-sm hover:underline">
                     <?php echo htmlspecialchars($func['nome_completo']); ?>
                   </a>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($func['cpf']); ?></td>
-                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($func['cargo']); ?></td>
-                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($func['empresa_contratante']); ?></td>
-                <td class="px-6 py-4 whitespace-nowrap"><?php echo date('d/m/Y', strtotime($func['data_admissao'])); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['cpf']); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['cargo']); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['empresa_contratante']); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo date('d/m/Y', strtotime($func['data_admissao'])); ?></td>
               </tr>
             <?php endforeach; ?>
           <?php endif; ?>
