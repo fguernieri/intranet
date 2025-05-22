@@ -28,10 +28,21 @@ if ($conn->connect_error) {
 
 // busca todos os insumos dessa filial
 $stmt = $conn->prepare("
-    SELECT INSUMO, CATEGORIA, UNIDADE
-      FROM insumos
-     WHERE FILIAL = ?
-     ORDER BY CATEGORIA, INSUMO
+    SELECT
+        i.INSUMO,
+        i.CATEGORIA,
+        i.UNIDADE,
+        i.CODIGO,
+        COALESCE(e_agg.ESTOQUE_AGREGADO, 0) AS ESTOQUE_ATUAL
+    FROM insumos i
+    LEFT JOIN (
+        SELECT CODIGO, SUM(Estoquetotal) AS ESTOQUE_AGREGADO
+        FROM EstoqueBDF -- Nome da tabela de estoque para BAR DA FABRICA
+        GROUP BY CODIGO
+    ) e_agg ON i.CODIGO = e_agg.CODIGO
+    WHERE i.FILIAL = ?
+    ORDER BY i.CATEGORIA, i.INSUMO
+    -- Estoque agregado (SUM) da tabela EstoqueBDF para evitar duplicação.
 ");
 $stmt->bind_param('s', $filial);
 $stmt->execute();
@@ -150,6 +161,7 @@ if (
             <tr>
               <th class="p-2 text-left">Insumo</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
+              <th class="p-2 text-center" style="width:7rem;">Estoque Atual</th>
               <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
@@ -160,6 +172,15 @@ if (
               $ins = htmlspecialchars($row['INSUMO'], ENT_QUOTES);
               $cat = htmlspecialchars($row['CATEGORIA'], ENT_QUOTES);
               $uni = htmlspecialchars($row['UNIDADE'], ENT_QUOTES);
+              $estoqueAtualNum = (float)($row['ESTOQUE_ATUAL'] ?? 0);
+              $estoqueAtualDisplay = number_format($estoqueAtualNum, 2, ',', '.');
+              
+              $estoqueColorClass = '';
+              if ($estoqueAtualNum > 0) {
+                $estoqueColorClass = 'text-green-400';
+              } elseif ($estoqueAtualNum < 0) {
+                $estoqueColorClass = 'text-red-400';
+              }
             ?>
             <tr class="hover:bg-gray-700" data-cat="<?=$cat?>">
               <td class="p-2"><?=$ins?></td>
@@ -174,6 +195,7 @@ if (
                   <div class="qty-btn increment">+</div>
                 </div>
               </td>
+              <td class="p-2 text-center font-semibold <?=$estoqueColorClass?>"><?=$estoqueAtualDisplay?></td>
               <td class="p-2"><?=$uni?></td>
               <td class="p-2"><?=$cat?></td>
               <td class="p-2">
