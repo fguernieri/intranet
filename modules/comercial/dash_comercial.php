@@ -11,6 +11,8 @@ require_once '../../config/db_dw.php';
 // 3) Permissões de vendedores vindas da sessão
 $permissoes = $_SESSION['vendedores_permitidos'] ?? [];
 
+
+
 // 4) Busca nomes desses vendedores (para select e filtro)
 $nomesPermitidos = [];
 if (!empty($permissoes)) {
@@ -180,11 +182,14 @@ $UltimaAtualizacao = $stmt->fetchColumn();
 </head>
 <body class="body bg-gray-900 text-white">
   <div class="flex h-screen">
-    <?php include __DIR__ . '/../../sidebar.php'; ?>
+    <?php 
+    include __DIR__ . '/../../sidebar.php'; 
+    ?>
     <main class="flex-1 p-6 overflow-auto">
       <h1 class="text-3xl font-bold mb-2 text-yellow-400 text-center">Bem-vindo, <?= htmlspecialchars($_SESSION['usuario_nome']); ?></h1>
       <h2 class="text-xl font-semibold mb-6 text-center text-white">Dashboard Comercial</h2>
-      
+      <?php require_once '../../components/tempo_curitiba.php'; ?>
+
       <!-- Formulário de filtros -->
       <form method="get" class="bg-gray-800 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-white">
         <div>
