@@ -1,3 +1,9 @@
+<?php
+
+include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,7 +14,6 @@
 
 </head>
 <body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
-<?php include '../../sidebar.php'; ?>
 
   <div class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md">
     <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
