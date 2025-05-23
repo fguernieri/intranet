@@ -16,6 +16,7 @@ if (empty($_SESSION['usuario_id'])) {
     header('Location:/login.php');
     exit;
 }
+$usuario = $_SESSION['usuario_nome'] ?? 'Usuário'; // Adicionado para a saudação
 
 /* ---------- carrega dados da view ---------------------------------- */
 require_once $_SERVER['DOCUMENT_ROOT'].'/db_config.php';
@@ -238,6 +239,25 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 
  
   <main class="flex-1 bg-gray-900 p-6 relative">
+    <!-- Saudação adicionada -->
+    <header class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold">
+            Bem-vindo, <?= htmlspecialchars($usuario); ?>
+        </h1>
+        <p class="text-gray-400 text-sm">
+            <?php
+            $hoje = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+            $fmt = new IntlDateFormatter(
+                'pt_BR',
+                IntlDateFormatter::FULL,
+                IntlDateFormatter::NONE,
+                'America/Sao_Paulo',
+                IntlDateFormatter::GREGORIAN
+            );
+            echo $fmt->format($hoje);
+            ?>
+        </p>
+    </header>
     <div class="dashboard-grid">
         <div class="panel" id="panel-clientes">
             <div class="flex justify-between items-center mb-4"> 
