@@ -22,9 +22,17 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/db_config.php';
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
 
+if ($conn->connect_error) {
+    error_log("comentarios_cliente.php: DB Connection Error: " . $conn->connect_error);
+    http_response_code(503); // Service Unavailable
+    echo json_encode(['error' => 'Serviço indisponível (DB Connect)']);
+    exit;
+}
+
 try {
     $sql = "
         SELECT 
+            id,
             comentario,
             usuario,
             DATE_FORMAT(criado_em, '%d/%m/%Y %H:%i') AS datahora_fmt
@@ -37,15 +45,24 @@ try {
         throw new Exception('Prepare falhou: ' . $conn->error);
     }
     $stmt->bind_param('s', $cliente);
-    $stmt->execute();
-    $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    
+    if (!$stmt->execute()) {
+        throw new Exception('Execute falhou: ' . $stmt->error);
+    }
+    
+    $result_obj = $stmt->get_result();
+    if (!$result_obj) {
+        // This case might be rare if execute() succeeded, but good to be defensive
+        throw new Exception('get_result() falhou após execute bem-sucedido: ' . $stmt->error);
+    }
+    $res = $result_obj->fetch_all(MYSQLI_ASSOC);
 
     echo json_encode($res, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 } catch (Throwable $e) {
     http_response_code(500);
-    error_log("comentarios_cliente.php: " . $e->getMessage());
+    error_log("comentarios_cliente.php: Exception: " . $e->getMessage() . " - Trace: " . $e->getTraceAsString());
     echo json_encode([
-        'error'  => 'Falha interna',
+        'error'  => 'Falha interna ao buscar comentários',
         'detail' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 } finally {
