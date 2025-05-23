@@ -1,7 +1,6 @@
 <?php
 
 require_once '../../config/db.php';
-include '../../sidebar.php';
 
 
 $id = $_GET['id'] ?? null;
@@ -58,8 +57,9 @@ $ingredientes = $stmtIng->fetchAll();
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
+  <?php include '../../sidebar.php'; ?>
+  <div class="print-container w-full mx-auto space-y-6 p-8">
 
-  <div class="print-container max-w-4xl mx-auto space-y-6">
   
     <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
     <div id="alerta" class="fixed right-1 top-4 justify-right transform bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-opacity z-50">
@@ -110,6 +110,7 @@ $ingredientes = $stmtIng->fetchAll();
               <th class="p-2">Descrição</th>
               <th class="p-2">Quantidade</th>
               <th class="p-2">Unidade</th>
+              <th class="p-2">Custo</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-700">
@@ -127,7 +128,7 @@ $ingredientes = $stmtIng->fetchAll();
     </div>
 
     <!-- Campo de Modo de Preparo com TinyMCE -->
-    <div class="mt-6 ">
+    <div class="mt-6 pb-6">
     <label for="modo_preparo" class="block mb-4 text-xl font-bold text-cyan-300">Modo de Preparo</label>
       <?php
         $editor_id = 'modo_preparo';
@@ -141,7 +142,7 @@ $ingredientes = $stmtIng->fetchAll();
   </div>
 
   <!-- Botão flutuante de imprimir -->
-  <button onclick="window.print()" class="no-print fixed bottom-6 right-6 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 px-5 rounded-full shadow-lg transition">
+  <button onclick="window.print()" class="no-print z-50 fixed bottom-6 right-6 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 px-5 rounded-full shadow-lg transition">
     🖨️ Imprimir
   </button>
 
