@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../config/db.php';
+require_once '../../config/db_dw.php';
 include '../../sidebar.php';
 
 $id = $_GET['id'] ?? null;
@@ -21,6 +22,37 @@ if (!$ficha) {
 $stmtIng = $pdo->prepare("SELECT * FROM ingredientes WHERE ficha_id = :id");
 $stmtIng->execute([':id' => $id]);
 $ingredientes = $stmtIng->fetchAll();
+
+// ── Colete os códigos que apareceram na ficha ────────────────
+$codigos = array_column($ingredientes, 'codigo');
+if ($codigos) {
+
+    // Monte a cláusula IN dinâmica:  (?, ?, ?, ...)
+    $placeholders = implode(',', array_fill(0, count($codigos), '?'));
+
+    // Busque o Custo médio de cada código
+    $sqlCusto = "
+        SELECT `Cód. Ref.`   AS codigo,
+               COALESCE(`Custo médio`,0) AS custo   -- evita NULL
+        FROM   ProdutosBares
+        WHERE  `Cód. Ref.` IN ($placeholders)
+    ";
+    $stmtC = $pdo_dw->prepare($sqlCusto);
+    $stmtC->execute($codigos);
+
+    // Transforme o resultado em mapa  [codigo => custo]
+    $custos = [];
+    foreach ($stmtC->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $custos[$row['codigo']] = $row['custo'];
+    }
+
+    // Junte o custo a cada ingrediente
+    foreach ($ingredientes as &$ing) {
+        $ing['custo'] = $custos[$ing['codigo']] ?? 0;
+    }
+    unset($ing);   // boa prática quando usa referência
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -117,9 +149,20 @@ $ingredientes = $stmtIng->fetchAll();
               <tr>
                 <td class="p-2"><?= htmlspecialchars($ing['codigo']) ?></td>
                 <td class="p-2"><?= htmlspecialchars($ing['descricao']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($ing['quantidade']) ?></td>
+                <td class="p-2">
+                  <?= number_format((float)$ing['quantidade'], 3, ',', '.') ?>
+                </td>
                 <td class="p-2"><?= htmlspecialchars($ing['unidade']) ?></td>
-              </tr>
+                <?php
+                    // garanta que ambos são numéricos
+                    $custo      = (float) $ing['custo'];       // ex.: 3.25
+                    $quantidade = (float) $ing['quantidade'];  // ex.: 0.150  (150 g)
+
+                    $subtotal = $custo * $quantidade;          // operação matemática
+                ?>
+                <td class="p-2">
+                    <?= number_format($subtotal, 2, ',', '.') ?>
+                </td>              </tr>
             <?php endforeach; ?>
           </tbody>
         </table>
