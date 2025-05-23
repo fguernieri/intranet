@@ -19,6 +19,7 @@ if (empty($_SESSION['usuario_id'])) {
 
 /* ---------- carrega dados da view ---------------------------------- */
 require_once $_SERVER['DOCUMENT_ROOT'].'/db_config.php';
+require_once __DIR__ . '/../../sidebar.php';
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
 
@@ -102,6 +103,12 @@ unset($cli);
 uasort($tree, fn($a, $b) => $b['dias'] <=> $a['dias']);
 
 $json_output = json_encode($tree, JSON_UNESCAPED_UNICODE|JSON_NUMERIC_CHECK);
+
+$total_geral_em_aberto = 0;
+foreach ($tree as $cliente_data) {
+    $total_geral_em_aberto += $cliente_data['valor'];
+}
+
 if (json_last_error() !== JSON_ERROR_NONE) {
     error_log('JSON Encode Error: ' . json_last_error_msg());
     $json_output = json_encode(['error' => 'Falha ao gerar dados']);
@@ -130,7 +137,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     .panel { background: #1a1a1a; padding: 1rem; border-radius: 8px; flex: 1; }
     table.dataTable { width: 100% !important; border-collapse: collapse; font-size: .85em; }
     table.dataTable th, table.dataTable td { padding: 4px 8px; border: 1px solid #333; }
-    table.dataTable thead th { background: #2a2a2a; color: #00aaff; }
+    table.dataTable thead th { background: #2a2a2a; color: #facc15; } /* Alterado para amarelo (Tailwind yellow-400) */
     table.dataTable tbody tr:hover { background: #2c2c2c; cursor: pointer; }
     td.valor { font-weight: bold; text-align: right; }
     td.dias { text-align: center; }
@@ -229,18 +236,38 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 <body>
 <body class="bg-gray-900 text-gray-100 flex min-h-screen">
 
-  <!-- SIDEBAR -->
-  <aside class="bg-gray-800 w-60 p-6 flex-shrink-0">
-    <?php
-      require_once __DIR__ . '/../../sidebar.php';
-      require_once $_SERVER['DOCUMENT_ROOT'] . '/auth.php';
-    ?>
-  </aside>
-
+ 
   <main class="flex-1 bg-gray-900 p-6 relative">
     <div class="dashboard-grid">
         <div class="panel" id="panel-clientes">
-            <h2 class="text-2xl font-bold text-yellow-400 mb-4">Valor em aberto</h2> <!-- Estilização do título -->
+            <div class="flex justify-between items-center mb-4"> 
+                <h2 class="text-2xl font-bold text-yellow-400">PAINEL DE COBRANÇA</h2> 
+                <a href="/modules/Cobranca/cobrancas_detalhes.php" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm shadow-md transition duration-150 ease-in-out">
+                    Ver Detalhamento
+                </a>
+            </div>
+
+            <!-- Caixa "Total Geral em Aberto" menor, à esquerda e abaixo do título -->
+            <div class="flex justify-start gap-4 mb-6">
+                <div id="panel-total-geral-interno" class="bg-gray-800 p-2 rounded-md" style="width: 200px; max-width: 100%;"> 
+                    <h2 class="text-base font-bold text-yellow-400 mb-1 text-center">Valor total em aberto</h2> 
+                    <p class="text-lg font-bold text-red-400 text-center"> 
+                        R$ <?= number_format($total_geral_em_aberto, 2, ',', '.') ?> 
+                    </p>
+                </div>
+
+                <!-- Caixa para informações de contagem de clientes - estilizada e posicionada ao lado -->
+                <div id="panel-clientes-info-custom"
+                     class="bg-gray-800 p-2 rounded-md" 
+                     style="width: 200px; max-width: 100%;">
+                    <h2 class="text-base font-bold text-yellow-400 mb-1 text-center">Clientes com débito</h2>
+                    <p id="clientes-info-text-content" class="text-lg font-bold text-gray-300 text-center">
+                        {/* O número será injetado pelo JavaScript */}
+                    </p>
+                </div>
+            </div>
+
             <table id="tbl-cli" class="display compact stripe">
                 <thead>
                     <tr>
@@ -249,6 +276,10 @@ if (json_last_error() !== JSON_ERROR_NONE) {
                     </tr>
                 </thead>
                 <tbody></tbody>
+        </div>
+    </div>
+ 
+    <!-- overlay e floating detail -->
             </table>
         </div>
     </div>
@@ -306,10 +337,34 @@ $(function() {
             { data: 'dias',    className: 'dias', createdCell: (td,v) => v>0&&$(td).addClass('atrasado') },
             { data: 'venc' }
         ],
-        order: [[3,'desc']], paging:false, searching:true, info:true,
-        language:{ search:'Buscar:', info:'_TOTAL_ clientes', infoEmpty:'Nenhum', infoFiltered:'(de _MAX_)' },
+        order: [[3,'desc']], paging:false, searching:false, info:true, // Alterado searching para false
+        language:{ /* search:'Buscar:', */ info:'_TOTAL_ clientes', infoEmpty:'Nenhum', infoFiltered:'(de _MAX_)' }, // Removida a tradução de 'search'
         rowId:'id_cli'
     });
+
+    // Manipula a exibição da contagem de clientes em uma caixa customizada
+    const dtInfoOriginal = $('#tbl-cli_info'); // ID padrão do elemento de info do DataTables
+    const customInfoBox = $('#panel-clientes-info-custom');
+    const customInfoTextContent = $('#clientes-info-text-content'); // Novo elemento para o texto
+
+    if (dtInfoOriginal.length && customInfoBox.length && customInfoTextContent.length) {
+        // Função para atualizar o conteúdo da caixa customizada
+        const updateCustomInfoText = () => {
+            customInfoTextContent.text(dtInfoOriginal.text().replace(/[^0-9]/g, '') || '0'); // Extrai apenas números ou mostra 0
+        };
+
+        // Atualização inicial
+        updateCustomInfoText();
+
+        // Oculta o elemento de info original do DataTables
+        dtInfoOriginal.hide();
+
+        // Garante que a caixa customizada seja atualizada e a original permaneça oculta em redesenhos da tabela
+        tbl.on('draw.dt', function () {
+            dtInfoOriginal.hide(); // Reafirma que está oculto
+            updateCustomInfoText();
+        });
+    }
 
     // abre detail flutuante
     $('#tbl-cli tbody').on('click','tr',function(){
