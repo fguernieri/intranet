@@ -324,7 +324,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
         <div id="pedidos-e-parcelas-container"></div>
         <hr style="border-color:#444;margin:1rem 0;"/>
         <div id="comentarios-secao">
-            <h4>Comentários do Cliente:</h4>
+            <h4>Comentários</h4>
             <div id="comentarios-historico"><em>(sem comentários)</em></div>
             <div style="display:flex;align-items:flex-start;">
                 <textarea id="comentario-cliente-txt" placeholder="Novo comentário…"></textarea>
