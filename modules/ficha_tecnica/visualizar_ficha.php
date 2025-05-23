@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../config/db.php';
-
+include '../../sidebar.php';
 
 $id = $_GET['id'] ?? null;
 if (!$id) {
@@ -57,7 +57,6 @@ $ingredientes = $stmtIng->fetchAll();
   </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
-  <?php include '../../sidebar.php'; ?>
   <div class="print-container w-full mx-auto space-y-6 p-8">
 
   
