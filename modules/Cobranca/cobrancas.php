@@ -170,15 +170,60 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     .parcelas-lista .info-linha { background: #222; padding: 4px 6px; border-radius: 3px; margin-bottom: 4px; }
 
     /* comentários */
-    #comentarios-historico { max-height: 120px; overflow-y: auto; border: 1px solid #444;
-                            padding: 6px; margin-bottom: 8px; font-size: .9em; background: #222; }
-    .comment-item { background: #1d1d1d; border: 1px solid #333; border-radius: 4px;
-                    padding: 6px 8px; font-size: .9em; margin-bottom: 6px; }
-    .comment-item small { color: #77c7ff; margin-right: 6px; }
-    textarea { width: calc(100% - 80px); height: 3rem; background: #222; color: #eee;
-               border: 1px solid #444; padding: 6px; box-sizing: border-box; margin-right: 8px; }
-    button.salvar { background: #4caf50; border: none; color: #fff;
-                   padding: 6px 12px; cursor: pointer; }
+    #comentarios-historico {
+        max-height: 160px; /* Increased height */
+        overflow-y: auto;
+        border: 1px solid #444;
+        padding: 8px;
+        margin-bottom: 10px;
+        font-size: .9em;
+        background: #222;
+        border-radius: 4px;
+    }
+    .comment-item {
+        background: #2a2a2a;
+        border: 1px solid #383838;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .comment-item:last-child {
+        margin-bottom: 0;
+    }
+    .comment-content { /* Wrapper for text part */
+        flex-grow: 1;
+        margin-right: 8px; /* Space before delete button */
+        word-break: break-word;
+    }
+    .comment-content small { /* Timestamp */
+        color: #77c7ff;
+        margin-right: 6px;
+    }
+    .comment-content strong { /* User */
+        color: #ccc;
+    }
+    .comment-content span { /* Comment text */
+        color: #eee;
+    }
+    .delete-comment-btn {
+        background: #e53e3e; /* Tailwind red-600 like */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+        line-height: 1.2;
+        flex-shrink: 0;
+        align-self: center;
+    }
+    .delete-comment-btn:hover { background: #c53030; } /* Tailwind red-700 like */
+    textarea#comentario-cliente-txt { width: calc(100% - 90px); /* Adjusted for button width + margin */ height: 3.5rem; background: #2d2d2d; color: #eee; border: 1px solid #444; padding: 8px; box-sizing: border-box; margin-right: 8px; border-radius: 4px; }
+    button#salvar-comentario-btn { background: #38a169; /* Tailwind green-600 like */ border: none; color: #fff; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    button#salvar-comentario-btn:hover { background: #2f855a; } /* Tailwind green-700 like */
 </style>
 </head>
 <body>
@@ -227,7 +272,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
             <div id="comentarios-historico"><em>(sem comentários)</em></div>
             <div style="display:flex;align-items:flex-start;">
                 <textarea id="comentario-cliente-txt" placeholder="Novo comentário…"></textarea>
-                <button class="salvar" id="salvar-comentario-btn">Salvar</button>
+                <button id="salvar-comentario-btn">Salvar</button> <!-- .salvar class can be removed if ID is used for styling -->
             </div>
         </div>
     </div>
@@ -238,6 +283,13 @@ const money = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2});
 let tbl, sel = null;
 
 $(function() {
+    if (dados && dados.error) {
+        console.error("Erro ao carregar dados para a tabela:", dados.error);
+        $('#panel-clientes').html(`<p class="text-red-500 font-bold p-4">Erro ao carregar dados da visão: ${dados.error}. Verifique o log do servidor.</p>`);
+        // Disable functionality that depends on 'dados'
+        return; 
+    }
+
     // monta DataTable
     const mapped = Object.entries(dados).flatMap(([k,c]) => {
         const num = Number(k), id = num || k;
@@ -296,6 +348,55 @@ $(function() {
             alert('Erro ao salvar');
         }
     });
+
+    // Event listener para DELETAR comentário (usando delegação de evento)
+    $('#comentarios-historico').on('click', '.delete-comment-btn', async function() {
+        if (!sel) {
+            alert('Nenhum cliente selecionado.');
+            return;
+        }
+
+        const commentItem = $(this).closest('.comment-item');
+        console.log('Comment item HTML:', commentItem.length ? commentItem[0].outerHTML : 'Comment item not found'); // Log o HTML do item
+        const commentId = commentItem.data('comment-id');
+        console.log('Extracted commentId from data attribute:', commentId, '(type: ' + typeof commentId + ')'); // Log o ID lido e seu tipo
+
+        // Verificação mais precisa: permite 0 como ID válido para ser enviado, mas não null/undefined/string vazia
+        if (commentId === null || commentId === undefined || commentId === '') {
+            alert('ID do comentário não encontrado.');
+            console.error('commentId is null, undefined, or empty string.');
+            return;
+        }
+
+        if (!confirm('Tem certeza que deseja excluir este comentário?')) {
+            return;
+        }
+
+        try {
+            const resp = await $.post(
+                '/modules/Cobranca/excluir_comentario.php',
+                { comment_id: commentId }, // Enviando o ID do comentário
+                null, 'json'
+            );
+            if (resp.status === 'OK') {
+                carregaHistorico(); // Recarrega o histórico para refletir a exclusão
+            } else {
+                // Este bloco será alcançado se o servidor responder com 2xx mas com um JSON indicando erro
+                alert(resp.error || 'Falha ao excluir o comentário.');
+            }
+        } catch (e) {
+            console.error("Erro ao excluir comentário:", e);
+            let errorMessage = 'Erro de comunicação ao tentar excluir o comentário.';
+            if (e.responseJSON && e.responseJSON.error) {
+                // Se o servidor enviou um JSON de erro (comum com 4xx/5xx)
+                errorMessage = e.responseJSON.error;
+            } else if (e.statusText && e.status) {
+                // Se houver um statusText do jqXHR (ex: "Not Found", "Internal Server Error")
+                errorMessage = `Erro ${e.status}: ${e.statusText}`;
+            }
+            alert(errorMessage);
+        }
+    });
 });
 
 function renderPedidos(id) {
@@ -322,15 +423,41 @@ function renderPedidos(id) {
 
 async function carregaHistorico() {
     const box = $('#comentarios-historico').html('<em>carregando…</em>');
+    if (!sel || !sel.nome) {
+        box.html('<em>Selecione um cliente para ver os comentários.</em>');
+        return;
+    }
     try {
         const d = await $.getJSON('/modules/Cobranca/comentarios_cliente.php', { cliente: sel.nome });
         if(d.error) return box.html(`<em>${d.error}</em>`);
         if(!d.length) return box.html('<em>(sem comentários)</em>');
-        box.html(d.map(c=>`
-            <div class="comment-item">
-                <small>[${c.datahora_fmt}]</small>${c.comentario}
-            </div>`).join(''));
+        
+        box.empty(); // Clear previous content (e.g., "carregando...")
+        d.forEach(c => {
+            console.log('Processando objeto comentário do backend:', c, 'Tipo de c.id:', typeof c.id); // LOG ADICIONAL
+            const commentTextDiv = $('<div></div>').addClass('comment-content');
+            
+            commentTextDiv.append(
+                $('<small></small>').text(`[${c.datahora_fmt}] `) // Add space after timestamp
+            );
+            commentTextDiv.append(
+                $('<strong></strong>').text(`${c.usuario || 'Sistema'}: `) // Add space after user
+            );
+            commentTextDiv.append(
+                $('<span></span>').text(c.comentario) // Safely sets text, escaping HTML
+            );
+
+            const deleteButton = $('<button class="delete-comment-btn" title="Excluir comentário">&times;</button>');
+
+            const commentItemDiv = $('<div></div>')
+                .addClass('comment-item')
+                .attr('data-comment-id', c.id)
+                .append(commentTextDiv)
+                .append(deleteButton);
+            box.append(commentItemDiv);
+        });
     } catch(e) {
+        console.error("Erro ao carregar histórico:", e);
         box.html('<em>Erro ao carregar histórico.</em>');
     }
 }
