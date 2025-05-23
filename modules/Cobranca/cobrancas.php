@@ -345,7 +345,20 @@ $(function() {
                 alert(resp.error||'Falha ao salvar');
             }
         } catch(e) {
-            alert('Erro ao salvar');
+            console.error("Erro ao salvar comentário (AJAX):", e); // Log detalhado do erro AJAX
+            let errorMsg = 'Erro de comunicação ao tentar salvar o comentário.';
+            if (e.responseJSON && e.responseJSON.error) {
+                errorMsg = e.responseJSON.error;
+                if (e.responseJSON.detail) {
+                    errorMsg += ` (Detalhe: ${e.responseJSON.detail})`;
+                }
+            } else if (e.responseText && e.status >= 400) { // Considerar e.status para erros HTTP
+                // Se não for JSON, mas houver texto na resposta (ex: erro fatal do PHP)
+                errorMsg += ` Resposta do servidor (HTTP ${e.status}): ${e.responseText.substring(0, 200)}`; // Limita o tamanho
+            } else if (e.statusText) {
+                errorMsg += ` Status: ${e.statusText}`;
+            }
+            alert(errorMsg);
         }
     });
 
@@ -434,7 +447,6 @@ async function carregaHistorico() {
         
         box.empty(); // Clear previous content (e.g., "carregando...")
         d.forEach(c => {
-            console.log('Processando objeto comentário do backend:', c, 'Tipo de c.id:', typeof c.id); // LOG ADICIONAL
             const commentTextDiv = $('<div></div>').addClass('comment-content');
             
             commentTextDiv.append(
