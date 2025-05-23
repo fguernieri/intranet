@@ -141,8 +141,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     table.dataTable thead th { background: #2a2a2a; color: #facc15; } /* Alterado para amarelo (Tailwind yellow-400) */
     table.dataTable tbody tr:hover { background: #2c2c2c; cursor: pointer; }
     td.valor { font-weight: bold; text-align: right; }
-    td.dias { text-align: center; }
-    td.dias.atrasado { background: #cc0000 !important; color: #fff !important; }
+    td.dias { text-align: center; /* font-weight será aplicado por JS ou CSS específico */ }
 
     /* overlay e floating detail */
     #overlay {
@@ -176,6 +175,12 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     .info-linha span { flex: 1; text-align: right; }
     .parcelas-lista { margin-left: 20px; margin-top: 8px; border-left: 2px solid #555; padding-left: 10px; }
     .parcelas-lista .info-linha { background: #222; padding: 4px 6px; border-radius: 3px; margin-bottom: 4px; }
+    /* Estilo para dias atrasados nas parcelas, incluindo semi-bold */
+    .parcelas-lista .info-linha span.dias.atrasado {
+        /* background-color: #cc0000; */ /* Removido fundo vermelho */
+        color: #fff;
+        font-weight: 600; /* Semi-bold */
+    }
 
     /* comentários */
     #comentarios-historico {
@@ -353,11 +358,21 @@ $(function() {
         columns: [
             { data: 'cliente' },
             { data: 'vendedor' },
-            { data: 'valor',   className: 'valor', render: d => money(d) },
-            { data: 'dias',    className: 'dias', createdCell: (td,v) => v>0&&$(td).addClass('atrasado') },
+            { data: 'valor',   className: 'valor', render: d => money(d) }, // Formata como moeda
+            { 
+                data: 'dias',
+                className: 'dias', // Para alinhamento e outros estilos base se necessário
+                createdCell: function(td, cellData, rowData, row, col) {
+                    const diasVencidos = parseInt(cellData);
+                    if (diasVencidos > 0) {
+                        const color = getDaysOverdueColor(diasVencidos);
+                        $(td).css({'background-color': color, 'color': '#fff', 'font-weight': '600'});
+                    }
+                }
+            },
             { data: 'venc' }
         ],
-        order: [[3,'desc']], paging:false, searching:false, info:true, // Alterado searching para false
+        order: [[3,'desc']], paging:false, searching:false, info:true,
         language:{ /* search:'Buscar:', */ info:'_TOTAL_ clientes', infoEmpty:'Nenhum', infoFiltered:'(de _MAX_)' }, // Removida a tradução de 'search'
         rowId:'id_cli'
     });
@@ -486,6 +501,36 @@ $(function() {
         }
     });
 });
+
+function getDaysOverdueColor(days) {
+    // 'days' é o número de dias vencidos, garantido como >= 1 pelo chamador (createdCell).
+
+    // Define após quantos dias de atraso a cor estará na metade do caminho para o vermelho total.
+    // Um valor menor (ex: 30) fará com que a cor fique vermelha mais rapidamente.
+    // Um valor maior (ex: 90) tornará o degradê mais gradual.
+    const halfwayIntensityDays = 60; 
+
+    // Cores RGB
+    // Começa com vermelho mais claro para poucos dias de atraso
+    const startColor = { r: 229, g: 62, b: 62 };  // Vermelho mais claro (ex: #E53E3E)
+    // E vai para um vermelho bem escuro para muitos dias de atraso
+    const endColor   = { r: 153, g: 27,  b: 27 };  // Vermelho bem escuro (ex: #991B1B)
+
+    // Calcula a proporção (ratio) para a interpolação da cor.
+    // - Se 'days' = halfwayIntensityDays, ratio = 0.5 (cor intermediária).
+    // - Conforme 'days' aumenta, 'ratio' se aproxima de 1 (cor final).
+    // - Conforme 'days' se aproxima de 1 (mínimo), 'ratio' se aproxima de 0 (cor inicial).
+    // A fórmula days / (days + K) garante que o ratio esteja entre 0 e 1 (exclusivo de 1).
+    const ratio = days / (days + halfwayIntensityDays);
+
+    // Interpola os componentes RGB
+    const r = Math.round(startColor.r * (1 - ratio) + endColor.r * ratio);
+    const g = Math.round(startColor.g * (1 - ratio) + endColor.g * ratio);
+    const b = Math.round(startColor.b * (1 - ratio) + endColor.b * ratio);
+
+    // Converte RGB para Hexadecimal
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
 
 function renderPedidos(id) {
     const c = dados[id]||{}, cont = $('#pedidos-e-parcelas-container').empty();
