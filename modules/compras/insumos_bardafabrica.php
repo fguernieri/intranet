@@ -409,8 +409,8 @@ if (
         if(q>0) lines.push({
           insumo:     r.children[0].textContent.trim(), // Insumo
           quantidade: q.toFixed(2),                     // Quantidade
-          unidade:    r.children[2].textContent.trim(), // Unidade
-          categoria:  r.children[3].textContent.trim(), // Categoria
+          unidade:    r.children[3].textContent.trim(), // Unidade
+          categoria:  r.children[4].textContent.trim(), // Categoria
           obs:        r.querySelector('input[name="observacao[]"]').value.trim()
         });
       });
