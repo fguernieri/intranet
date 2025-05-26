@@ -57,6 +57,7 @@ $chartCmv = [
   ]],
   'xaxis' => ['categories' => array_column($pratos, 'nome')],
   'colors' => ['#f59e0b']
+
 ];
 
 // Chart de pizza (por grupo)
