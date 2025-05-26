@@ -32,6 +32,7 @@ $ingredientes = $stmtIng->fetchAll();
   <title>Editar: <?= htmlspecialchars($ficha['nome_prato']) ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
 
@@ -52,7 +53,7 @@ $ingredientes = $stmtIng->fetchAll();
     <form action="salvar_edicao.php" method="POST" enctype="multipart/form-data" class="space-y-6">
       <input type="hidden" name="id" value="<?= $ficha['id'] ?>">
 
-     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <!-- Código Cloudify -->
       <div>
         <label class="block text-cyan-300 mb-1 font-medium">Cód Cloudify</label>
@@ -62,20 +63,41 @@ $ingredientes = $stmtIng->fetchAll();
       </div>
 
       <!-- Nome do Prato -->
-      <div class="md:col-span-2">
+      <div class="md:col-span-3">
         <label class="block text-cyan-300 mb-1 font-medium">Nome do Prato</label>
         <input type="text" name="nome_prato" id="nome_prato" required
                value="<?= htmlspecialchars($ficha['nome_prato']) ?>"
                class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
       </div>
 
-      <!-- Integração -->
-      <div>
-        <label class="block text-cyan-300 mb-1 font-medium">Integração</label>
-        <input type="text" name="integracao"
-               value="<?= htmlspecialchars($ficha['integracao'] ?? '') ?>"
-               class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-cyan-500">
-      </div>
+          <!-- Status de ativação -->
+          <!-- Toggle WAB -->
+          <label class="custom-switch custom-switch-small mb-2">
+            <input type="checkbox" name="ativo_wab" id="ativo_wab" class="custom-switch-input"
+              <?php echo isset($ficha['ativo_wab']) && $ficha['ativo_wab'] == 1 ? 'checked' : ''; ?>>
+            <span class="custom-switch-slider"></span>
+            <span class="custom-switch-label">WAB</span>
+          </label>
+
+          <!-- Toggle BDF -->
+          <label class="custom-switch custom-switch-small">
+            <input type="checkbox" name="ativo_bdf_almoco" id="ativo_bdf_almoco" class="custom-switch-input"
+              <?php echo isset($ficha['ativo_bdf_almoco']) && $ficha['ativo_bdf_almoco'] == 1 ? 'checked' : ''; ?>>
+            <span class="custom-switch-slider"></span>
+            <span class="custom-switch-label">BDF Almoço Semana</span>
+          </label>
+          <label class="custom-switch custom-switch-small">
+            <input type="checkbox" name="ativo_bdf_almoco_fds" id="ativo_bdf_almoco_fds" class="custom-switch-input"
+              <?php echo isset($ficha['ativo_bdf_almoco_fds']) && $ficha['ativo_bdf_almoco_fds'] == 1 ? 'checked' : ''; ?>>
+            <span class="custom-switch-slider"></span>
+            <span class="custom-switch-label">BDF Almoço FDS</span>
+          </label>
+          <label class="custom-switch custom-switch-small">
+            <input type="checkbox" name="ativo_bdf_noite" id="ativo_bdf_noite" class="custom-switch-input"
+              <?php echo isset($ficha['ativo_bdf_noite']) && $ficha['ativo_bdf_noite'] == 1 ? 'checked' : ''; ?>>
+            <span class="custom-switch-slider"></span>
+            <span class="custom-switch-label">BDF Noite</span>
+          </label>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">

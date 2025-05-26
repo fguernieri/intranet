@@ -137,13 +137,48 @@ main {
   color: #e5e7eb;           /* text-gray-200 */
 }
 
-/* 8. Modo escuro (prefers-color-scheme) */
+/* Switch menor */
+/* Switch menor - sobrescrevendo completamente */
+.custom-switch.custom-switch-small .custom-switch-slider {
+  width: 36px;
+  height: 20px;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s;
+}
 
+.custom-switch.custom-switch-small .custom-switch-slider::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.custom-switch.custom-switch-small .custom-switch-input:checked + .custom-switch-slider {
+  background-color: #2563eb;
+}
+
+.custom-switch.custom-switch-small .custom-switch-input:checked + .custom-switch-slider::after {
+  transform: translateX(16px);
+}
+
+.custom-switch.custom-switch-small .custom-switch-input:focus + .custom-switch-slider {
+  box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.5);
+}
+
+/* Modo escuro também para o switch pequeno */
 @media (prefers-color-scheme: dark) {
-  .custom-switch-slider {
-    background-color: #374151;/* bg-gray-700 */
+  .custom-switch.custom-switch-small .custom-switch-slider {
+    background-color: #374151;
   }
-  .custom-switch-input:checked + .custom-switch-slider {
-    background-color: #2563eb;/* manter blue-600 */
+  .custom-switch.custom-switch-small .custom-switch-input:checked + .custom-switch-slider {
+    background-color: #2563eb;
   }
 }

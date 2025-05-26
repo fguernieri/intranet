@@ -62,6 +62,11 @@ try {
     $codigo     = $_POST['codigo'];
     $ingred_ids = $_POST['ingrediente_id'];
     $excluir    = $_POST['excluir'];
+    $ativo_wab = isset($_POST['ativo_wab']) ? 1 : 0;
+    $ativo_bdf_almoco = isset($_POST['ativo_bdf_almoco']) ? 1 : 0;
+    $ativo_bdf_almoco_fds = isset($_POST['ativo_bdf_almoco_fds']) ? 1 : 0;
+    $ativo_bdf_noite = isset($_POST['ativo_bdf_noite']) ? 1 : 0;
+
 
     $pdo->beginTransaction();
 
@@ -95,8 +100,11 @@ try {
     // Atualizar ficha técnica
     $stmt = $pdo->prepare("UPDATE ficha_tecnica SET 
         nome_prato = :nome, rendimento = :rendimento, modo_preparo = :modo, 
-        imagem = :imagem, usuario = :responsavel, codigo_cloudify = :codigo 
+        imagem = :imagem, usuario = :responsavel, codigo_cloudify = :codigo, 
+        ativo_wab = :ativo_wab, ativo_bdf_noite = :ativo_bdf_noite, ativo_bdf_almoco = :ativo_bdf_almoco, 
+        ativo_bdf_almoco_fds = :ativo_bdf_almoco_fds 
         WHERE id = :id");
+        
     $stmt->execute([
         ':nome'       => $nome,
         ':rendimento' => $rendimento,
@@ -104,6 +112,10 @@ try {
         ':imagem'     => $imagem_nome,
         ':responsavel'=> $responsavel,
         ':codigo'     => $cloudify,
+        ':ativo_wab'  => $ativo_wab,
+        ':ativo_bdf_almoco'     => $ativo_bdf_almoco,
+        ':ativo_bdf_almoco_fds' => $ativo_bdf_almoco_fds,
+        ':ativo_bdf_noite'      => $ativo_bdf_noite,
         ':id'         => $id
     ]);
 
@@ -113,7 +125,12 @@ try {
         'rendimento'      => $rendimento,
         'modo_preparo'    => $modo,
         'usuario'         => $responsavel, // aqui continua como "usuario" pois é o nome do campo na tabela
-        'codigo_cloudify' => $cloudify
+        'codigo_cloudify' => $cloudify,
+        'ativo_wab'       => $ativo_wab,
+        'ativo_bdf_almoco'     => $ativo_bdf_almoco,
+        'ativo_bdf_almoco_fds' => $ativo_bdf_almoco_fds,
+        'ativo_bdf_noite'      => $ativo_bdf_noite
+        
     ];
     logHistorico($pdo, $id, $usuario_logado, $antigo, $novo);
 
