@@ -22,6 +22,12 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css">
+
+<!-- jQuery e DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
 
@@ -86,7 +92,7 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php if (!empty($fichas)): ?>
       <!-- 💻 Desktop: Tabela -->
       <div class="overflow-x-auto bg-gray-800 rounded shadow hidden md:block">
-        <table class="min-w-full text-sm text-center">
+        <table class="min-w-full text-sm text-center" id="tabela-consulta">
           <thead class="bg-gray-700 text-cyan-300">
             <tr>
               <th class="p-3">Farol</th>
@@ -267,6 +273,30 @@ function fecharImportProdutos() {
     ></iframe>
   </div>
 </div>
+
+
+<script>
+const table = $('#tabela-consulta').DataTable({
+  language: {
+    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+  },
+  pageLength: -1, // 👈 exibe todos os registros
+  ordering: true,         // 👈 garante que a ordenação esteja ativada
+  order: [],              // 👈 não define ordenação inicial
+   columnDefs: [
+    { targets: [0, 5], orderable: false } // 👈 desativa ordenação das colunas Farol e Ações
+  ],
+  
+  
+  initComplete: function () {
+    // Esconde o select padrão
+    $('.dataTables_length').hide();
+    $('.dataTables_filter').hide();
+  }
+
+});
+
+</script>
 
 </body>
 </html>
