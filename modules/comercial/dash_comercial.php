@@ -60,6 +60,7 @@ SELECT
   Empresa,
   NumeroPedido    AS NumeroPedido,
   CodCliente      AS CodCliente,
+  Cliente,
   Estado,
   DataPedido      AS DataPedido,
   Vendedor,
@@ -292,7 +293,7 @@ $UltimaAtualizacao = $stmt->fetchColumn();
             <?php foreach ($pedidos as $row): ?>
             <tr class="hover:bg-gray-700">
               <td class="px-4 py-2"><?= $row['NumeroPedido'] ?? '' ?></td>
-              <td class="px-4 py-2"><?= $row['CodCliente'] ?? '' ?></td>
+              <td class="px-4 py-2"><?= $row['Cliente'] ?? '' ?></td>
               <td class="px-4 py-2"><?= htmlspecialchars($row['Estado'] ?? '') ?></td>
               <td class="px-4 py-2"><?= htmlspecialchars($row['Vendedor'] ?? '') ?></td>
               <td class="px-4 py-2">
