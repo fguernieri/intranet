@@ -182,3 +182,10 @@ main {
     background-color: #2563eb;
   }
 }
+
+/* /assets/style.css */
+.apexcharts-tooltip {
+  background: rgba(0,0,0,0.85) !important;  /* fundo escuro */
+  color: #fff !important;                   /* texto claro   */
+  border-color: #444 !important;            /* borda discreta */
+}
