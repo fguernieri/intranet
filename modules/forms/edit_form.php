@@ -2,6 +2,10 @@
 // modules/forms/edit_form.php
 declare(strict_types=1);
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+
 use Modules\Forms\Model\FormModel;
 
 require __DIR__ . '/../../config/db.php';     // deve expor $pdo (PDO)
