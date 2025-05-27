@@ -43,10 +43,24 @@ $submitted = isset($_GET['submitted']) && $_GET['submitted'] == 1;
     .rating .star:hover,
     .rating .star:hover ~ .star { color: #f6b01e; }
   </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#309898',
+            warning: '#FF9F00',
+            alert: '#F4631E',
+            danger: '#CB0404'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4"><?= htmlspecialchars($form['title']) ?></h1>
+<body class="bg-primary bg-opacity-70 min-h-screen flex items-center justify-center p-4">
+  <div class="p-6 space-y-6 max-w-3xl w-full bg-white rounded-2xl shadow-md border border-primary">
+    <h1 class="text-2xl font-bold text-primary text-center"><?= htmlspecialchars($form['title']) ?></h1>
     <?php if ($form['description']): ?>
       <p class="text-gray-700 mb-6"><?= nl2br(htmlspecialchars($form['description'])) ?></p>
     <?php endif; ?>
@@ -64,7 +78,7 @@ $submitted = isset($_GET['submitted']) && $_GET['submitted'] == 1;
           $cfg  = $f['settings'] ? json_decode($f['settings'], true) : [];
         ?>
           <div class="mb-4">
-            <label class="block font-medium mb-1">
+            <label class="block font-semibold text-warning mb-1">
               <?= htmlspecialchars($f['label']) ?> <?= $req ? '<span class="text-red-500">*</span>' : '' ?>
             </label>
 
