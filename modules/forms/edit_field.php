@@ -9,6 +9,8 @@ use Modules\Forms\Model\FieldModel;
 require __DIR__ . '/../../config/db.php';
 require __DIR__ . '/Model/FormModel.php';
 require __DIR__ . '/Model/FieldModel.php';
+require __DIR__ . '/../../auth.php';
+
 
 $formId  = filter_input(INPUT_GET, 'form_id', FILTER_VALIDATE_INT) 
         ?? filter_input(INPUT_POST, 'form_id', FILTER_VALIDATE_INT);
