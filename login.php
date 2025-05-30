@@ -1,7 +1,7 @@
 <?php
 session_start();
 $erro = isset($_GET['erro']) ? true : false;
-
+$msg = $_GET['msg'] ?? null;
 
 ?>
 <!DOCTYPE html>
@@ -59,5 +59,19 @@ $erro = isset($_GET['erro']) ? true : false;
       <a href="#" class="text-gray-400 hover:text-yellow-400 transition text-sm sm:text-base">Esqueceu a senha?.!</a>
     </div>
   </div>
+    <?php if ($msg === 'sessao_expirada'): ?>
+    <div id="toast-msg" class="fixed top-4 right-4 bg-yellow-500 text-gray-900 px-4 py-3 rounded shadow-lg z-50 transition-opacity duration-300 opacity-0">
+      Sua sessão expirou por inatividade.
+    </div>
+    <script>
+      const toast = document.getElementById('toast-msg');
+      if (toast) {
+        toast.classList.remove('opacity-0');
+        setTimeout(() => {
+          toast.classList.add('opacity-0');
+        }, 4000); // Some após 4 segundos
+      }
+    </script>
+  <?php endif; ?>
 </body>
 </html>

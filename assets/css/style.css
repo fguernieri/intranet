@@ -36,6 +36,42 @@
   background-color: #b91c1c; /* bg-red-700 */
 }
 
+.btn-acao-azul {
+  min-width: 90px;
+  height: 33px;
+  padding: 0 12px;
+  border-radius: 0.25rem;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2563EB; /* blue-600 */
+  color: #ffffff;            /* white */
+  transition: background-color 0.2s;
+}
+
+.btn-acao-azul:hover {
+  background-color: #1D4ED8; /* blue-700 */
+}
+
+.btn-acao-verde {
+  min-width: 90px;
+  height: 33px;
+  padding: 0 12px;
+  border-radius: 0.25rem;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #16A34A; /* green-600 */
+  color: #ffffff;            /* white */
+  transition: background-color 0.2s;
+}
+
+.btn-acao-verde:hover {
+  background-color: #15803D; /* green-700 */
+}
+
 .divider_yellow {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;

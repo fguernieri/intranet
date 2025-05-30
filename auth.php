@@ -1,16 +1,27 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/config/session_config.php';
+
 session_start();
 
+// ⚠️ Verifica inatividade real por tempo de acesso
+$tempoMaximoInatividade = 10800; // 3 horas
+
+if (isset($_SESSION['ultimo_acesso']) && (time() - $_SESSION['ultimo_acesso']) > $tempoMaximoInatividade) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php?msg=sessao_expirada');
+    exit;
+}
+$_SESSION['ultimo_acesso'] = time();
+
 // 1) Inclui a conexão principal e configurações
-require_once __DIR__ . '/config/db.php';      // $pdo aponta para o banco principal
-require_once __DIR__ . '/config/app.php';     // constantes de URL, paths, etc.
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/app.php';
 
 // 2) Função para obter IDs de vendedores autorizados para um usuário e ativos
-
 function getAuthorizedVendors(PDO $pdo, int $userId): array {
-    // Monta a SQL como string normal para evitar problemas de heredoc
     $sql = "
         SELECT uvp.vendedor_id
           FROM user_vendedor_permissoes AS uvp
@@ -28,7 +39,7 @@ function getAuthorizedVendors(PDO $pdo, int $userId): array {
 
 // 3) Verifica se o usuário está autenticado
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
+    header('Location: ' . BASE_URL . '/login.php?msg=sessao_expirada');
     exit;
 }
 

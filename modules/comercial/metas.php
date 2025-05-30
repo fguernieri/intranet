@@ -81,6 +81,8 @@ $seriesJson = json_encode($seriesPorTipo);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Metas</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+
 </head>
 <body class="bg-gray-900 text-white">
   <div class="flex h-screen">
@@ -98,7 +100,7 @@ $seriesJson = json_encode($seriesPorTipo);
 
             <form action="nova_meta_tipo.php" method="post" class="flex gap-2 items-center">
               <input type="text" name="nome" placeholder="Nova meta..." required class="bg-gray-900 border border-gray-600 rounded px-2 py-1 text-sm text-white" />
-              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">+ Nova Meta</button>
+              <button type="submit" class="btn-acao-verde">+ Nova Meta</button>
             </form>
           </details>
         </div>
@@ -113,7 +115,7 @@ $seriesJson = json_encode($seriesPorTipo);
             <?php endfor; ?>
           </select>
         </label>
-        <button type="submit" class="ml-auto bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">Filtrar</button>
+        <button type="submit" class="btn-acao-azul ml-auto">Filtrar</button>
       </form>
 
       <!-- Vários gráficos por tipo -->
@@ -191,7 +193,7 @@ $seriesJson = json_encode($seriesPorTipo);
             <?php endfor; ?>
           </select>
         </label>
-        <button type="submit" class="ml-auto bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm">Filtrar</button>
+        <button type="submit" class="ml-auto btn-acao-azul">Filtrar</button>
       </form>
 
       <h1 class="text-2xl text-yellow-400 font-semibold mb-4">Metas por Vendedor (<?= str_pad((string)$mesAtual, 2, '0', STR_PAD_LEFT) ?>/<?= $anoAtual ?>)</h1>

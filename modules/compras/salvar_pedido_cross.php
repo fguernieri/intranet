@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // fixa a filial
-$filial  = 'BAR DA FABRICA';
+$filial  = 'CROSS';
 $usuario = $_SESSION['usuario_nome'] ?? '';
 
 // conexão + transação
@@ -56,22 +56,37 @@ try {
         $dataHora
     );
 
-    // lê arrays do POST
-    $insumosArr     = $_POST['insumo']     ?? [];
-    $categoriasArr  = $_POST['categoria']  ?? [];
-    $unidadesArr    = $_POST['unidade']    ?? [];
-    $quantidadesArr = $_POST['quantidade'] ?? [];
-    $obsArr         = $_POST['observacao'] ?? [];
+    // 3) Lê e decodifica o JSON
+    $jsonInput = $_POST['itensJson'] ?? '';
+    $itens = json_decode($jsonInput, true);
+
+    if (!is_array($itens)) {
+        http_response_code(400);
+        error_log("salvar_pedido_cross.php erro: JSON inválido ou ausente. Recebido: " . $jsonInput);
+        exit('JSON inválido ou ausente');
+    }
+    if (empty($itens)) {
+        // Nenhum item para processar, pode redirecionar ou retornar erro.
+        // Se o JS já valida isso, talvez não seja estritamente necessário, mas é uma boa defesa.
+        header('Location: insumos_cross.php?status=noitems'); // Exemplo de status
+        exit;
+    }
 
     // loop existentes
-    foreach ($insumosArr as $i => $_) {
-        $insumoNome = trim($insumosArr[$i] ?? '');
-        $categoria  = substr(trim($categoriasArr[$i] ?? ''), 0, 50);
-        $unidade    = substr(trim($unidadesArr[$i]   ?? ''), 0, 20);
-        $quantidade = floatval(str_replace(',', '.', $quantidadesArr[$i] ?? '0'));
-        $observacao = substr(trim($obsArr[$i]         ?? ''), 0, 200);
+    foreach ($itens as $item) {
+        $insumoNomeRaw = $item['insumo'] ?? '';
+        $quantidadeRaw = $item['quantidade'] ?? '0';
 
-        if ($insumoNome === '' || $quantidade <= 0) continue;
+        $insumoNome  = trim($insumoNomeRaw);
+        $quantidade  = floatval($quantidadeRaw); // Convertido para float para validação e bind 'd'
+        
+        if ($insumoNome === '' || $quantidade <= 0) {
+            continue; // Pula itens inválidos
+        }
+
+        $categoria   = substr(trim($item['categoria'] ?? ''), 0, 50);
+        $unidade     = substr(trim($item['unidade']   ?? ''), 0, 20);
+        $observacao  = substr(trim($item['observacao']?? ''), 0, 200);
 
         $stmtInfo->execute();
         $stmtInfo->bind_result($insumoCloudfy, $insumoCodigo);
