@@ -5,6 +5,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../config/db_dw.php';
 
+require_once __DIR__ . '/../../auth.php';
+
+
 // 2) Captura e validação do ID do parâmetro GET
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
