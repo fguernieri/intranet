@@ -5,7 +5,7 @@ $codigo = $_POST['codigo'] ?? null;
 $termo = $_POST['termo'] ?? '';
 
 if ($codigo) {
-    $stmt = $pdo_dw->prepare("SELECT `Nome` as Insumo, `Cód. Ref.` AS codigo, `Unidade` AS unidade
+    $stmt = $pdo_dw->prepare("SELECT `Nome` as Insumo, `Cód. Ref.` AS codigo, `Unidade` AS unidade, `Custo médio` AS custo
                               FROM ProdutosBares
                               WHERE `Cód. Ref.` = :codigo
                               LIMIT 1");
