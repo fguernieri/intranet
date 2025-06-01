@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../../sidebar.php';
+include __DIR__ . '/../../auth.php';
 include __DIR__ . '/../../config/db.php';
 include __DIR__ . '/../../config/db_dw.php';
 ?>
@@ -12,16 +12,37 @@ include __DIR__ . '/../../config/db_dw.php';
   <title>Dashboard da Cozinha</title>
 
   <link rel="stylesheet" href="../../assets/css/style.css">
-  <link rel="icon" href="/assets/favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
-<body class="bg-gray-900 text-white">
-<main class="p-4 md:ml-64">
+<body class="bg-gray-900 mt-12 mb-8 text-white">
+
+<main class="flex-1 p-6 overflow-auto">
+
   <h1 class="text-2xl font-bold mb-4">Dashboard da Cozinha</h1>
+  <?php include __DIR__ . '/../../sidebar.php'; ?>
+
+  <!-- Disp Cozinhas -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+    <a href="disp_bdf_almoco.php" class="btn-acao">
+      Disp BDF Almoço
+    </a>
+    <a href="disp_bdf_almoco_fds.php" class="btn-acao">
+      Disp BDF Almoço FDS
+    </a>
+    <a href="disp_bdf_noite.php" class="btn-acao">
+      Disp BDF Noite
+    </a>
+    <a href="disp_wab.php" class="btn-acao">
+      Disp WAB
+    </a>
+    <a href="telegram_disp_config.php" class="btn-acao-azul">
+      Telegram
+    </a>
+
+  </div>
 
   <!-- KPIs -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
@@ -36,11 +57,11 @@ include __DIR__ . '/../../config/db_dw.php';
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
     <div>
       <h2 class="text-xl font-semibold mb-2">CMV por Prato</h2>
-      <div id="chart-cmv" class="rounded-xl p-4"></div>
+      <div id="chart-cmv" class="rounded-xl p-2"></div>
     </div>
     <div>
       <h2 class="text-xl font-semibold mb-2">Distribuição por Grupo</h2>
-      <div id="chart-grupo" class="rounded-xl p-4"></div>
+      <div id="chart-grupo" class="rounded-xl p-2"></div>
     </div>
   </div>
 
