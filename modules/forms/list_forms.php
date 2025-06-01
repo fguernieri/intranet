@@ -40,6 +40,10 @@ if (isset($_GET['deleted']))  $alerts[] = 'Formulário excluído com sucesso!';
   <div>
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Formulários</h1>
+            <a href="telegram_config.php" class="bg-blue-400 hover:bg-blue-700 text-white px-6 py-2 rounded">
+        Telegram
+      </a>
+
       <a href="edit_form.php" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
         + Novo formulário
       </a>
