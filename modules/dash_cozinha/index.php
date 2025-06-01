@@ -19,7 +19,7 @@ include __DIR__ . '/../../config/db_dw.php';
 
 <body class="bg-gray-900 mt-12 mb-8 text-white">
 
-<main class="flex-1 p-6 overflow-auto">
+<main class="flex-1 p-6 overflow-auto ml-64">
 
   <h1 class="text-2xl font-bold mb-4">Dashboard da Cozinha</h1>
   <?php include __DIR__ . '/../../sidebar.php'; ?>
