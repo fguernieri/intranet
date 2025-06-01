@@ -34,10 +34,10 @@ if (isset($_GET['deleted']))  $alerts[] = 'Formulário excluído com sucesso!';
   <title>Formulários</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">]
+<body class="bg-gray-100 mt-12 mb-8 flex">
 <?php include __DIR__ . '/../../sidebar.php'; ?>
 
-  <div class="max-w-4xl mx-auto">
+  <div>
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">Formulários</h1>
       <a href="edit_form.php" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
@@ -78,6 +78,8 @@ if (isset($_GET['deleted']))  $alerts[] = 'Formulário excluído com sucesso!';
                    class="text-blue-600 hover:underline">Editar</a>
                 <a href="builder.php?form_id=<?= $f['id'] ?>"
                    class="text-cyan-600 hover:underline">Campos</a>
+                <a href="show_responses.php?form_id=<?= $f['id'] ?>"
+                   class="text-blue-600 hover:underline ml-2">Ver respostas</a>
                 <form method="post" class="inline" onsubmit="return confirm('Excluir formulário “<?= addslashes($f['title']) ?>”?');">
                   <input type="hidden" name="delete_id" value="<?= $f['id'] ?>">
                   <button type="submit" class="text-red-600 hover:underline">Excluir</button>

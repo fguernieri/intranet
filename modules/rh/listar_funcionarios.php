@@ -19,7 +19,7 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="../../assets/css/style.css">
 
 </head>
-<body class="bg-gray-400 mt-12 mb-8 min-h-screen flex">
+<body class="bg-gray-100 mt-12 mb-8 flex">
 
   <div class="mx-auto bg-white p-6 rounded-2xl shadow-md">
     <div class="flex justify-between items-center mb-4">
