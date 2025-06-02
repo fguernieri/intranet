@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 declare(strict_types=1);
 
@@ -5,8 +6,7 @@ declare(strict_types=1);
 // Ele busca respostas novas em cada tabela de disponibilidade,
 // envia ao Telegram e registra em "automation_disp" para não reenviar.
 
-// 0) Inclusões obrigatórias
-require __DIR__ . '/../../auth.php';
+// 0) Inclusão de configuração do banco (sem auth.php)
 require __DIR__ . '/../../config/db.php';
 
 // Função para escapar caracteres especiais no Markdown legado do Telegram
@@ -19,20 +19,20 @@ function escapeTelegramMarkdown(string $texto): string {
 // 1) Mapping de formKey para nome amigável e tabela de respostas
 $formConfig = [
     'disp_bdf_almoco'     => [
-        'label'     => 'Disponibilidade BDF (Almoço)',
-        'table'     => 'disp_bdf_almoco',
+        'label' => 'Disponibilidade BDF (Almoço)',
+        'table' => 'disp_bdf_almoco',
     ],
     'disp_bdf_almoco_fds' => [
-        'label'     => 'Disponibilidade BDF (Almoço - FDS)',
-        'table'     => 'disp_bdf_almoco_fds',
+        'label' => 'Disponibilidade BDF (Almoço - FDS)',
+        'table' => 'disp_bdf_almoco_fds',
     ],
     'disp_bdf_noite'      => [
-        'label'     => 'Disponibilidade BDF (Noite)',
-        'table'     => 'disp_bdf_noite',
+        'label' => 'Disponibilidade BDF (Noite)',
+        'table' => 'disp_bdf_noite',
     ],
     'disp_wab'            => [
-        'label'     => 'Disponibilidade WAB',
-        'table'     => 'disp_wab',
+        'label' => 'Disponibilidade WAB',
+        'table' => 'disp_wab',
     ],
 ];
 
