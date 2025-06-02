@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 // Este script deve ser rodado via cron (CLI), sem interface web.
-// Ele busca respostas novas em cada tabela de disponibilidade,
-// envia ao Telegram e registra em "automation_disp" para não reenviar.
+// Ele busca respostas novas agrupadas por (data, nome_usuario) em cada tabela de disponibilidade,
+// envia UMA mensagem ao Telegram por grupo e registra em "automation_disp" para não reenviar.
 
-// 0) Inclusão de configuração do banco (sem auth.php)
+// 0) Inclusão de configuração do banco
 require __DIR__ . '/../../config/db.php';
 
 // Função para escapar caracteres especiais no Markdown legado do Telegram
@@ -49,64 +49,72 @@ foreach ($formConfig as $formKey => $cfg) {
     $templates[$formKey] = $row['template_md'] ?? '';
 }
 
-// 3) Para cada formKey, busque respostas novas e envie
+// 3) Para cada formKey, busque grupos (data, nome_usuario) e envie
 $telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
 $telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
 
-// Prepara consultas fixas
+// 3.1) Consulta para obter um único ID por (data, nome_usuario) ainda não enviado
 $stmtNew = $pdo->prepare("
-    SELECT id, data, nome_usuario, comentarios
-      FROM {TABLE}
-     WHERE id NOT IN (
-         SELECT response_id
-           FROM automation_disp
-          WHERE form_key = :form_key
-     )
-     ORDER BY id ASC
+    SELECT 
+      MIN(id) AS id, 
+      data, 
+      nome_usuario, 
+      comentarios
+    FROM {TABLE}
+    WHERE id NOT IN (
+      SELECT response_id 
+        FROM automation_disp 
+       WHERE form_key = :form_key
+    )
+    GROUP BY data, nome_usuario, comentarios
+    ORDER BY data ASC, nome_usuario ASC
 ");
 
+// 3.2) Consulta para detalhes dos pratos de um grupo
 $stmtDetails = $pdo->prepare("
     SELECT f.nome_prato, d.disponivel
       FROM {TABLE} AS d
-      LEFT JOIN ficha_tecnica AS f
+ LEFT JOIN ficha_tecnica AS f
         ON f.codigo_cloudify = d.codigo_cloudify
      WHERE d.data = :data_envio
        AND d.nome_usuario = :usuario
      ORDER BY d.id ASC
 ");
 
+// 3.3) Consulta para obter destinatários fixos (form_id = 3)
 $stmtRecipients = $pdo->prepare("
     SELECT chat_id
       FROM telegram_recipient_forms
      WHERE form_id = 3
 ");
 
+// 3.4) Consulta para logar cada envio em automation_disp
 $stmtInsertLog = $pdo->prepare("
     INSERT INTO automation_disp (form_key, response_id, sent_at)
     VALUES (:form_key, :response_id, NOW())
 ");
 
 foreach ($formConfig as $formKey => $cfg) {
-    $table = $cfg['table'];
+    $table      = $cfg['table'];
     $templateMd = $templates[$formKey];
     if (empty($templateMd)) {
         // Se não houver template cadastrado, pula
         continue;
     }
 
-    // 3.1) Busque respostas novas nesta tabela
+    // 3.5) Busque grupos novos (um registro por data + usuário)
     $queryNew = str_replace('{TABLE}', $table, $stmtNew->queryString);
     $stmtFetchNew = $pdo->prepare($queryNew);
     $stmtFetchNew->execute([':form_key' => $formKey]);
-    $newRows = $stmtFetchNew->fetchAll(PDO::FETCH_ASSOC);
+    $newGroups = $stmtFetchNew->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($newRows as $resp) {
-        $respId = (int)$resp['id'];
-        $dataEnvio = $resp['data'];
-        $usuario   = $resp['nome_usuario'];
-        $comentarioGeral = trim((string)$resp['comentarios']);
+    foreach ($newGroups as $grp) {
+        $respId         = (int)$grp['id'];
+        $dataEnvio      = $grp['data'];
+        $usuario        = $grp['nome_usuario'];
+        $comentarioGeral = trim((string)$grp['comentarios']);
 
-        // 3.2) Busque detalhes dos pratos para este envio
+        // 3.6) Busque detalhes dos pratos para este grupo (data + usuário)
         $queryDetails = str_replace('{TABLE}', $table, $stmtDetails->queryString);
         $stmtFetchDetails = $pdo->prepare($queryDetails);
         $stmtFetchDetails->execute([
@@ -115,14 +123,14 @@ foreach ($formConfig as $formKey => $cfg) {
         ]);
         $rowsDetalhes = $stmtFetchDetails->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3.3) Monte o array de placeholders
+        // 3.7) Monte o array de placeholders
         $assoc = [
-            'data'         => $dataEnvio,
-            'nome_usuario' => $usuario,
-            'comentarios'  => $comentarioGeral,
+            'data'          => $dataEnvio,
+            'nome_usuario'  => $usuario,
+            'comentarios'   => $comentarioGeral,
         ];
 
-        // 3.4) Construa a lista de pratos
+        // 3.8) Construa a lista de pratos
         $lista = [];
         foreach ($rowsDetalhes as $r) {
             $nome = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -131,7 +139,7 @@ foreach ($formConfig as $formKey => $cfg) {
         }
         $assoc['lista_codigos'] = implode("\n", $lista);
 
-        // 3.5) Substitua placeholders no template
+        // 3.9) Substitua placeholders no template
         $linhas = explode("\n", $templateMd);
         $saida  = [];
         foreach ($linhas as $linha) {
@@ -153,11 +161,11 @@ foreach ($formConfig as $formKey => $cfg) {
         }
         $textoEnviar = implode("\n", $saida);
 
-        // 3.6) Busque destinatários (form_id = 3)
+        // 3.10) Busque destinatários (form_id = 3)
         $stmtRecipients->execute();
         $destRows = $stmtRecipients->fetchAll(PDO::FETCH_COLUMN, 0);
 
-        // 3.7) Envie ao Telegram
+        // 3.11) Envie ao Telegram (apenas UMA vez por data + usuário)
         foreach ($destRows as $chatId) {
             $params = [
                 'chat_id'    => $chatId,
@@ -172,7 +180,7 @@ foreach ($formConfig as $formKey => $cfg) {
             curl_close($ch);
         }
 
-        // 3.8) Registre este envio em automation_disp
+        // 3.12) Registre este envio em automation_disp
         $stmtInsertLog->execute([
             ':form_key'    => $formKey,
             ':response_id' => $respId
