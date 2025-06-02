@@ -253,6 +253,7 @@ foreach ($rawTpl as $row) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuração – Envio via Telegram</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-gray-100 mt-12 mb-8 flex">
 <?php include __DIR__ . '/../../sidebar.php'; ?>

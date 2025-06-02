@@ -5,6 +5,14 @@ declare(strict_types=1);
 require __DIR__ . '/../../auth.php';
 require __DIR__ . '/../../config/db.php';
 
+// 0.1) Flash de sucesso do teste (utilizando sessão)
+$flashTeste = '';
+if (isset($_SESSION['sucesso_teste'])) {
+    // Recupera a mensagem enviada e limpa o flash
+    $flashTeste = $_SESSION['sucesso_teste'];
+    unset($_SESSION['sucesso_teste']);
+}
+
 // 1) Mapeie aqui as suas quatro páginas de disponibilidade,
 //    usando a mesma chave que você usará para "form_key" e
 //    indicando o nome amigável para exibir no config.
@@ -132,21 +140,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'nome_usuario' => (string)$usuario,
                 ];
 
-                // 2) Constrói a lista apenas com código e ícone de disponibilidade:
+                // 2.2.6) Constrói a lista apenas com código e ícone de disponibilidade:
                 $lista = [];
                 foreach ($rows as $r) {
                     $nome   = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
                     $disp   = $r['disponivel'] ? '✅' : '❌';
                     $lista[] = "- {$nome} : {$disp}";
-                }             
-               
+                }
                 $assoc['lista_codigos'] = implode("\n", $lista);
 
                 // (Opcional) Se seu template usar {comentarios} para observações gerais,
                 // você pode preencher com a concatenação de todos ou deixar vazio:
                 $assoc['comentarios'] = $comentarioGeral;
 
-                // 2.2.6) Substitua {label} por $assoc[label] linha a linha
+                // 2.2.7) Substitua {label} por $assoc[label] linha a linha
                 $linhas = explode("\n", $templateMd);
                 $saida  = [];
 
@@ -173,7 +180,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $textoEnviar = implode("\n", $saida);
 
-                // 2.2.7) Envie ao Telegram, sempre usando form_id = 3
+                // 2.2.8) Salva no flash de sessão para exibir ao retornar à página
+                $_SESSION['sucesso_teste'] = $textoEnviar;
+
+                // 2.2.9) Envie ao Telegram, sempre usando form_id = 3
                 $telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
                 $telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
 
@@ -198,9 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     curl_exec($ch);
                     curl_close($ch);
                 }
-            }
-        }
-
+            } // fim if ($lastResp)
+        } // fim if ($respTable !== '')
+        
         // Redireciona para a mesma página (para não reenviar no F5)
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
@@ -209,8 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 3) Carregue os templates atuais para exibir no formulário
 $currentTemplates = [];
-$inClause = implode(',', array_fill(0, count($formKeys), '?'));
-$stmt = $pdo->prepare("
+$inClause         = implode(',', array_fill(0, count($formKeys), '?'));
+$stmt             = $pdo->prepare("
     SELECT form_key, template_md
       FROM telegram_disp_templates
      WHERE form_key IN ({$inClause})
@@ -229,6 +239,7 @@ unset($rows);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuração – Templates Telegram (Disponibilidade)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body class="bg-gray-100 text-gray-900">
   <main class="p-6 md:ml-64">
@@ -238,26 +249,35 @@ unset($rows);
       Para testar imediatamente a última resposta, clique em “Enviar Teste”.
     </p>
 
+    <!-- Mensagem de sucesso ao enviar teste -->
+    <?php if (!empty($flashTeste)): ?>
+      <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-6">
+        <strong class="font-semibold">Teste enviado com sucesso!</strong>
+        <p class="mt-2 text-sm">
+          Abaixo você vê o Markdown completo que foi enviado ao Telegram. Compare com o que chegou no app:
+        </p>
+        <pre class="mt-2 bg-gray-50 border border-gray-200 rounded p-3 overflow-auto text-sm"><?= htmlspecialchars($flashTeste, ENT_QUOTES, 'UTF-8') ?></pre>
+      </div>
+    <?php endif; ?>
+
     <?php foreach ($formKeys as $key => $titulo): ?>
       <form method="POST" class="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 class="text-2xl font-semibold mb-4"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h2>
+        <h2 class="text-2xl font-semibold mb-4"><?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h2>
 
         <label class="block text-gray-700 mb-2 font-medium">
-          Template Markdown para <em><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></em>:
+          Template Markdown para <em><?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></em>:
         </label>
         <textarea
-          name="template_md[<?php echo $key; ?>]"
+          name="template_md[<?= $key; ?>]"
           class="w-full p-2 border border-gray-300 rounded h-48 font-mono text-sm"
-          placeholder="Digite aqui o template para <?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?>…"
-        ><?php 
-          echo htmlspecialchars($currentTemplates[$key] ?? '', ENT_QUOTES, 'UTF-8'); 
-        ?></textarea>
+          placeholder="Digite aqui o template para <?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?>…"
+        ><?= htmlspecialchars($currentTemplates[$key] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
 
         <p class="mt-2 text-sm text-gray-500">
           Exemplos de placeholders (copie exatamente do nome das colunas no BD):<br>
-          <code class="bg-gray-100 px-1 rounded">{data}</code>, 
-          <code class="bg-gray-100 px-1 rounded">{nome_usuario}</code>, 
-          <code class="bg-gray-100 px-1 rounded">{lista_codigos}</code>, 
+          <code class="bg-gray-100 px-1 rounded">{data}</code>,
+          <code class="bg-gray-100 px-1 rounded">{nome_usuario}</code>,
+          <code class="bg-gray-100 px-1 rounded">{lista_codigos}</code>,
           <code class="bg-gray-100 px-1 rounded">{comentarios}</code><br>
           *Cada `{campo}` deve bater exatamente com a coluna na tabela.*
         </p>
@@ -268,7 +288,7 @@ unset($rows);
             type="submit"
             name="action"
             value="save_template"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            class="btn-acao-azul"
           >
             Salvar Modelo
           </button>
@@ -278,13 +298,13 @@ unset($rows);
             type="submit"
             name="action"
             value="send_test"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            class="btn-acao-verde"
           >
             Enviar Teste
           </button>
 
           <!-- Passa junto o form_key para diferenciarmos qual template testar -->
-          <input type="hidden" name="form_key" value="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" />
+          <input type="hidden" name="form_key" value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" />
         </div>
       </form>
     <?php endforeach; ?>
