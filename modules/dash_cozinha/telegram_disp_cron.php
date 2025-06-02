@@ -109,9 +109,9 @@ foreach ($formConfig as $formKey => $cfg) {
     $newGroups = $stmtFetchNew->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($newGroups as $grp) {
-        $respId         = (int)$grp['id'];
-        $dataEnvio      = $grp['data'];
-        $usuario        = $grp['nome_usuario'];
+        $respId          = (int)$grp['id'];
+        $dataEnvio       = $grp['data'];
+        $usuario         = $grp['nome_usuario'];
         $comentarioGeral = trim((string)$grp['comentarios']);
 
         // 3.6) Busque detalhes dos pratos para este grupo (data + usuário)
