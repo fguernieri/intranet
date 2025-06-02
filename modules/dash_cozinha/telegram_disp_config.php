@@ -13,6 +13,14 @@ if (isset($_SESSION['sucesso_teste'])) {
     unset($_SESSION['sucesso_teste']);
 }
 
+// Função para escapar caracteres especiais no Markdown legado do Telegram
+function escapeTelegramMarkdown(string $texto): string {
+    // Somente escapamos os símbolos que podem quebrar itálico/negrito/código/links
+    $caracteres = ['\\', '_', '*', '`', '[', ']'];
+    $escapados  = ['\\\\', '\\_', '\\*', '\\`', '\\[', '\\]'];
+    return str_replace($caracteres, $escapados, $texto);
+}
+
 // 1) Mapeie aqui as suas quatro páginas de disponibilidade,
 //    usando a mesma chave que você usará para "form_key" e
 //    indicando o nome amigável para exibir no config.
@@ -112,9 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $lastResp = $respStmt->fetch(PDO::FETCH_ASSOC);
 
             if ($lastResp) {
-                // 2.2.4) Para todas as tabelas de disp_bdf_* e disp_wab, capturamos
-                //           'data' e 'nome_usuario' desse último envio, e então
-                //           buscamos todas as linhas com esse mesmo par.
+                // 2.2.4) Captura 'data' e 'nome_usuario' para buscar todas as linhas
                 $dataEnvio = $lastResp['data'];
                 $usuario   = $lastResp['nome_usuario'];
                 $comentarioGeral = trim((string)$lastResp['comentarios']);
@@ -140,26 +146,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'nome_usuario' => (string)$usuario,
                 ];
 
-                // 2.2.6) Constrói a lista apenas com código e ícone de disponibilidade:
+                // 2.2.6) Constrói a lista apenas com nome do prato + ícone de disponibilidade
                 $lista = [];
                 foreach ($rows as $r) {
-                    $nome   = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-                    $disp   = $r['disponivel'] ? '✅' : '❌';
+                    $nome = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                    $disp = $r['disponivel'] ? '✅' : '❌';
                     $lista[] = "- {$nome} : {$disp}";
                 }
                 $assoc['lista_codigos'] = implode("\n", $lista);
 
-                // (Opcional) Se seu template usar {comentarios} para observações gerais,
-                // você pode preencher com a concatenação de todos ou deixar vazio:
+                // Se seu template usar {comentarios}, preencha
                 $assoc['comentarios'] = $comentarioGeral;
 
-                // 2.2.7) Substitua {label} por $assoc[label] linha a linha
+                // 2.2.7) Substitui cada {label} no template pelo valor correspondente
                 $linhas = explode("\n", $templateMd);
                 $saida  = [];
 
                 foreach ($linhas as $linha) {
                     preg_match_all('/\{([^}]+)\}/', $linha, $matches);
-                    $placeholders = $matches[1]; // array de labels sem as chaves
+                    $placeholders = $matches[1]; // labels sem chaves
 
                     $novaLinha = $linha;
                     $incluir   = true;
@@ -169,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $incluir = false;
                             break;
                         }
-                        $valor    = htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                        $valor     = htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
                         $novaLinha = str_replace("{" . $label . "}", $valor, $novaLinha);
                     }
 
@@ -183,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // 2.2.8) Salva no flash de sessão para exibir ao retornar à página
                 $_SESSION['sucesso_teste'] = $textoEnviar;
 
-                // 2.2.9) Envie ao Telegram, sempre usando form_id = 3
+                // 2.2.9) Envie ao Telegram (form_id = 3 para todos)
                 $telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
                 $telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
 
@@ -196,9 +201,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $destRows = $destStmt->fetchAll(PDO::FETCH_COLUMN, 0);
 
                 foreach ($destRows as $chatId) {
+                    // Aplica escape no texto antes de enviar
                     $params = [
                         'chat_id'    => $chatId,
-                        'text'       => $textoEnviar,
+                        'text'       => escapeTelegramMarkdown($textoEnviar),
                         'parse_mode' => 'Markdown'
                     ];
                     $ch = curl_init($telegramApiUrl);
