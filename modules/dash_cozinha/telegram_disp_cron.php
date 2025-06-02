@@ -2,21 +2,17 @@
 <?php
 declare(strict_types=1);
 
-// Este script deve ser rodado via cron (CLI), sem interface web.
-// Ele busca respostas novas agrupadas por (data, nome_usuario) em cada tabela de disponibilidade,
-// envia UMA mensagem ao Telegram por grupo e registra em "automation_disp" para não reenviar.
-
-// 0) Inclusão de configuração do banco
+// 0) Carrega a conexão PDO (sem sessões nem cabeçalhos HTTP)
 require __DIR__ . '/../../config/db.php';
 
-// Função para escapar caracteres especiais no Markdown legado do Telegram
+// Função para escapar caracteres especiais no Markdown (legacy) do Telegram
 function escapeTelegramMarkdown(string $texto): string {
     $caracteres = ['\\', '_', '*', '`', '[', ']'];
     $escapados  = ['\\\\', '\\_', '\\*', '\\`', '\\[', '\\]'];
     return str_replace($caracteres, $escapados, $texto);
 }
 
-// 1) Mapping de formKey para nome amigável e tabela de respostas
+// 1) Mapeamento formKey -> [label, nome da tabela de respostas]
 $formConfig = [
     'disp_bdf_almoco'     => [
         'label' => 'Disponibilidade BDF (Almoço)',
@@ -36,7 +32,7 @@ $formConfig = [
     ],
 ];
 
-// 2) Obtenha o template Markdown para cada formKey
+// 2) Carrega do banco o templateMarkdown para cada formKey
 $templates = [];
 $stmtTpl = $pdo->prepare("
     SELECT form_key, template_md
@@ -49,28 +45,25 @@ foreach ($formConfig as $formKey => $cfg) {
     $templates[$formKey] = $row['template_md'] ?? '';
 }
 
-// 3) Para cada formKey, busque grupos (data, nome_usuario) e envie
-$telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
-$telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
+// 3) Preparar as consultas fixas que vamos reusar:
 
-// 3.1) Consulta para obter um único ID por (data, nome_usuario) ainda não enviado
-$stmtNew = $pdo->prepare("
-    SELECT 
-      MIN(id) AS id, 
-      data, 
-      nome_usuario, 
-      comentarios
-    FROM {TABLE}
-    WHERE id NOT IN (
-      SELECT response_id 
-        FROM automation_disp 
-       WHERE form_key = :form_key
-    )
-    GROUP BY data, nome_usuario, comentarios
-    ORDER BY data ASC, nome_usuario ASC
+// 3.1) Lê o maior response_id já enviado para este formKey
+$stmtGetLast = $pdo->prepare("
+    SELECT COALESCE(MAX(response_id), 0) AS last_sent_id
+      FROM automation_disp
+     WHERE form_key = :form_key
 ");
 
-// 3.2) Consulta para detalhes dos pratos de um grupo
+// 3.2) Busca o próximo registro (o mais recente) cuja id > last_sent_id
+$stmtNext = $pdo->prepare("
+    SELECT id, data, nome_usuario, comentarios
+      FROM {TABLE}
+     WHERE id > :last_sent_id
+     ORDER BY id DESC
+     LIMIT 1
+");
+
+// 3.3) Busca todos os pratos para um determinado (data, nome_usuario)
 $stmtDetails = $pdo->prepare("
     SELECT f.nome_prato, d.disponivel
       FROM {TABLE} AS d
@@ -81,111 +74,130 @@ $stmtDetails = $pdo->prepare("
      ORDER BY d.id ASC
 ");
 
-// 3.3) Consulta para obter destinatários fixos (form_id = 3)
+// 3.4) Busca destinatários fixos (form_id = 3)
 $stmtRecipients = $pdo->prepare("
     SELECT chat_id
       FROM telegram_recipient_forms
      WHERE form_id = 3
 ");
 
-// 3.4) Consulta para logar cada envio em automation_disp
+// 3.5) Insere em automation_disp para registrar que já enviamos esse response_id
 $stmtInsertLog = $pdo->prepare("
     INSERT INTO automation_disp (form_key, response_id, sent_at)
     VALUES (:form_key, :response_id, NOW())
 ");
 
+// 4) Itera sobre cada formKey e tenta enviar uma mensagem nova (se existir id > last_sent_id)
+$telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
+$telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
+
 foreach ($formConfig as $formKey => $cfg) {
     $table      = $cfg['table'];
     $templateMd = $templates[$formKey];
+
+    // Se não houver template cadastrado para esse formKey, ignora
     if (empty($templateMd)) {
-        // Se não houver template cadastrado, pula
         continue;
     }
 
-    // 3.5) Busque grupos novos (um registro por data + usuário)
-    $queryNew = str_replace('{TABLE}', $table, $stmtNew->queryString);
-    $stmtFetchNew = $pdo->prepare($queryNew);
-    $stmtFetchNew->execute([':form_key' => $formKey]);
-    $newGroups = $stmtFetchNew->fetchAll(PDO::FETCH_ASSOC);
+    // 4.1) Obter o último id já enviado para este formKey
+    $stmtGetLast->execute([':form_key' => $formKey]);
+    $rowLast = $stmtGetLast->fetch(PDO::FETCH_ASSOC);
+    $lastSentId = (int)$rowLast['last_sent_id'];
 
-    foreach ($newGroups as $grp) {
-        $respId          = (int)$grp['id'];
-        $dataEnvio       = $grp['data'];
-        $usuario         = $grp['nome_usuario'];
-        $comentarioGeral = trim((string)$grp['comentarios']);
+    // 4.2) Buscar o próximo registro com id > lastSentId
+    $sqlNext = str_replace('{TABLE}', $table, $stmtNext->queryString);
+    $stmtFetchNext = $pdo->prepare($sqlNext);
+    $stmtFetchNext->execute([
+        ':last_sent_id' => $lastSentId
+    ]);
+    $nextRow = $stmtFetchNext->fetch(PDO::FETCH_ASSOC);
 
-        // 3.6) Busque detalhes dos pratos para este grupo (data + usuário)
-        $queryDetails = str_replace('{TABLE}', $table, $stmtDetails->queryString);
-        $stmtFetchDetails = $pdo->prepare($queryDetails);
-        $stmtFetchDetails->execute([
-            ':data_envio' => $dataEnvio,
-            ':usuario'    => $usuario
-        ]);
-        $rowsDetalhes = $stmtFetchDetails->fetchAll(PDO::FETCH_ASSOC);
-
-        // 3.7) Monte o array de placeholders
-        $assoc = [
-            'data'          => $dataEnvio,
-            'nome_usuario'  => $usuario,
-            'comentarios'   => $comentarioGeral,
-        ];
-
-        // 3.8) Construa a lista de pratos
-        $lista = [];
-        foreach ($rowsDetalhes as $r) {
-            $nome = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $disp = $r['disponivel'] ? '✅' : '❌';
-            $lista[] = "- {$nome} : {$disp}";
-        }
-        $assoc['lista_codigos'] = implode("\n", $lista);
-
-        // 3.9) Substitua placeholders no template
-        $linhas = explode("\n", $templateMd);
-        $saida  = [];
-        foreach ($linhas as $linha) {
-            preg_match_all('/\{([^}]+)\}/', $linha, $matches);
-            $placeholders = $matches[1];
-            $novaLinha = $linha;
-            $incluir   = true;
-            foreach ($placeholders as $label) {
-                if (!isset($assoc[$label]) || trim($assoc[$label]) === '') {
-                    $incluir = false;
-                    break;
-                }
-                $valor = htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-                $novaLinha = str_replace("{" . $label . "}", $valor, $novaLinha);
-            }
-            if ($incluir) {
-                $saida[] = $novaLinha;
-            }
-        }
-        $textoEnviar = implode("\n", $saida);
-
-        // 3.10) Busque destinatários (form_id = 3)
-        $stmtRecipients->execute();
-        $destRows = $stmtRecipients->fetchAll(PDO::FETCH_COLUMN, 0);
-
-        // 3.11) Envie ao Telegram (apenas UMA vez por data + usuário)
-        foreach ($destRows as $chatId) {
-            $params = [
-                'chat_id'    => $chatId,
-                'text'       => escapeTelegramMarkdown($textoEnviar),
-                'parse_mode' => 'Markdown'
-            ];
-            $ch = curl_init($telegramApiUrl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_exec($ch);
-            curl_close($ch);
-        }
-
-        // 3.12) Registre este envio em automation_disp
-        $stmtInsertLog->execute([
-            ':form_key'    => $formKey,
-            ':response_id' => $respId
-        ]);
+    // Se não encontrou nada (não há registro novo), pula para o próximo formKey
+    if (!$nextRow) {
+        continue;
     }
+
+    // 4.3) Pegamos esse único registro (id, data, nome_usuario, comentarios)
+    $respId          = (int)$nextRow['id'];
+    $dataEnvio       = $nextRow['data'];
+    $usuario         = $nextRow['nome_usuario'];
+    $comentarioGeral = trim((string)$nextRow['comentarios']);
+
+    // 4.4) Buscar todos os pratos deste (data, nome_usuario)
+    $sqlDetails = str_replace('{TABLE}', $table, $stmtDetails->queryString);
+    $stmtFetchDetails = $pdo->prepare($sqlDetails);
+    $stmtFetchDetails->execute([
+        ':data_envio' => $dataEnvio,
+        ':usuario'    => $usuario
+    ]);
+    $rowsDetalhes = $stmtFetchDetails->fetchAll(PDO::FETCH_ASSOC);
+
+    // 4.5) Montar array de placeholders para o template
+    $assoc = [
+        'data'          => $dataEnvio,
+        'nome_usuario'  => $usuario,
+        'comentarios'   => $comentarioGeral,
+    ];
+
+    // 4.6) Construir a lista de pratos (cada linha “- prato : ✅/❌”)
+    $lista = [];
+    foreach ($rowsDetalhes as $r) {
+        $nome = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $disp = $r['disponivel'] ? '✅' : '❌';
+        $lista[] = "- {$nome} : {$disp}";
+    }
+    // Adiciona no array para substituir no template
+    $assoc['lista_codigos'] = implode("\n", $lista);
+
+    // 4.7) Substituir cada {campo} no template pelo valor correspondente
+    $linhas = explode("\n", $templateMd);
+    $saida  = [];
+    foreach ($linhas as $linha) {
+        preg_match_all('/\{([^}]+)\}/', $linha, $matches);
+        $placeholders = $matches[1];
+        $novaLinha = $linha;
+        $incluir   = true;
+
+        foreach ($placeholders as $label) {
+            if (!isset($assoc[$label]) || trim($assoc[$label]) === '') {
+                $incluir = false;
+                break;
+            }
+            $valor = htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $novaLinha = str_replace("{" . $label . "}", $valor, $novaLinha);
+        }
+
+        if ($incluir) {
+            $saida[] = $novaLinha;
+        }
+    }
+    $textoEnviar = implode("\n", $saida);
+
+    // 4.8) Buscar todos os chat_id (form_id = 3)
+    $stmtRecipients->execute();
+    $destRows = $stmtRecipients->fetchAll(PDO::FETCH_COLUMN, 0);
+
+    // 4.9) Enviar a mensagem ao Telegram **UMA ÚNICA VEZ** para cada chat_id
+    foreach ($destRows as $chatId) {
+        $params = [
+            'chat_id'    => $chatId,
+            'text'       => escapeTelegramMarkdown($textoEnviar),
+            'parse_mode' => 'Markdown'
+        ];
+        $ch = curl_init($telegramApiUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+    // 4.10) Gravar em automation_disp que enviamos este response_id
+    $stmtInsertLog->execute([
+        ':form_key'    => $formKey,
+        ':response_id' => $respId
+    ]);
 }
 
-// Fim do script. Não imprimir nada em tela.
+// Fim do script. Não imprime nada em tela.
