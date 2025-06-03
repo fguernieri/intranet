@@ -6,7 +6,7 @@ $nome = $_POST['nome'] ?? null;
 $comentarios = $_POST['comentarios'] ?? null;
 
 // Gera um lote_id único com timestamp
-$loteId = date('Y-m-d H:i:s');
+$loteId = date('Y-m-d H:i:s'); 
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
