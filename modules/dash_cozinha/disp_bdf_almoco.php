@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Disp de Cardápio BDF Almoço</title>
+  <title>Disp de Cardápio BDF Almoço 2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
