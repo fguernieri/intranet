@@ -77,7 +77,7 @@ if (
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PEDIDO DE COMPRA — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
+  <title>PEDIDO DE COMPRA TESTE — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/assets/css/style.css" rel="stylesheet">
   <style>
