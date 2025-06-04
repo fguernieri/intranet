@@ -8,22 +8,18 @@ require __DIR__ . '/../../config/db.php';
 // 0.1) Flash de sucesso do teste (utilizando sessão)
 $flashTeste = '';
 if (isset($_SESSION['sucesso_teste'])) {
-    // Recupera a mensagem enviada e limpa o flash
     $flashTeste = $_SESSION['sucesso_teste'];
     unset($_SESSION['sucesso_teste']);
 }
 
-// Função para escapar caracteres especiais no Markdown legado do Telegram
+// Função para escapar caracteres especiais no Telegram Markdown
 function escapeTelegramMarkdown(string $texto): string {
-    // Somente escapamos os símbolos que podem quebrar itálico/negrito/código/links
     $caracteres = ['\\', '_', '*', '`', '[', ']'];
     $escapados  = ['\\\\', '\\_', '\\*', '\\`', '\\[', '\\]'];
     return str_replace($caracteres, $escapados, $texto);
 }
 
-// 1) Mapeie aqui as suas quatro páginas de disponibilidade,
-//    usando a mesma chave que você usará para "form_key" e
-//    indicando o nome amigável para exibir no config.
+// 1) Mapeie suas quatro páginas de disponibilidade
 $formKeys = [
     'disp_bdf_almoco'      => 'Disponibilidade BDF (Almoço)',
     'disp_bdf_almoco_fds'  => 'Disponibilidade BDF (Almoço - FDS)',
@@ -31,17 +27,15 @@ $formKeys = [
     'disp_wab'             => 'Disponibilidade WAB'
 ];
 
-// 2) Captura de POST: pode ser "save_template" ou "send_test"
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action  = $_POST['action'] ?? '';
     $formKey = $_POST['form_key'] ?? '';
 
-    // 2.1) Salvar / Atualizar o template Markdown no banco
+    // 2.1) Salvar ou atualizar o template Markdown
     if ($action === 'save_template' && isset($formKeys[$formKey])) {
-        $raw  = $_POST['template_md'][$formKey] ?? '';
-        $md   = trim($raw);
+        $raw = $_POST['template_md'][$formKey] ?? '';
+        $md  = trim($raw);
 
-        // Verifica se já existe registro para esse form_key
         $stmt = $pdo->prepare("
             SELECT COUNT(*) 
               FROM telegram_disp_templates 
@@ -51,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $exists = (bool)$stmt->fetchColumn();
 
         if ($exists) {
-            // Atualiza
             $upd = $pdo->prepare("
                 UPDATE telegram_disp_templates
                    SET template_md = :template_md
@@ -62,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':form_key'    => $formKey
             ]);
         } else {
-            // Insere
             $ins = $pdo->prepare("
                 INSERT INTO telegram_disp_templates (form_key, template_md)
                 VALUES (:form_key, :template_md)
@@ -73,62 +65,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
-        // Redireciona para evitar re-submission
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
 
-    // 2.2) Enviar Teste: pega a última resposta da tabela X e manda ao Telegram
+    // 2.2) Enviar Teste (puxa a última resposta e envia ao Telegram)
     if ($action === 'send_test' && isset($formKeys[$formKey])) {
-        // 2.2.1) Carrega o template.md do banco
+        // Carrega o template Markdown salvo
         $tplStmt = $pdo->prepare("
             SELECT template_md
               FROM telegram_disp_templates
              WHERE form_key = :form_key
         ");
         $tplStmt->execute([':form_key' => $formKey]);
-        $tplRow = $tplStmt->fetch(PDO::FETCH_ASSOC);
-        $templateMd = $tplRow['template_md'] ?? '';
+        $templateMd = $tplStmt->fetchColumn() ?: '';
 
-        // 2.2.2) Descobre em qual tabela buscar a última resposta
-        switch ($formKey) {
-            case 'disp_bdf_almoco':
-                $respTable = 'disp_bdf_almoco';
-                break;
-            case 'disp_bdf_almoco_fds':
-                $respTable = 'disp_bdf_almoco_fds';
-                break;
-            case 'disp_bdf_noite':
-                $respTable = 'disp_bdf_noite';
-                break;
-            case 'disp_wab':
-                $respTable = 'disp_wab';
-                break;
-            default:
-                $respTable = '';
-        }
+        // Determina a tabela de respostas com base no form_key
+        $respTable = match ($formKey) {
+            'disp_bdf_almoco'     => 'disp_bdf_almoco',
+            'disp_bdf_almoco_fds' => 'disp_bdf_almoco_fds',
+            'disp_bdf_noite'      => 'disp_bdf_noite',
+            'disp_wab'            => 'disp_wab',
+            default               => ''
+        };
 
         if ($respTable !== '') {
-            // 2.2.3) Primeiro, busque o último registro (ORDER BY id DESC LIMIT 1)
             $respStmt = $pdo->prepare("
-                SELECT *
-                  FROM {$respTable}
-                 ORDER BY id DESC
+                SELECT * 
+                  FROM {$respTable} 
+                 ORDER BY id DESC 
                  LIMIT 1
             ");
             $respStmt->execute();
             $lastResp = $respStmt->fetch(PDO::FETCH_ASSOC);
 
             if ($lastResp) {
-                // 2.2.4) Captura 'data' e 'nome_usuario' para buscar todas as linhas
-                $dataEnvio = $lastResp['data'];
-                $usuario   = $lastResp['nome_usuario'];
+                $dataEnvio       = $lastResp['data'];
+                $usuario         = $lastResp['nome_usuario'];
                 $comentarioGeral = trim((string)$lastResp['comentarios']);
 
                 $allStmt = $pdo->prepare("
                     SELECT f.nome_prato, d.disponivel
                       FROM {$respTable} AS d
-                      LEFT JOIN ficha_tecnica AS f
+                      LEFT JOIN ficha_tecnica AS f 
                         ON f.codigo_cloudify = d.codigo_cloudify
                      WHERE d.data = :data_envio
                        AND d.nome_usuario = :usuario
@@ -140,13 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 $rows = $allStmt->fetchAll(PDO::FETCH_ASSOC);
 
-                // 2.2.5) Monte o array de placeholders:
                 $assoc = [
-                    'data'         => (string)$dataEnvio,
-                    'nome_usuario' => (string)$usuario,
+                    'data'         => $dataEnvio,
+                    'nome_usuario' => $usuario,
+                    'comentarios'  => $comentarioGeral,
                 ];
 
-                // 2.2.6) Constrói a lista apenas com nome do prato + ícone de disponibilidade
                 $lista = [];
                 foreach ($rows as $r) {
                     $nome = htmlspecialchars($r['nome_prato'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -155,27 +133,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $assoc['lista_codigos'] = implode("\n", $lista);
 
-                // Se seu template usar {comentarios}, preencha
-                $assoc['comentarios'] = $comentarioGeral;
-
-                // 2.2.7) Substitui cada {label} no template pelo valor correspondente
+                // Substitui placeholders no template
                 $linhas = explode("\n", $templateMd);
                 $saida  = [];
 
                 foreach ($linhas as $linha) {
                     preg_match_all('/\{([^}]+)\}/', $linha, $matches);
-                    $placeholders = $matches[1]; // labels sem chaves
-
                     $novaLinha = $linha;
                     $incluir   = true;
 
-                    foreach ($placeholders as $label) {
+                    foreach ($matches[1] as $label) {
                         if (!isset($assoc[$label]) || trim($assoc[$label]) === '') {
                             $incluir = false;
                             break;
                         }
-                        $valor     = htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-                        $novaLinha = str_replace("{" . $label . "}", $valor, $novaLinha);
+                        $novaLinha = str_replace(
+                            "{" . $label . "}",
+                            htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                            $novaLinha
+                        );
                     }
 
                     if ($incluir) {
@@ -185,10 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $textoEnviar = implode("\n", $saida);
 
-                // 2.2.8) Salva no flash de sessão para exibir ao retornar à página
+                // Salva no flash para exibir resultado na tela
                 $_SESSION['sucesso_teste'] = $textoEnviar;
 
-                // 2.2.9) Envie ao Telegram (form_id = 3 para todos)
+                // Envia ao Telegram (form_id = 3)
                 $telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
                 $telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
 
@@ -198,10 +174,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      WHERE form_id = :form_id
                 ");
                 $destStmt->execute([':form_id' => 3]);
-                $destRows = $destStmt->fetchAll(PDO::FETCH_COLUMN, 0);
+                $destRows = $destStmt->fetchAll(PDO::FETCH_COLUMN);
 
                 foreach ($destRows as $chatId) {
-                    // Aplica escape no texto antes de enviar
                     $params = [
                         'chat_id'    => $chatId,
                         'text'       => escapeTelegramMarkdown($textoEnviar),
@@ -214,10 +189,147 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     curl_exec($ch);
                     curl_close($ch);
                 }
-            } // fim if ($lastResp)
-        } // fim if ($respTable !== '')
-        
-        // Redireciona para a mesma página (para não reenviar no F5)
+            }
+        }
+
+        // Redireciona para a mesma página (evita re-submission)
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    // 2.3) Teste Cron: processa novos lote_id e envia ao Telegram
+    if ($action === 'cron_test' && isset($formKeys[$formKey])) {
+        $tabela = match ($formKey) {
+            'disp_bdf_almoco'     => 'disp_bdf_almoco',
+            'disp_bdf_almoco_fds' => 'disp_bdf_almoco_fds',
+            'disp_bdf_noite'      => 'disp_bdf_noite',
+            'disp_wab'            => 'disp_wab',
+            default               => null
+        };
+
+        if ($tabela) {
+            // Se não houver nenhum registro, usar '1970-01-01 00:00:00' como fallback
+            $lastStmt = $pdo->prepare("
+                SELECT MAX(lote_id) 
+                  FROM automation_disp 
+                 WHERE form_key = :form_key
+            ");
+            $lastStmt->execute([':form_key' => $formKey]);
+            $lastLote = $lastStmt->fetchColumn();
+
+            $fallback = '1970-01-01 00:00:00';
+            $compareLote = $lastLote !== null ? $lastLote : $fallback;
+
+            $novosLotesStmt = $pdo->prepare("
+                SELECT DISTINCT lote_id 
+                  FROM {$tabela}
+                 WHERE lote_id IS NOT NULL
+                   AND lote_id > :last
+                 ORDER BY lote_id ASC
+            ");
+            $novosLotesStmt->execute([':last' => $compareLote]);
+            $novosLotes = $novosLotesStmt->fetchAll(PDO::FETCH_COLUMN);
+
+            $tplStmt = $pdo->prepare("
+                SELECT template_md 
+                  FROM telegram_disp_templates 
+                 WHERE form_key = :form_key
+            ");
+            $tplStmt->execute([':form_key' => $formKey]);
+            $templateMd = $tplStmt->fetchColumn();
+
+            foreach ($novosLotes as $loteId) {
+                $dadosStmt = $pdo->prepare("
+                    SELECT d.*, f.nome_prato 
+                      FROM {$tabela} d
+                 LEFT JOIN ficha_tecnica f 
+                        ON f.codigo_cloudify = d.codigo_cloudify
+                     WHERE d.lote_id = :lote_id
+                ");
+                $dadosStmt->execute([':lote_id' => $loteId]);
+                $rows = $dadosStmt->fetchAll();
+
+                if (!$rows) continue;
+
+                $usuario   = $rows[0]['nome_usuario'];
+                $dataEnvio = $rows[0]['data'];
+                $comentarioGeral = trim((string)$rows[0]['comentarios']);
+
+                $lista = [];
+                foreach ($rows as $r) {
+                $nome = htmlspecialchars($r['nome_prato'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                    $disp = $r['disponivel'] ? '✅' : '❌';
+                    $lista[] = "- {$nome} : {$disp}";
+                }
+
+                $assoc = [
+                    'data'         => $dataEnvio,
+                    'nome_usuario' => $usuario,
+                    'lista_codigos'=> implode("\n", $lista),
+                    'comentarios'  => $comentarioGeral
+                ];
+
+                $linhas = explode("\n", $templateMd);
+                $saida  = [];
+
+                foreach ($linhas as $linha) {
+                    preg_match_all('/\{([^}]+)\}/', $linha, $matches);
+                    $novaLinha = $linha;
+                    $incluir   = true;
+
+                    foreach ($matches[1] as $label) {
+                        if (!isset($assoc[$label]) || trim($assoc[$label]) === '') {
+                            $incluir = false;
+                            break;
+                        }
+                        $novaLinha = str_replace(
+                            "{" . $label . "}",
+                            htmlspecialchars($assoc[$label], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+                            $novaLinha
+                        );
+                    }
+
+                    if ($incluir) $saida[] = $novaLinha;
+                }
+
+                $textoEnviar = implode("\n", $saida);
+
+                $telegramToken  = '8013231460:AAEhGNGKvHmZz4F_Zc-krqmtogdhX8XR3Bk';
+                $telegramApiUrl = "https://api.telegram.org/bot{$telegramToken}/sendMessage";
+
+                $destStmt = $pdo->prepare("
+                    SELECT chat_id 
+                      FROM telegram_recipient_forms 
+                     WHERE form_id = :form_id
+                ");
+                $destStmt->execute([':form_id' => 3]);
+                $destinos = $destStmt->fetchAll(PDO::FETCH_COLUMN);
+
+                foreach ($destinos as $chatId) {
+                    $params = [
+                        'chat_id'    => $chatId,
+                        'text'       => escapeTelegramMarkdown($textoEnviar),
+                        'parse_mode' => 'Markdown'
+                    ];
+                    $ch = curl_init($telegramApiUrl);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_exec($ch);
+                    curl_close($ch);
+                }
+
+                $logStmt = $pdo->prepare("
+                    INSERT INTO automation_disp (form_key, lote_id, sent_at)
+                    VALUES (:form_key, :lote_id, NOW())
+                ");
+                $logStmt->execute([
+                    ':form_key' => $formKey,
+                    ':lote_id'  => $loteId
+                ]);
+            }
+        }
+
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
@@ -247,12 +359,15 @@ unset($rows);
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <main class="p-6 md:ml-64">
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col sm:flex-row">
+<?php require __DIR__ . '/../../sidebar.php'; ?>
+
+  <main class="flex-1 p-4 sm:p-10 pt-20 sm:pt-10">
     <h1 class="text-3xl font-bold mb-6">Configuração de Templates – Telegram (Disponibilidade)</h1>
     <p class="mb-4 text-gray-700">
-      Edite o Markdown de cada modelo e clique em “Salvar Modelo”.  
-      Para testar imediatamente a última resposta, clique em “Enviar Teste”.
+      Edite o Markdown de cada modelo e clique em “Salvar Modelo”.<br>
+      Para testar imediatamente a última resposta, clique em “Enviar Teste”.<br>
+      Ou use o “Teste Cron” para simular envios com base nos lote_id mais recentes.
     </p>
 
     <!-- Mensagem de sucesso ao enviar teste -->
@@ -260,7 +375,7 @@ unset($rows);
       <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-6">
         <strong class="font-semibold">Teste enviado com sucesso!</strong>
         <p class="mt-2 text-sm">
-          Abaixo você vê o Markdown completo que foi enviado ao Telegram. Compare com o que chegou no app:
+          Abaixo você vê o Markdown completo que foi enviado ao Telegram.
         </p>
         <pre class="mt-2 bg-gray-50 border border-gray-200 rounded p-3 overflow-auto text-sm"><?= htmlspecialchars($flashTeste, ENT_QUOTES, 'UTF-8') ?></pre>
       </div>
@@ -307,6 +422,16 @@ unset($rows);
             class="btn-acao-verde"
           >
             Enviar Teste
+          </button>
+
+          <!-- Botão Teste Cron -->
+          <button
+            type="submit"
+            name="action"
+            value="cron_test"
+            class="btn-acao-azul"
+          >
+            Teste Cron
           </button>
 
           <!-- Passa junto o form_key para diferenciarmos qual template testar -->
