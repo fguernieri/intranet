@@ -2,6 +2,7 @@
 include __DIR__ . '/../../auth.php';
 include __DIR__ . '/../../config/db.php';
 include __DIR__ . '/../../config/db_dw.php';
+include __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -17,12 +18,11 @@ include __DIR__ . '/../../config/db_dw.php';
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
-<body class="bg-gray-900 mt-12 mb-8 text-white">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col sm:flex-row">
 
-<main class="flex-1 p-6 overflow-auto ml-64">
+<main class="flex-1 p-4 sm:p-10 pt-20 sm:pt-10">
 
   <h1 class="text-2xl font-bold mb-4">Dashboard da Cozinha</h1>
-  <?php include __DIR__ . '/../../sidebar.php'; ?>
 
   <!-- Disp Cozinhas -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
