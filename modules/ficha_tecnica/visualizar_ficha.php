@@ -62,6 +62,14 @@ if ($codigos) {
     body { background: #fff !important; color: #000 !important; }
     .no-print { display: none !important; }
     .print-container { width: auto !important; margin: 0 !important; padding: 0 !important; }
+    
+    /* Garante que a foto não ultrapasse a largura da página impressa */
+    img {
+    max-width: 100%;
+    height: auto;
+    /* opcional: limite máximo em altura */
+    max-height: 120mm;
+  }
 
     /* Evita quebras dentro das seções */
     .section-ingredientes,
