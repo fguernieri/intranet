@@ -30,6 +30,17 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
+<style>
+/* Remove os ícones de ordenação em todos os <th> do DataTable */
+table.dataTable thead th.sorting:before,
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:before,
+table.dataTable thead th.sorting_asc:after,
+table.dataTable thead th.sorting_desc:before,
+table.dataTable thead th.sorting_desc:after {
+  display: none !important;
+}
+</style>
 
   <!-- Alerta de exclusão -->
   <?php if (isset($_GET['excluido'])): ?>
@@ -63,18 +74,15 @@ $fichas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h1 class="text-3xl font-bold text-cyan-400 text-center mb-8">Consulta de Fichas Técnicas</h1>
 
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-      <form method="GET" class="w-full flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-start gap-2">
+      <form class="w-full flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-start gap-2">
         <input 
           type="text" 
-          name="filtro" 
+          name="filtro"
+          id="searchBox"
           value="<?= htmlspecialchars($filtro) ?>" 
           placeholder="Buscar por nome do prato..."
           class="w-full sm:w-96 p-3 rounded bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
-        <button 
-          type="submit"
-          class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-5 py-3 rounded"
-        >Buscar</button>
       </form>
 
       <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -276,26 +284,32 @@ function fecharImportProdutos() {
 
 
 <script>
-const table = $('#tabela-consulta').DataTable({
-  language: {
-    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
-  },
-  pageLength: -1, // 👈 exibe todos os registros
-  ordering: true,         // 👈 garante que a ordenação esteja ativada
-  order: [],              // 👈 não define ordenação inicial
-   columnDefs: [
-    { targets: [0, 5], orderable: false } // 👈 desativa ordenação das colunas Farol e Ações
-  ],
-  
-  
-  initComplete: function () {
-    // Esconde o select padrão
-    $('.dataTables_length').hide();
-    $('.dataTables_filter').hide();
-  }
+$(document).ready(function() {
+  // Inicializa o DataTable e guarda na variável "table"
+  const table = $('#tabela-consulta').DataTable({
+    language: {
+      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+    },
+    pageLength: -1,      // exibe todos os registros
+    ordering: true,
+    order: [],           // sem ordenação inicial
+    columnDefs: [
+      { targets: [0,5], orderable: false }, // Farol e Ações não ordenáveis
+      { targets: 5, searchable: false } // Ações fora da procura
 
+    ],
+    initComplete: function () {
+      // Esconde os controles padrão
+      $('.dataTables_length').hide();
+      $('.dataTables_filter').hide();
+    }
+  });
+
+  // Ao digitar no input, chama table.search() e redesenha a tabela
+  $('#searchBox').on('keyup', function() {
+    table.search(this.value).draw();
+  });
 });
-
 </script>
 
 </body>
