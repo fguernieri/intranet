@@ -6,42 +6,26 @@ include __DIR__ . '/../../sidebar.php';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard da Cozinha</title>
-
   <link rel="stylesheet" href="../../assets/css/style.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
-
 <body class="bg-gray-900 text-white min-h-screen flex flex-col sm:flex-row">
-
 <main class="flex-1 p-4 sm:p-10 pt-20 sm:pt-10">
-
   <h1 class="text-2xl font-bold mb-4">Dashboard da Cozinha</h1>
 
   <!-- Disp Cozinhas -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-    <a href="disp_bdf_almoco.php" class="btn-acao">
-      Disp BDF Almoço
-    </a>
-    <a href="disp_bdf_almoco_fds.php" class="btn-acao">
-      Disp BDF Almoço FDS
-    </a>
-    <a href="disp_bdf_noite.php" class="btn-acao">
-      Disp BDF Noite
-    </a>
-    <a href="disp_wab.php" class="btn-acao">
-      Disp WAB
-    </a>
-    <a href="telegram_disp_config.php" class="btn-acao-azul">
-      Telegram
-    </a>
-
+    <a href="disp_bdf_almoco.php"       class="btn-acao">Disp BDF Almoço</a>
+    <a href="disp_bdf_almoco_fds.php"   class="btn-acao">Disp BDF Almoço FDS</a>
+    <a href="disp_bdf_noite.php"        class="btn-acao">Disp BDF Noite</a>
+    <a href="disp_wab.php"              class="btn-acao">Disp WAB</a>
+    <a href="telegram_disp_config.php"  class="btn-acao-azul">Telegram</a>
   </div>
 
   <!-- KPIs -->
@@ -53,32 +37,48 @@ include __DIR__ . '/../../sidebar.php';
     <div class="card1 text-center"><p>Margem Média (%)</p><p id="kpi-margem">--</p></div>
   </div>
 
-  <!-- Gráficos -->
+  <!-- Gráficos CMV e Grupo -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
     <div>
       <h2 class="text-xl font-semibold mb-2">CMV por Prato</h2>
-      <div id="chart-cmv" class="rounded-xl p-2"></div>
+      <div id="chart-cmv" class="card1 no-hover"></div>
     </div>
     <div>
       <h2 class="text-xl font-semibold mb-2">Distribuição por Grupo</h2>
-      <div id="chart-grupo" class="rounded-xl p-2"></div>
+      <div id="chart-grupo" class="card1 no-hover"></div>
     </div>
   </div>
 
-  <!-- Tabela -->
+  <!-- Gráficos Disponibilidade -->
+  <div class="grid grid-cols-3 mt-6 gap-4">
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Disp. Tempo Real</h2>
+      <div id="chart-availability" class="card1 no-hover p-4"></div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Disp. Últimos 7 Dias</h2>
+      <div id="chart-availability-7d" class="card1 no-hover p-4"></div>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Disp. Últimos 30 Dias</h2>
+      <div id="chart-availability-30d" class="card1 no-hover p-4"></div>
+    </div>
+  </div>
+
+  <!-- Tabela Detalhamento -->
   <div class="mt-6">
     <h2 class="text-xl font-semibold mb-2">Detalhamento</h2>
     <div class="overflow-x-auto">
       <table id="tabela-sortable" class="min-w-full text-sm text-left">
         <thead>
           <tr class="bg-yellow-600 text-white">
-            <th class="p-2 cursor-pointer" onclick="sortTable(0)" scope="col">Prato</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(1)" scope="col">Grupo</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(2)" scope="col">Custo</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(3)" scope="col">Preço</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(4)" scope="col">CMV&nbsp;(%)</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(5)" scope="col">Margem&nbsp;(R$)</th>
-            <th class="p-2 cursor-pointer" onclick="sortTable(6)" scope="col">Margem&nbsp;(%)</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(0)">Prato</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(1)">Grupo</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(2)">Custo</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(3)">Preço</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(4)">CMV&nbsp;(%)</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(5)">Margem&nbsp;(R$)</th>
+            <th class="p-2 cursor-pointer" onclick="sortTable(6)">Margem&nbsp;(%)</th>
           </tr>
         </thead>
         <tbody id="tabela-pratos" data-sort-dir="asc"></tbody>
@@ -88,29 +88,31 @@ include __DIR__ . '/../../sidebar.php';
 </main>
 
 <script>
-async function carregarDashboard() {
-  try {
-    const res  = await fetch('dash_data.php');
-    const data = await res.json();
+  async function fetchDashData() {
+    const resp = await fetch('dash_data.php', { cache: 'no-cache' });
+    if (!resp.ok) throw new Error('Erro ao buscar dados');
+    return resp.json();
+  }
 
-    /* KPIs ------------------------------------------------------------ */
-    document.getElementById('kpi-total').textContent = data.kpis.total ?? '--';
-    document.getElementById('kpi-custo').textContent = `R$ ${(data.kpis.custo ?? 0).toFixed(2)}`;
-    document.getElementById('kpi-preco').textContent = `R$ ${(data.kpis.preco ?? 0).toFixed(2)}`;
-    document.getElementById('kpi-cmv').textContent   = `${(data.kpis.cmv   ?? 0).toFixed(1)}%`;
-    /* margem média calculada aqui mesmo */
-    const margemMedia = 100 - (data.kpis.cmv ?? 0);
-    document.getElementById('kpi-margem').textContent = `${margemMedia.toFixed(1)}%`;
+  document.addEventListener('DOMContentLoaded', async () => {
+    const data = await fetchDashData();
 
-    /* Gráficos -------------------------------------------------------- */
-    new ApexCharts(document.querySelector('#chart-cmv'),   data.chartCmv  ).render();
+    // KPIs
+    document.getElementById('kpi-total').textContent  = data.kpis.total ?? '--';
+    document.getElementById('kpi-custo').textContent  = `R$ ${(data.kpis.custo ?? 0).toFixed(2)}`;
+    document.getElementById('kpi-preco').textContent  = `R$ ${(data.kpis.preco ?? 0).toFixed(2)}`;
+    document.getElementById('kpi-cmv').textContent    = `${(data.kpis.cmv ?? 0).toFixed(1)}%`;
+    document.getElementById('kpi-margem').textContent = `${(100 - (data.kpis.cmv ?? 0)).toFixed(1)}%`;
+
+    // Gráficos CMV e Grupo
+    new ApexCharts(document.querySelector('#chart-cmv'),   data.chartCmv).render();
     new ApexCharts(document.querySelector('#chart-grupo'), data.chartGrupo).render();
 
-    /* Tabela ---------------------------------------------------------- */
+    // Tabela
     const tbody = document.getElementById('tabela-pratos');
     tbody.innerHTML = data.tabela.map(p => {
       const margemR = p.preco - p.custo;
-      const margemP = (margemR / p.preco) * 100;
+      const margemP = margemR / p.preco * 100;
       return `
         <tr class="border-b border-gray-700 hover:bg-gray-800">
           <td class="p-2">${p.nome}</td>
@@ -122,38 +124,68 @@ async function carregarDashboard() {
           <td class="p-2">${margemP.toFixed(1)}%</td>
         </tr>`;
     }).join('');
-  } catch (e) {
-    console.error('Erro ao carregar dashboard:', e);
-  }
-}
 
-/* Ordenação ---------------------------------------------------------- */
-function sortTable(col) {
-  const table = document.getElementById('tabela-sortable');
-  let dir = table.tBodies[0].getAttribute('data-sort-dir') === 'asc' ? 'asc' : 'desc';
-  let switching = true;
-
-  while (switching) {
-    switching = false;
-    const rows = table.rows;
-    for (let i = 1; i < rows.length - 1; i++) {
-      const xText = rows[i].cells[col].textContent;
-      const yText = rows[i + 1].cells[col].textContent;
-      const xVal  = parseFloat(xText.replace(/[R$%]/g, '').replace(',', '.')) || xText.toLowerCase();
-      const yVal  = parseFloat(yText.replace(/[R$%]/g, '').replace(',', '.')) || yText.toLowerCase();
-      const mustSwitch = dir === 'asc' ? xVal > yVal : xVal < yVal;
-      if (mustSwitch) {
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-        break;
-      }
+    // Função genérica para chart de disponibilidade
+    function renderDispChart(selector, obj) {
+      const labels = Object.keys(obj);
+      const series = Object.values(obj);
+      if (!labels.length) return;
+      const opts = {
+        chart:    { type: 'radialBar', height: 350 },
+        plotOptions: {
+          radialBar: {
+            startAngle: 0, endAngle: 270,
+            track: { background: '#333', strokeWidth:'100%', margin:5,
+              dropShadow:{ enabled:true, top:2, left:0, blur:4, opacity:0.15 } },
+            dataLabels:{ name:{show:false}, value:{show:false} },
+            barLabels:{
+              enabled:true, useSeriesColors:true, offsetX:-8, fontSize:'12px',
+              formatter:(name, opts)=>`${name}: ${opts.w.globals.series[opts.seriesIndex].toFixed(1)}%`
+            }
+          }
+        },
+        fill:{ type:'gradient', gradient:{
+          shade:'dark', type:'horizontal', shadeIntensity:0.5,
+          gradientToColors:['#ABE5A1'], inverseColors:true,
+          opacityFrom:1, opacityTo:1, stops:[0,100]
+        }},
+        stroke:{ lineCap:'round' },
+        labels: labels,
+        series: series,
+        colors: ['#0d47a1','#1565c0','#1976d2','#1e88e5']
+      };
+      new ApexCharts(document.querySelector(selector), opts).render();
     }
-    if (!switching) dir = dir === 'asc' ? 'desc' : 'asc';
-  }
-  table.tBodies[0].setAttribute('data-sort-dir', dir);
-}
 
-carregarDashboard();
+    // Disp tempo real, 7d e 30d
+    renderDispChart('#chart-availability',    data.availability);
+    renderDispChart('#chart-availability-7d', data.availability7d);
+    renderDispChart('#chart-availability-30d',data.availability30d);
+  });
+
+  // Sort table
+  function sortTable(col) {
+    const table = document.getElementById('tabela-sortable');
+    let dir = table.tBodies[0].getAttribute('data-sort-dir') === 'asc' ? 'asc' : 'desc';
+    let switching = true;
+    while (switching) {
+      switching = false;
+      const rows = table.rows;
+      for (let i = 1; i < rows.length - 1; i++) {
+        const x = rows[i].cells[col].textContent.replace(/[R$%,]/g,'').trim();
+        const y = rows[i+1].cells[col].textContent.replace(/[R$%,]/g,'').trim();
+        const a = isNaN(x) ? x.toLowerCase() : parseFloat(x);
+        const b = isNaN(y) ? y.toLowerCase() : parseFloat(y);
+        if ((dir==='asc' && a>b) || (dir==='desc' && a<b)) {
+          rows[i].parentNode.insertBefore(rows[i+1], rows[i]);
+          switching = true;
+          break;
+        }
+      }
+      if (!switching) dir = dir==='asc' ? 'desc' : 'asc';
+    }
+    table.tBodies[0].setAttribute('data-sort-dir', dir);
+  }
 </script>
 </body>
 </html>
