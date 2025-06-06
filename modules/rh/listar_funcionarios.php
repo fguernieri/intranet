@@ -1,7 +1,6 @@
 <?php
 // listar_funcionarios.php
 require_once '../../config/db.php';
-include '../../sidebar.php';
 
 
 // Busca todos os funcionários
@@ -20,14 +19,22 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </head>
 <body class="bg-gray-100 mt-12 mb-8 flex">
-
+<?php include '../../sidebar.php';?>
   <div class="mx-auto bg-white p-6 rounded-2xl shadow-md">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Lista de Funcionários</h1>
       <a href="form_funcionario.php" class="btn-acao py-2 px-4">+ Novo Funcionário</a>
     </div>
+    <div>
+    <input 
+      type="text" 
+      id="searchBox" 
+      placeholder="Digite para filtrar..." 
+      class="px-3 py-2 border rounded-lg mb-4"
+    />
+    </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table id="lista_funcionario" class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Nome</th>
@@ -61,5 +68,50 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </table>
     </div>
   </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('searchBox');
+  if (!input) {
+    console.error('Não foi possível encontrar o elemento #searchBox');
+    return;
+  }
+
+  let timer = null;
+  input.addEventListener('keyup', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const termo = this.value.toLowerCase().trim();
+      filtrarTabela(termo);
+    }, 100);
+  });
+
+  function filtrarTabela(termo) {
+    const linhas = document.querySelectorAll('#lista_funcionario tbody tr');
+    if (!linhas.length) {
+      console.warn('Nenhuma linha encontrada em #lista_funcionario');
+      return;
+    }
+
+    linhas.forEach(linha => {
+      // Concatena o texto de todas as <td> daquela linha
+      const textoLinha = Array
+        .from(linha.cells)
+        .map(td => td.innerText.toLowerCase())
+        .join(' ');
+
+      // Se o termo existir em qualquer coluna, mostra a linha; senão oculta
+      if (textoLinha.includes(termo)) {
+        linha.style.display = '';
+      } else {
+        linha.style.display = 'none';
+      }
+    });
+  }
+
+  // Chama uma vez para, inicialmente, deixar tudo visível
+  filtrarTabela('');
+});
+</script>
+
 </body>
 </html>
