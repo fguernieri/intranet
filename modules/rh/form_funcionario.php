@@ -468,7 +468,27 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
       }
     });
 
-    
+// Ao sair do campo CEP, busca no ViaCEP e preenche tudo em maiúsculas
+document.getElementById('cep').addEventListener('blur', function() {
+  const valorCep = this.value.replace(/\D/g, ''); // deixa só números
+  if (valorCep.length !== 8) return; // só continua se tiver 8 dígitos
+
+  fetch(`https://viacep.com.br/ws/${valorCep}/json/`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || data.erro) {
+        console.warn('CEP não encontrado');
+        // Caso queira, você pode limpar os campos ou mostrar uma mensagem aqui
+        return;
+      }
+      // Preenche os inputs de endereço em MAIÚSCULAS
+      document.querySelector('input[name="logradouro"]').value = (data.logradouro || '').toUpperCase();
+      document.querySelector('input[name="bairro"]').value    = (data.bairro    || '').toUpperCase();
+      document.querySelector('input[name="cidade"]').value    = (data.localidade|| '').toUpperCase();
+      document.querySelector('input[name="estado"]').value    = (data.uf        || '').toUpperCase();
+    })
+    .catch(err => console.error('Erro ao buscar endereço:', err));
+});
   </script>
 </body>
 </html>
