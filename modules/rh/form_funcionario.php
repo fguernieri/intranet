@@ -41,7 +41,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
         <input type="text" id="buscaNome" class="mt-1 p-2 w-full border rounded" placeholder="Digite 3 letras ou mais..." autocomplete="off" />
         <ul id="listaSugestoes" class="absolute z-10 w-full bg-white border rounded shadow max-h-60 overflow-auto hidden"></ul>
       </div>
-
+      <hr class="divider_yellow">
       <!-- Dados Pessoais -->
       <fieldset>
         <legend class="text-lg font-semibold mb-2">Dados Pessoais</legend>
@@ -67,8 +67,9 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
               <input type="date" class="mt-1 p-2 w-full border rounded" name="data_nascimento" />
             </label>
           </div>
+          <hr class="divider_yellow col-span-2">
           <!-- Endereço Detalhado -->
-          <fieldset class="md:col-span-2 border-t pt-4">
+          <fieldset class="col-span-2">
             <legend class="text-lg font-semibold mb-2">Endereço</legend>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="md:col-span-2">
@@ -121,6 +122,37 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
           </div>
         </div>
       </fieldset>
+      <hr class="divider_yellow">
+      
+
+      <!-- Dados para contato -->
+      <fieldset>
+        <legend class="text-lg font-semibold mb-2">Dados para Contato</legend>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm">Nome
+              <input type="text" class="mt-1 p-2 w-full border rounded" name="nome_contato" />
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm">Telefone
+              <input type="text" class="mt-1 p-2 w-full border rounded" name="telefone_contato" placeholder="(00) 00000-0000" />
+            </label>
+          </div>
+          <div>
+          <label class="block text-sm mb=2" for="grau_parentesco">Grau de parentesco:</label>
+            <select class="mt-1 p-2 w-full border rounded text-sm" name="grau_parentesco">
+              <option value="">Selecione</option>
+              <option value="pai_mae">Pai/Mãe</option>
+              <option value="irmaos">Irmãos</option>
+              <option value="filho">Filho(a)</option>
+              <option value="esposo">Esposo(a)</option>
+              <option value="outro">Outros</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+      <hr class="divider_yellow">
 
       <!-- Informações Profissionais -->
       <fieldset>
@@ -185,6 +217,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
           </label>
         </div>
       </fieldset>
+      <hr class="divider_yellow">
 
       <!-- Dados Bancários -->
       <fieldset>

@@ -20,8 +20,23 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </head>
 <body class="bg-gray-100 mt-12 mb-8 flex">
+
+
 <?php include '../../sidebar.php';?>
   <div class="mx-auto bg-white p-6 rounded-2xl shadow-md">
+  <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1): ?>
+    <div id="mensagemSucesso" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow text-sm">
+      ✅ Alterações salvas com sucesso!
+    </div>
+    <script>
+      // Esconde após 3 segundos
+      setTimeout(() => {
+        const msg = document.getElementById('mensagemSucesso');
+        if (msg) msg.style.display = 'none';
+      }, 3000);
+    </script>
+    <?php endif; ?>
+
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Lista de Funcionários</h1>
       <a href="form_funcionario.php" class="btn-acao py-2 px-4">+ Novo Funcionário</a>

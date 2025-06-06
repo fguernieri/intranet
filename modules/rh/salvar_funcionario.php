@@ -21,7 +21,8 @@ try {
     'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'cep',
     'telefone', 'email', 'empresa_contratante', 'cargo', 'departamento',
     'data_admissao', 'numero_folha', 'numero_pis', 'tipo_contrato', 'salario',
-    'cnpj', 'data_demissao', 'banco', 'agencia', 'conta', 'codigo_banco', 'chave_pix'
+    'cnpj', 'data_demissao', 'banco', 'agencia', 'conta', 'codigo_banco', 'chave_pix',
+    'nome_contato', 'telefone_contato', 'grau_parentesco'
   ];
 
     foreach ($campos as $campo) {
@@ -49,7 +50,7 @@ try {
   $stmt->execute($valores);
 
   // Redireciona ou responde
-    header('Location: form_funcionario.php?sucesso=1');
+    header('Location: listar_funcionarios.php?sucesso=1');
     exit;
 
 } catch (Exception $e) {
