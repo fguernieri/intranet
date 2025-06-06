@@ -207,7 +207,9 @@ $UltimaAtualizacao = $stmt->fetchColumn();
           <div><label class="block mb-2 text-sm font-semibold">📅 Data Fim</label><input type="date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-sm"></div>
           <div class="p-2"><p><strong>Período disponível:</strong> <?= $data_inicial? date('d/m/Y',$data_inicial):'' ?> a <?= $data_final? date('d/m/Y',$data_final):'' ?></p></div>
           <div><p class="p-2 text-sm text-gray-400 mt-auto">Última Atualização em: <?=date('d/m/Y H:i:s', strtotime($UltimaAtualizacao))?></p></div>
-          <div class="flex justify-end"><button type="submit" class="btn-acao">Aplicar Filtros</button></div>
+          <div class="flex justify-end gap-4">
+            <a class="btn-acao" href="metas.php">Cadastro Metas</a>
+            <button type="submit" class="btn-acao">Aplicar Filtros</button></div>
         </div>
       </form>
       
