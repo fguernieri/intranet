@@ -117,7 +117,7 @@ $sqlAlmoco = "
     WHERE lote_id = (SELECT MAX(lote_id) FROM disp_bdf_almoco)
 ";
 $row = $pdo->query($sqlAlmoco)->fetch(PDO::FETCH_ASSOC);
-$data['Disp BDF Almoco'] = ($row['total']>0)
+$data['BDF Almoco'] = ($row['total']>0)
     ? round(($row['disponiveis'] / $row['total']) * 100, 1)
     : 0;
 
