@@ -1,6 +1,7 @@
 <?php
 // listar_funcionarios.php
 require_once '../../config/db.php';
+require_once '../../auth.php'
 
 
 // Busca todos os funcionários
