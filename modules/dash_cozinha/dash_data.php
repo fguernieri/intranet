@@ -84,7 +84,7 @@ $sqlNoite = "
     WHERE lote_id = (SELECT MAX(lote_id) FROM disp_bdf_noite)
 ";
 $row = $pdo->query($sqlNoite)->fetch(PDO::FETCH_ASSOC);
-$data['Disp BDF Noite'] = ($row['total']>0)
+$data['BDF Noite'] = ($row['total']>0)
     ? round(($row['disponiveis'] / $row['total']) * 100, 1)
     : 0;
 
@@ -95,7 +95,7 @@ $sqlFds = "
     WHERE lote_id = (SELECT MAX(lote_id) FROM disp_bdf_almoco_fds)
 ";
 $row = $pdo->query($sqlFds)->fetch(PDO::FETCH_ASSOC);
-$data['Disp BDF Alm FDS'] = ($row['total']>0)
+$data['BDF Alm FDS'] = ($row['total']>0)
     ? round(($row['disponiveis'] / $row['total']) * 100, 1)
     : 0;
 
@@ -106,7 +106,7 @@ $sqlWab = "
     WHERE lote_id = (SELECT MAX(lote_id) FROM disp_wab)
 ";
 $row = $pdo->query($sqlWab)->fetch(PDO::FETCH_ASSOC);
-$data['Disp WAB'] = ($row['total']>0)
+$data['WAB'] = ($row['total']>0)
     ? round(($row['disponiveis'] / $row['total']) * 100, 1)
     : 0;
 
