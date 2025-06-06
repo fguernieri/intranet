@@ -50,7 +50,7 @@ try {
   $stmt->execute($valores);
 
   // Redireciona ou responde
-    header('Location: form_funcionario.php?sucesso=1');
+    header('Location: listar_funcionarios.php?sucesso=1');
     exit;
 
 } catch (Exception $e) {

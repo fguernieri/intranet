@@ -41,7 +41,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
         <input type="text" id="buscaNome" class="mt-1 p-2 w-full border rounded" placeholder="Digite 3 letras ou mais..." autocomplete="off" />
         <ul id="listaSugestoes" class="absolute z-10 w-full bg-white border rounded shadow max-h-60 overflow-auto hidden"></ul>
       </div>
-
+      <hr class="divider_yellow">
       <!-- Dados Pessoais -->
       <fieldset>
         <legend class="text-lg font-semibold mb-2">Dados Pessoais</legend>
@@ -67,6 +67,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
               <input type="date" class="mt-1 p-2 w-full border rounded" name="data_nascimento" />
             </label>
           </div>
+          <hr class="divider_yellow col-span-2">
           <!-- Endereço Detalhado -->
           <fieldset class="col-span-2">
             <legend class="text-lg font-semibold mb-2">Endereço</legend>
@@ -121,6 +122,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
           </div>
         </div>
       </fieldset>
+      <hr class="divider_yellow">
       
 
       <!-- Dados para contato -->
@@ -150,6 +152,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
           </div>
         </div>
       </fieldset>
+      <hr class="divider_yellow">
 
       <!-- Informações Profissionais -->
       <fieldset>
@@ -214,6 +217,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
           </label>
         </div>
       </fieldset>
+      <hr class="divider_yellow">
 
       <!-- Dados Bancários -->
       <fieldset>
