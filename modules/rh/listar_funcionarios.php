@@ -6,7 +6,7 @@ require_once '../../auth.php';
 
 // Busca todos os funcionários
 $stmt = $pdo->query(
-    'SELECT nome_completo, cpf, rg, data_nascimento, empresa_contratante, cargo, data_admissao FROM funcionarios ORDER BY nome_completo'
+    'SELECT nome_completo, cpf, rg, data_nascimento, empresa_contratante, cargo, data_admissao, email, telefone FROM funcionarios ORDER BY nome_completo'
 );
 $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -41,8 +41,8 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Nome</th>
             <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">CPF</th>
             <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Cargo</th>
-            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Empresa</th>
-            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Admissão</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">Telefone</th>
+            <th class="p-3 text-left text-sm font-medium uppercase tracking-wider">E-mail</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -60,8 +60,8 @@ $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </td>
                 <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['cpf']); ?></td>
                 <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['cargo']); ?></td>
-                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['empresa_contratante']); ?></td>
-                <td class="p-3 text-sm whitespace-nowrap"><?php echo date('d/m/Y', strtotime($func['data_admissao'])); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['telefone'] ?? ''); ?></td>
+                <td class="p-3 text-sm whitespace-nowrap"><?php echo htmlspecialchars($func['email'] ?? ''); ?></td>
               </tr>
             <?php endforeach; ?>
           <?php endif; ?>
