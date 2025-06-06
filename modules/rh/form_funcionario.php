@@ -47,12 +47,12 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
         <legend class="text-lg font-semibold mb-2">Dados Pessoais</legend>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm">Nome completo
+            <label class="block text-sm">Nome completo (*)
               <input type="text" class="mt-1 p-2 w-full border rounded" name="nome_completo" required />
             </label>
           </div>
           <div>
-            <label class="block text-sm">CPF
+            <label class="block text-sm">CPF (*)
               <input type="text" class="mt-1 p-2 w-full border rounded" id="cpf" name="cpf" placeholder="000.000.000-00" required />
               <small class="text-red-600 hidden" id="cpfErro">CPF inválido</small>
             </label>
@@ -102,7 +102,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/sidebar.php';
                 </label>
               </div>
               <div>
-                <label class="block text-sm">CEP
+                <label class="block text-sm">CEP (*)
                   <input type="text" class="mt-1 p-2 w-full border rounded" id="cep" name="cep" placeholder="00000-000" required />
                 </label>
               </div>
