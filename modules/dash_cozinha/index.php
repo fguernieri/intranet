@@ -50,7 +50,7 @@ include __DIR__ . '/../../sidebar.php';
   </div>
 
   <!-- Gráficos Disponibilidade -->
-  <div class="grid grid-cols-3 mt-6 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-3 mt-6 gap-4">
     <div>
       <h2 class="text-xl font-semibold mb-2">Disp. Tempo Real</h2>
       <div id="chart-availability" class="card1 no-hover p-4"></div>
@@ -69,9 +69,9 @@ include __DIR__ . '/../../sidebar.php';
   <div class="mt-6">
     <h2 class="text-xl font-semibold mb-2">Detalhamento</h2>
     <div class="overflow-x-auto">
-      <table id="tabela-sortable" class="min-w-full text-sm text-left">
+      <table id="tabela-sortable" class="min-w-full text-xs text-left">
         <thead>
-          <tr class="bg-yellow-600 text-white">
+          <tr class="bg-yellow-600 text-white text-sm">
             <th class="p-2 cursor-pointer" onclick="sortTable(0)">Prato</th>
             <th class="p-2 cursor-pointer" onclick="sortTable(1)">Grupo</th>
             <th class="p-2 cursor-pointer" onclick="sortTable(2)">Custo</th>
@@ -137,22 +137,21 @@ include __DIR__ . '/../../sidebar.php';
             startAngle: 0, endAngle: 270,
             track: { background: '#333', strokeWidth:'100%', margin:5,
               dropShadow:{ enabled:true, top:2, left:0, blur:4, opacity:0.15 } },
-            dataLabels:{ name:{show:false}, value:{show:false} },
-            barLabels:{
-              enabled:true, useSeriesColors:true, offsetX:-8, fontSize:'12px',
-              formatter:(name, opts)=>`${name}: ${opts.w.globals.series[opts.seriesIndex].toFixed(1)}%`
+            dataLabels:{ name:{show:true}, value:{show:true},
+            },
+            barLabels: {
+              enabled:         true,
+              useSeriesColors: false, 
+              offsetX:         -8,
+              formatter:       (name, opts) =>
+                `${name}: ${opts.w.globals.series[opts.seriesIndex].toFixed(1)}%`,
             }
           }
         },
-        fill:{ type:'gradient', gradient:{
-          shade:'dark', type:'horizontal', shadeIntensity:0.5,
-          gradientToColors:['#ABE5A1'], inverseColors:true,
-          opacityFrom:1, opacityTo:1, stops:[0,100]
-        }},
         stroke:{ lineCap:'round' },
         labels: labels,
         series: series,
-        colors: ['#0d47a1','#1565c0','#1976d2','#1e88e5']
+        colors: ['#ffbc3c','#ffd256','#ffe970','#ffff8a']
       };
       new ApexCharts(document.querySelector(selector), opts).render();
     }

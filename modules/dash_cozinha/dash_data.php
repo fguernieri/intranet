@@ -71,7 +71,15 @@ $chartGrupo = [
     'chart'  => array_merge(['type' => 'donut'], $themeDark),
     'labels' => array_keys($grupos),
     'series' => array_values($grupos),
-    'colors' => ['#facc15', '#f59e0b', '#eab308', '#d97706']
+    'colors' => ['#ffff8a', '#ffe970', '#ffd256', '#ffbc3c'],
+    'stroke' => [
+      'show' => false  ],
+    'legend'  => [
+        'fontSize'        => '10px',
+        'position'        => 'bottom',    // posiciona abaixo do gráfico
+        'horizontalAlign'=> 'center',     // centraliza na horizontal
+        'offsetY'         => 0            // ajuste vertical, se precisar
+    ]
 ];
 
 // 5) Disponibilidade "tempo real" (último lote)
