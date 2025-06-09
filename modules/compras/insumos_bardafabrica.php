@@ -65,6 +65,21 @@ foreach ($insumos as $row) {
 }
 $insumos = $insumos_dedup;
 
+// DEDUPLICAÇÃO DE INSUMOS ANTES DE RENDERIZAR A TABELA
+$insumosUnicos = [];
+$chavesVistas = [];
+foreach ($insumos as $row) {
+    // Usa CODIGO se existir, senão INSUMO+CATEGORIA+UNIDADE como chave composta
+    $chave = isset($row['CODIGO']) && $row['CODIGO'] !== ''
+        ? $row['CODIGO']
+        : $row['INSUMO'] . '|' . $row['CATEGORIA'] . '|' . $row['UNIDADE'];
+    if (!isset($chavesVistas[$chave])) {
+        $insumosUnicos[] = $row;
+        $chavesVistas[$chave] = true;
+    }
+}
+$insumos = $insumosUnicos;
+
 $categorias = array_values(array_unique(array_column($insumos, 'CATEGORIA')));
 $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
 
