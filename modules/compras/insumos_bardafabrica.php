@@ -33,19 +33,18 @@ $stmt = $conn->prepare("
         i.CATEGORIA,
         i.UNIDADE,
         i.CODIGO,
-        COALESCE(e_agg.ESTOQUE_AGREGADO, 0) AS ESTOQUE_ATUAL,
+        COALESCE(e.ESTOQUE_ATUAL, 0) AS ESTOQUE_ATUAL,
         COALESCE(vw.total_insumo_usado_9dias, 0) AS CONSUMO_9DIAS,
         COALESCE(vw.sugestao_compra, 0) AS SUGESTAO_COMPRA
     FROM insumos i
     LEFT JOIN (
-        SELECT CODIGO, SUM(Estoquetotal) AS ESTOQUE_AGREGADO
-        FROM EstoqueBDF -- Nome da tabela de estoque para BAR DA FABRICA
+        SELECT CODIGO, SUM(Estoquetotal) AS ESTOQUE_ATUAL
+        FROM EstoqueBDF
         GROUP BY CODIGO
-    ) e_agg ON i.CODIGO = e_agg.CODIGO
+    ) e ON i.CODIGO = e.CODIGO
     LEFT JOIN vw_consumo_insumos_3m vw ON i.CODIGO = vw.cod_insumo
     WHERE i.FILIAL = ?
     ORDER BY i.CATEGORIA, i.INSUMO
-    -- Estoque agregado (SUM) da tabela EstoqueBDF para evitar duplicação.
 ");
 $stmt->bind_param('s', $filial);
 $stmt->execute();
