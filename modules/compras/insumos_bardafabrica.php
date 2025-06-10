@@ -607,4 +607,5 @@ if (
     document.getElementById('btn-scroll-bottom').onclick = ()=> window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
   </script>
 </body>
-</html>
+</html><?php
+echo '<pre>'; var_dump($insumos[0]); echo '</pre>';
