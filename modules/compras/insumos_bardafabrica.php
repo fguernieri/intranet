@@ -24,6 +24,7 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
 if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
+  
 }
 
 // busca todos os insumos dessa filial
@@ -120,7 +121,7 @@ if (
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PEDIDO DE COMPRA — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
+  <title>PEDIDO DE COMPRAS — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/assets/css/style.css" rel="stylesheet">
   <style>
