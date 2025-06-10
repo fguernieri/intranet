@@ -1,5 +1,5 @@
 <?php
-$senha = '0990'; // Altere aqui se quiser outro valor
+$senha = '1234'; // Altere aqui se quiser outro valor
 
 $hash = password_hash($senha, PASSWORD_DEFAULT);
 
