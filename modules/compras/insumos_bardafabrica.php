@@ -24,6 +24,7 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $conn->set_charset('utf8mb4');
 if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
+  
 }
 
 // busca todos os insumos dessa filial
@@ -33,22 +34,65 @@ $stmt = $conn->prepare("
         i.CATEGORIA,
         i.UNIDADE,
         i.CODIGO,
-        COALESCE(e_agg.ESTOQUE_AGREGADO, 0) AS ESTOQUE_ATUAL
+        COALESCE(e.ESTOQUE_ATUAL, 0) AS ESTOQUE_ATUAL,
+        COALESCE(vw.total_insumo_usado_9dias, 0) AS CONSUMO_9DIAS,
+        COALESCE(vw.sugestao_compra, 0) AS SUGESTAO_COMPRA
     FROM insumos i
     LEFT JOIN (
-        SELECT CODIGO, SUM(Estoquetotal) AS ESTOQUE_AGREGADO
-        FROM EstoqueBDF -- Nome da tabela de estoque para BAR DA FABRICA
+        SELECT CODIGO, SUM(Estoquetotal) AS ESTOQUE_ATUAL
+        FROM EstoqueBDF
         GROUP BY CODIGO
-    ) e_agg ON i.CODIGO = e_agg.CODIGO
+    ) e ON i.CODIGO = e.CODIGO
+    LEFT JOIN vw_consumo_insumos_3m vw ON i.CODIGO = vw.cod_insumo
     WHERE i.FILIAL = ?
     ORDER BY i.CATEGORIA, i.INSUMO
-    -- Estoque agregado (SUM) da tabela EstoqueBDF para evitar duplicação.
 ");
-$stmt->bind_param('s', $filial);
-$stmt->execute();
-$insumos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+if (!$stmt) {
+    die('<div style="color:red;font-weight:bold">Erro ao preparar statement: ' . $conn->error . '</div>');
+}
+if (!$stmt->bind_param('s', $filial)) {
+    die('<div style="color:red;font-weight:bold">Erro ao fazer bind_param: ' . $stmt->error . '</div>');
+}
+if (!$stmt->execute()) {
+    die('<div style="color:red;font-weight:bold">Erro ao executar statement: ' . $stmt->error . '</div>');
+}
+$result = $stmt->get_result();
+if (!$result) {
+    die('<div style="color:red;font-weight:bold">Erro ao obter resultado: ' . $stmt->error . '</div>');
+}
+$insumos = $result->fetch_all(MYSQLI_ASSOC);
+if (empty($insumos)) {
+    echo '<div style="color:orange;font-weight:bold">Aviso: Nenhum insumo retornado pela consulta SQL.</div>';
+}
 $stmt->close();
 $conn->close();
+
+// Deduplicar insumos por CODIGO (ou INSUMO+UNIDADE+CATEGORIA se não houver CODIGO)
+$insumos_dedup = [];
+$insumos_seen = [];
+foreach ($insumos as $row) {
+    $key = isset($row['CODIGO']) ? $row['CODIGO'] : ($row['INSUMO'].'|'.$row['UNIDADE'].'|'.$row['CATEGORIA']);
+    if (!isset($insumos_seen[$key])) {
+        $insumos_dedup[] = $row;
+        $insumos_seen[$key] = true;
+    }
+}
+$insumos = $insumos_dedup;
+
+// DEDUPLICAÇÃO DE INSUMOS ANTES DE RENDERIZAR A TABELA
+$insumosUnicos = [];
+$chavesVistas = [];
+foreach ($insumos as $row) {
+    // Usa CODIGO se existir, senão INSUMO+CATEGORIA+UNIDADE como chave composta
+    $chave = isset($row['CODIGO']) && $row['CODIGO'] !== ''
+        ? $row['CODIGO']
+        : $row['INSUMO'] . '|' . $row['CATEGORIA'] . '|' . $row['UNIDADE'];
+    if (!isset($chavesVistas[$chave])) {
+        $insumosUnicos[] = $row;
+        $chavesVistas[$chave] = true;
+    }
+}
+$insumos = $insumosUnicos;
 
 $categorias = array_values(array_unique(array_column($insumos, 'CATEGORIA')));
 $unidades   = array_values(array_unique(array_column($insumos, 'UNIDADE')));
@@ -77,7 +121,7 @@ if (
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PEDIDO DE COMPRA — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
+  <title>PEDIDO DE COMPRAS — <?= htmlspecialchars($filial, ENT_QUOTES) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="/assets/css/style.css" rel="stylesheet">
   <style>
@@ -162,6 +206,8 @@ if (
               <th class="p-2 text-left">Insumo</th>
               <th class="p-2 text-center" style="width:8rem">QTDE</th>
               <th class="p-2 text-center" style="width:7rem;">Estoque Atual</th>
+              <th class="p-2 text-center" style="width:7rem;">Consumo 9 dias</th>
+              <th class="p-2 text-center" style="width:7rem;">Sugestão Compra</th>
               <th class="p-2 text-left">Unidade</th>
               <th class="p-2 text-left">Categoria</th>
               <th class="p-2 text-left">Observação</th>
@@ -196,6 +242,12 @@ if (
                 </div>
               </td>
               <td class="p-2 text-center font-semibold <?=$estoqueColorClass?>"><?=$estoqueAtualDisplay?></td>
+              <td class="p-2 text-center font-semibold">
+                <?= number_format((float)($row['CONSUMO_9DIAS'] ?? 0), 2, ',', '.') ?>
+              </td>
+              <td class="p-2 text-center font-semibold">
+                <?= number_format((float)($row['SUGESTAO_COMPRA'] ?? 0), 2, ',', '.') ?>
+              </td>
               <td class="p-2"><?=$uni?></td>
               <td class="p-2"><?=$cat?></td>
               <td class="p-2">
@@ -556,4 +608,5 @@ if (
     document.getElementById('btn-scroll-bottom').onclick = ()=> window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
   </script>
 </body>
-</html>
+</html><?php
+echo '<pre>'; var_dump($insumos[0]); echo '</pre>';
