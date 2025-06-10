@@ -46,9 +46,23 @@ $stmt = $conn->prepare("
     WHERE i.FILIAL = ?
     ORDER BY i.CATEGORIA, i.INSUMO
 ");
-$stmt->bind_param('s', $filial);
-$stmt->execute();
-$insumos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+if (!$stmt) {
+    die('<div style="color:red;font-weight:bold">Erro ao preparar statement: ' . $conn->error . '</div>');
+}
+if (!$stmt->bind_param('s', $filial)) {
+    die('<div style="color:red;font-weight:bold">Erro ao fazer bind_param: ' . $stmt->error . '</div>');
+}
+if (!$stmt->execute()) {
+    die('<div style="color:red;font-weight:bold">Erro ao executar statement: ' . $stmt->error . '</div>');
+}
+$result = $stmt->get_result();
+if (!$result) {
+    die('<div style="color:red;font-weight:bold">Erro ao obter resultado: ' . $stmt->error . '</div>');
+}
+$insumos = $result->fetch_all(MYSQLI_ASSOC);
+if (empty($insumos)) {
+    echo '<div style="color:orange;font-weight:bold">Aviso: Nenhum insumo retornado pela consulta SQL.</div>';
+}
 $stmt->close();
 $conn->close();
 
